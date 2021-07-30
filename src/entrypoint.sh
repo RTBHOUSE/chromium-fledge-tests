@@ -4,7 +4,7 @@
 if [ -v DISPLAY ] && [ -v XAUTH ]; then
   xauth add ${XAUTH#*/}  # with hostname info dropped
 else
-  vncserver -passwd ~/.vnc/passwd -noxstartup :20 &> /dev/null &
+  vncserver -passwd ~/.vnc/passwd -localhost no -noxstartup :20 &> /dev/null &
   export DISPLAY=:20
 fi
 
