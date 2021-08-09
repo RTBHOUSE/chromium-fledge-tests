@@ -1,4 +1,20 @@
 <script>
+function randomVector(n) {
+  const vector = new Array(n);
+  for (let i = 0; i < n; i++) {
+    vector[i] = Math.random();
+  }
+  return vector;
+}
+
+function randomMatrix(n, m) {
+  const matrix = new Array(n);
+  for (let i = 0; i < n; i++) {
+    matrix[i] = randomVector(m);
+  }
+  return matrix;
+}
+
 if (!navigator.joinAdInterestGroup) {
   document.write("your browser doesn't have joinAdInterestGroup -- do you need to set some flags?");
 } else {
@@ -9,15 +25,14 @@ if (!navigator.joinAdInterestGroup) {
     userBiddingSignals: {key: "user bidding signals "},
     ads: [
       {
-        renderUrl: "https://fledge-tests.creativecdn.net:9001/ad-1.html",
+        renderUrl: "https://fledge-tests.creativecdn.net:9001/ad.html",
         metadata: {
-          bid: 1
-        },
-      },
-      {
-        renderUrl: "https://fledge-tests.creativecdn.net:9001/ad-2.html",
-        metadata: {
-          bid: 2
+          bid: 1,
+          X: randomMatrix(200, 1),
+          A: randomMatrix(200, 200),
+          B: randomMatrix(100, 200),
+          C: randomMatrix(50, 100),
+          D: randomMatrix(1, 50)
         },
       },
     ],

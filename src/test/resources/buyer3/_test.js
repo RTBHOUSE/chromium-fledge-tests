@@ -58,23 +58,36 @@ function relu(a) {
 }
 
 function singleTest(X, A, B, C, D) {
-    let Y = multiplyMatrix(A, X);
-    Y = multiplyMatrix(B, Y);
-    Y = multiplyMatrix(C, Y);
-    Y = multiplyMatrix(D, Y);
+    let Y = relu(multiplyMatrix(A, X));
+    Y = relu(multiplyMatrix(B, Y));
+    Y = relu(multiplyMatrix(C, Y));
+    Y = relu(multiplyMatrix(D, Y));
     return Y;
 }
 
-function test(loops) {
-    for (let i = 0; i < loops; i++) {
-        const X = relu(randomMatrix(200, 1));
-        const A = relu(randomMatrix(200, 200));
-        const B = relu(randomMatrix(100, 200));
-        const C = relu(randomMatrix(50, 100));
-        const D = relu(randomMatrix(1, 50));
+function test(warmups, loops) {
 
-        singleTest(X, A, B, C, D);
+    let X = new Array(warmups + loops);
+    let A = new Array(warmups + loops);
+    let B = new Array(warmups + loops);
+    let C = new Array(warmups + loops);
+    let D = new Array(warmups + loops);
+    for (let i = 0; i < warmups + loops; i++) {
+        X[i] = randomMatrix(200, 1);
+        A[i] = randomMatrix(200, 200);
+        B[i] = randomMatrix(100, 200);
+        C[i] = randomMatrix(50, 100);
+        D[i] = randomMatrix(1, 50);
     }
+    for (let i = 0; i < warmups; i++) {
+        singleTest(X[i], A[i], B[i], C[i], D[i]);
+    }
+    let start = new Date().getTime();
+    for (let i = warmups; i < warmups + loops; i++) {
+        singleTest(X[i], A[i], B[i], C[i], D[i]);
+    }
+    let end = new Date().getTime();
+    console.log("time spent on 1 loop " + ((end - start) / loops) + " ms");
 }
 
-test(1)
+test(10, 100)

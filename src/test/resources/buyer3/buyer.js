@@ -1,19 +1,3 @@
-function randomVector(n) {
-  const vector = new Array(n);
-  for (let i = 0; i < n; i++) {
-    vector[i] = Math.random();
-  }
-  return vector;
-}
-
-function randomMatrix(n, m) {
-  const matrix = new Array(n);
-  for (let i = 0; i < n; i++) {
-    matrix[i] = randomVector(m);
-  }
-  return matrix;
-}
-
 function multiplyMatrix(a, b) {
   const rows_a = a.length
   const cols_a = a[0].length;
@@ -57,30 +41,25 @@ function relu(a) {
   return a;
 }
 
-function singleTest(X, A, B, C, D) {
-  let Y = multiplyMatrix(A, X);
-  Y = multiplyMatrix(B, Y);
-  Y = multiplyMatrix(C, Y);
-  Y = multiplyMatrix(D, Y);
+function test(X, A, B, C, D) {
+  let Y = relu(multiplyMatrix(A, X));
+  Y = relu(multiplyMatrix(B, Y));
+  Y = relu(multiplyMatrix(C, Y));
+  Y = relu(multiplyMatrix(D, Y));
   return Y;
 }
 
-function test(loops) {
-  for (let i = 0; i < loops; i++) {
-    const X = relu(randomMatrix(200, 1));
-    const A = relu(randomMatrix(200, 200));
-    const B = relu(randomMatrix(100, 200));
-    const C = relu(randomMatrix(50, 100));
-    const D = relu(randomMatrix(1, 50));
-
-    singleTest(X, A, B, C, D);
-  }
-}
-
 function generateBid(interestGroup, auctionSignals, perBuyerSignals, trustedBiddingSignals, browserSignals) {
-  test(1);
 
   const ad = interestGroup.ads[0];
+  let X = ad.metadata.X;
+  let A = ad.metadata.A;
+  let B = ad.metadata.B;
+  let C = ad.metadata.C;
+  let D = ad.metadata.D;
+
+  test(X, A, B, C, D);
+
   return {'ad': 'example',
           'bid': ad.metadata.bid,
           'render': ad.renderUrl};

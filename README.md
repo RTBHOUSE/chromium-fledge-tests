@@ -2,18 +2,18 @@
 
 This repository contains a framework to test [FLEDGE
 ](https://github.com/WICG/turtledove/blob/main/FLEDGE.md)
-implementation capabilities, e.g., various bidding function timing.
+implementation capabilities in [Chromium](https://chromium-review.googlesource.com) and is part of research related to expected removal of third-party cookies.
 
-This is part of research related to cookie-less world ads.
+## Run tests  
 
-For more follow those links:
+### Run tests with the latest chromium build
 
-* [WIGC/turtledove](https://github.com/WICG/turtledove)
-* [Turtledove First Experiment (FLEDGE)
-](https://github.com/WICG/turtledove/blob/main/FLEDGE.md)
+- `bash run.sh`
 
+### Run tests with custom chromium build
 
-## Run tests – `bash run.sh`
+- `bash run.sh --chromium-directory <path-to-chromium-dir>`
+- `bash run.sh --chromium-url <url-to-chromium-zip>`
 
-### Extra dependencies
+## Extra dependencies
 * docker
