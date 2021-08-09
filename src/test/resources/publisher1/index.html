@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>publisher.html</title>
+</head>
+<body>
+
+<script type="module">
+if (navigator.runAdAuction) {
+  const ar = await navigator.runAdAuction({
+    seller: 'https://localhost:8083',
+    decisionLogicUrl: 'https://localhost:8083/decision_logic.js',
+    interestGroupBuyers: ['https://localhost:8081'],
+    auctionSignals: {key: "auction signals"},
+    sellerSignals: {key: "seller signals"},
+    perBuyerSignals: {
+      'https://localhost:8081': {
+        contextualBidRequestId: 'abc'
+      }
+    }
+  });
+  if (ar === null) {
+    document.write("No turtledove winner");
+  } else {
+    const iframe = document.createElement('iframe');
+    iframe.src = ar;
+    document.body.appendChild(iframe);
+  }
+}
+
+</script>
+
+<script>
+if (!navigator.runAdAuction) {
+  document.write("your browser doesn't have runAdAuction -- do you need to set some flags?");
+}
+</script>
+
+<h1>Hello!</h1>
+
+
+</body>
+</html>

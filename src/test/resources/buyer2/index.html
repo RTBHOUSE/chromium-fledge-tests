@@ -1,0 +1,27 @@
+<script>
+if (!navigator.joinAdInterestGroup) {
+  document.write("your browser doesn't have joinAdInterestGroup -- do you need to set some flags?");
+} else {
+  navigator.joinAdInterestGroup({
+    owner: "https://fledge-tests.creativecdn.net:8091",
+    name: "tc-ig",
+    biddingLogicUrl: "https://fledge-tests.creativecdn.net:8091/buyer.js",
+    userBiddingSignals: {key: "user bidding signals "},
+    ads: [
+      {
+        renderUrl: "https://fledge-tests.creativecdn.net:8091/ad-1.html",
+        metadata: {
+          bid: 1
+        },
+      },
+      {
+        renderUrl: "https://fledge-tests.creativecdn.net:8091/ad-2.html",
+        metadata: {
+          bid: 2
+        },
+      },
+    ],
+  }, 10000);
+  document.write("joined interest group");
+}
+</script>

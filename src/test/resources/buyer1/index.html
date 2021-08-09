@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>advertiser.html</title>
+</head>
+<body>
+
+<script>
+const kSecsPerDay = 60 * 60 * 24 * 1000;
+navigator.joinAdInterestGroup({
+  owner: 'https://localhost:8081',
+  name: 'test-group',
+  biddingLogicUrl: 'https://localhost:8081/bidding_fn.js',
+  userBiddingSignals: {key: "user bidding signals"},
+  ads: [{renderUrl: "https://localhost:8081/ad1.html",}]
+}, 30 * kSecsPerDay)
+</script>
+
+<h1>Hello!</h1>
+
+
+</body>
+</html>
