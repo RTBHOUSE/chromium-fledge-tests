@@ -46,10 +46,10 @@ function nn_forward(input, nn_model_weights) {
     return X[0];
 }
 
-function generateBid(input, nn_model_weights, ) {
-  return nn_forward(input, nn_model_weights[0]) * nn_forward(input, nn_model_weights[1])
-            * nn_forward(input, nn_model_weights[2]) * nn_forward(input, nn_model_weights[3])
-            * nn_forward(input, nn_model_weights[4]);
+function generateBid(input, nn_models_weights) {
+  return nn_forward(input, nn_models_weights[0]) * nn_forward(input, nn_models_weights[1])
+            * nn_forward(input, nn_models_weights[2]) * nn_forward(input, nn_models_weights[3])
+            * nn_forward(input, nn_models_weights[4]);
 }
 
 function test(warmups, loops) {
@@ -58,17 +58,17 @@ function test(warmups, loops) {
     }
     let bids = new Array(loops);
     let inputs = new Array(loops);
-    let nn_model_weights = new Array(loops);
+    let nn_models_weights = new Array(loops);
 
     for (let i = 0; i < loops; i++) {
         inputs[i] = randomVector(200);
-        nn_model_weights[i] = new Array(4);
+        nn_models_weights[i] = new Array(5);
         for (let model = 0; model < 5; model++) {
-            nn_model_weights[i][model] = new Array(5);
-            nn_model_weights[i][model][0] = randomMatrix(200, 200);
-            nn_model_weights[i][model][1] = randomMatrix(100, 200);
-            nn_model_weights[i][model][2] = randomMatrix(50, 100);
-            nn_model_weights[i][model][3] = randomMatrix(1, 50);
+            nn_models_weights[i][model] = new Array(4);
+            nn_models_weights[i][model][0] = randomMatrix(200, 200);
+            nn_models_weights[i][model][1] = randomMatrix(100, 200);
+            nn_models_weights[i][model][2] = randomMatrix(50, 100);
+            nn_models_weights[i][model][3] = randomMatrix(1, 50);
         }
     }
     let start = 0;
@@ -76,7 +76,7 @@ function test(warmups, loops) {
         if (i == warmups) {
             start = new Date().getTime();
         }
-        bids[i] = generateBid(inputs[i], nn_model_weights[i]);
+        bids[i] = generateBid(inputs[i], nn_models_weights[i]);
     }
     let end = new Date().getTime();
 
@@ -85,4 +85,4 @@ function test(warmups, loops) {
 
 }
 
-test(10, 100)
+test(10, 100);
