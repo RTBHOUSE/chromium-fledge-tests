@@ -46,6 +46,12 @@ function nn_forward(input, nn_model_weights) {
     return X[0];
 }
 
+function generateBid(input, nn_model_weights, ) {
+  return nn_forward(input, nn_model_weights[0]) * nn_forward(input, nn_model_weights[1])
+            * nn_forward(input, nn_model_weights[2]) * nn_forward(input, nn_model_weights[3])
+            * nn_forward(input, nn_model_weights[4]);
+}
+
 function test(warmups, loops) {
     if (warmups > loops) {
         throw new Error("warmups greater than loops");
@@ -57,17 +63,20 @@ function test(warmups, loops) {
     for (let i = 0; i < loops; i++) {
         inputs[i] = randomVector(200);
         nn_model_weights[i] = new Array(4);
-        nn_model_weights[i][0] = randomMatrix(200, 200);
-        nn_model_weights[i][1] = randomMatrix(100, 200);
-        nn_model_weights[i][2] = randomMatrix(50, 100);
-        nn_model_weights[i][3] = randomMatrix(1, 50);
+        for (let model = 0; model < 5; model++) {
+            nn_model_weights[i][model] = new Array(5);
+            nn_model_weights[i][model][0] = randomMatrix(200, 200);
+            nn_model_weights[i][model][1] = randomMatrix(100, 200);
+            nn_model_weights[i][model][2] = randomMatrix(50, 100);
+            nn_model_weights[i][model][3] = randomMatrix(1, 50);
+        }
     }
     let start = 0;
     for (let i = 0; i < loops; i++) {
         if (i == warmups) {
             start = new Date().getTime();
         }
-        bids[i] = nn_forward(inputs[i], nn_model_weights[i]);
+        bids[i] = generateBid(inputs[i], nn_model_weights[i]);
     }
     let end = new Date().getTime();
 

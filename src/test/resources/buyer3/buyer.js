@@ -1,67 +1,45 @@
-function multiplyMatrix(a, b) {
-  const rows_a = a.length
-  const cols_a = a[0].length;
-  const rows_b = b.length;
-  const cols_b = b[0].length;
-
-  if (cols_a !== rows_b) {
-    throw new Error("Invalid matrix dimensions");
+function multiply(a, b) {
+  if (a[0].length !== b.length) {
+     throw new Error("invalid matrix dimensions");
   }
-
-  const c = new Array(rows_a);
-
-  for (let i = 0; i < rows_a; ++i) {
-    const row = new Array(cols_b);
-    for (let j = 0; j < cols_b; ++j) {
-      let s = a[i][0] * b[0][j];
-      for (let k = 1; k < cols_a; ++k) {
-        s += a[i][k] * b[k][j];
-      }
-      row[j] = s;
+  var v = new Array(a.length);
+  for (var i = 0; i < a.length; i++) {
+    v[i] = 0;
+    for (var j = 0; j < b.length; j++) {
+      v[i] += a[i][j] * b[j];
     }
-    c[i] = row;
   }
-
-  return c;
+  return v;
 }
 
 function relu(a) {
-  if (a.length > 0) {
-    if (a[0].length > 0) {
-      for (let i = 0; i < a.length; ++i) {
-        relu(a[i]);
-      }
-    } else {
-      for (let i = 0; i < a.length; ++i) {
-        a[i] = Math.max(0, a[i]);
-      }
+    if (a.length > 0) {
+        for (let i = 0; i < a.length; ++i) {
+            a[i] = Math.max(0, a[i]);
+        }
     }
-  }
-
-  return a;
+    return a;
 }
 
-function test(X, A, B, C, D) {
-  let Y = relu(multiplyMatrix(A, X));
-  Y = relu(multiplyMatrix(B, Y));
-  Y = relu(multiplyMatrix(C, Y));
-  Y = relu(multiplyMatrix(D, Y));
-  return Y;
+function nn_forward(input, nn_model_weights) {
+    let X = input;
+    X = relu(multiply(nn_model_weights[0], X));
+    X = relu(multiply(nn_model_weights[1], X));
+    X = relu(multiply(nn_model_weights[2], X));
+    X = relu(multiply(nn_model_weights[3], X));
+    return X[0];
 }
 
 function generateBid(interestGroup, auctionSignals, perBuyerSignals, trustedBiddingSignals, browserSignals) {
 
   const ad = interestGroup.ads[0];
-  let X = ad.metadata.X;
-  let A = ad.metadata.A;
-  let B = ad.metadata.B;
-  let C = ad.metadata.C;
-  let D = ad.metadata.D;
+  let input = ad.metadata.input;
+  let nn_model_weights = ad.metadata.nn_model_weights;
 
-  test(X, A, B, C, D);
+  let bid = nn_forward(input, nn_model_weights);
 
   return {'ad': 'example',
-          'bid': ad.metadata.bid,
+          'bid': bid,
           'render': ad.renderUrl};
 }
 

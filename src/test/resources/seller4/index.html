@@ -1,0 +1,29 @@
+  <h1>run ad auction</h1>
+
+<script>
+if (!navigator.runAdAuction) {
+  document.write("your browser doesn't have runAdAuction -- do you need to set some flags?");
+}
+</script>
+
+  <script type=module>
+if (navigator.runAdAuction) {
+  const ar = await navigator.runAdAuction({
+    seller: 'https://fledge-tests.creativecdn.net:9012',
+    decisionLogicUrl: 'https://fledge-tests.creativecdn.net:9012/seller.js',
+    trustedScoringSignalsUrl: 'https://fledge-tests.creativecdn.net:9012/trusted-scoring.json',
+    interestGroupBuyers: ["https://fledge-tests.creativecdn.net:9011"],
+    auctionSignals: {key: "auction signals"},
+    sellerSignals: {key: "seller signals"},
+    perBuyerSignals: {"https://fledge-tests.creativecdn.net:9011": {key: "tc signals"}},
+  });
+
+  if (ar === null) {
+    document.write("No turtledove winner");
+  } else {
+    const iframe = document.createElement('iframe');
+    iframe.src = ar;
+    document.body.appendChild(iframe);
+  }
+}
+  </script>
