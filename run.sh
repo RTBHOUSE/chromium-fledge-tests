@@ -58,7 +58,7 @@ elif [[ -n ${CHROMIUM_URL} ]]; then
   echo "using chromium build from URL ${CHROMIUM_URL}"
   mkdir -p "extracted"
   cd "extracted"
-  curl -# "${CHROMIUM_URL}" > "chromium-custom.zip"
+  curl -L -# "${CHROMIUM_URL}" > "chromium-custom.zip"
   unzip "chromium-custom.zip"
   CHROMIUM_PATH=$(find "${PWD}/" -name chrome -type f)
   CHROMIUM_DIR=$(dirname "${CHROMIUM_PATH}")
