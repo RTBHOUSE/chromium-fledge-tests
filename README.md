@@ -70,6 +70,8 @@ function generateBid(input, nn_models_weights) {
 }
 ```
 
+Some motivation and implementation details were presented in this [issue](https://github.com/WICG/turtledove/issues/215).
+
 ### benchmark 1: tight loop with a warm-up run in V8 engine with jit
 
 In this scenario we run node.js with [js script](https://github.com/RTBHOUSE/chromium-fledge-tests/blob/master/src/test/resources/buyer4/_test.js), which calls `generateBid()` inside a loop including some warm-up phase. Inputs and weights are different for every iteration and generated before the test. Results are output to avoid unwanted optimizations.
