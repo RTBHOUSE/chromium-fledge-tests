@@ -64,16 +64,7 @@ class MockServer:
         self.http_server = None
         self.requests = []
 
-    @property
-    def address(self):
-        return f'{self.server_name}:{self.server_port}'
-
-    @property
-    def directory(self):
-        return self.server_directory
-
-    def __enter__(self):
-        logger.info(f"server {self.address} starting")
+        logger.info(f"server {self.address} initializing")
         server_address = ('0.0.0.0', self.server_port)
         self.http_server = http.server.ThreadingHTTPServer(
             server_address,
@@ -85,6 +76,17 @@ class MockServer:
             certfile=common_dir + '/ssl/fledge-tests.creativecdn.net.crt',
             keyfile=common_dir + '/ssl/fledge-tests.creativecdn.net.key',
             ssl_version=ssl.PROTOCOL_TLS)
+
+    @property
+    def address(self):
+        return f'{self.server_name}:{self.server_port}'
+
+    @property
+    def directory(self):
+        return self.server_directory
+
+    def __enter__(self):
+        logger.info(f"server {self.address} starting")
         thread = threading.Thread(target=self.run, args=())
         thread.daemon = True
         thread.start()
