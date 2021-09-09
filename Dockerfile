@@ -27,18 +27,18 @@ RUN export REVISION=$(curl -s -S 'https://www.googleapis.com/download/storage/v1
     pip3 install --user selenium assertpy; \
     mkdir /home/usertd/logs
 
-COPY --chown=usertd:usertd src src
+COPY --chown=usertd:usertd . tests
 
-RUN mkdir -p $HOME/.pki/nssdb; \
-    certutil -d $HOME/.pki/nssdb -N; \
-    certutil -d sql:/home/usertd/.pki/nssdb/ -A -t TC -n "fledge-tests CA" -i src/test/ssl/ca/ca.crt
+RUN mkdir -p /home/usertd/.pki/nssdb; \
+    certutil -d /home/usertd/.pki/nssdb -N; \
+    certutil -d sql:/home/usertd/.pki/nssdb/ -A -t TC -n "fledge-tests CA" -i /home/usertd/tests/common/ssl/ca/ca.crt
 
-WORKDIR /home/usertd/src
+WORKDIR /home/usertd/tests
 VOLUME /home/usertd/logs
 
 # This is a hack due to https://bugs.chromium.org/p/chromium/issues/detail?id=1229652
 # Set a password to VNC server in case you want to connect to it (port 5900).
 RUN mkdir ~/.vnc; echo turtledove | vncpasswd -f > ~/.vnc/passwd
-ENTRYPOINT [ "/home/usertd/src/entrypoint.sh" ]
+ENTRYPOINT [ "/home/usertd/tests/entrypoint.sh" ]
 
-CMD python3 test/run_tests.py
+CMD python3 -m unittest

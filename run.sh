@@ -56,8 +56,8 @@ if [[ -n ${CHROMIUM_DIR} ]]; then
   volumeOpt="-v ${CHROMIUM_DIR}:/home/usertd/chromium-custom/"
 elif [[ -n ${CHROMIUM_URL} ]]; then
   echo "using chromium build from URL ${CHROMIUM_URL}"
-  mkdir -p "extracted"
-  cd "extracted"
+  mkdir -p "_chromium"
+  cd "_chromium"
   curl -L -# "${CHROMIUM_URL}" > "chromium-custom.zip"
   unzip "chromium-custom.zip"
   CHROMIUM_PATH=$(find "${PWD}/" -name chrome -type f)

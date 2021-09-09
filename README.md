@@ -1,7 +1,6 @@
 # Chromium-FLEDGE-tests
 
-This repository contains a framework to test [FLEDGE
-](https://github.com/WICG/turtledove/blob/main/FLEDGE.md)
+This repository contains a framework to test [FLEDGE](https://github.com/WICG/turtledove/blob/main/FLEDGE.md)
 implementation capabilities in [Chromium](https://chromium-review.googlesource.com) and is part of research related to anticipated removal of third-party cookies. It supports end-to-end functional and performance FLEDGE testing.
 
 - [How to run tests](#how-to-run-tests)
@@ -18,7 +17,7 @@ implementation capabilities in [Chromium](https://chromium-review.googlesource.c
 
 ## Functional tests
 
-In the [tests](https://github.com/RTBHOUSE/chromium-fledge-tests/blob/master/src/test/tests.py) we simulate an end-to-end FLEDGE flow, which includes joining interest groups and running ad auctions. The tests launch the latest or custom-built Chromium browser with Selenium. They serve mock servers which provide buyer's and seller's logic including the `joinAdInterestGroup()` and `runAdAuction()` API calls. These mock servers track all requests, so we could verify not just the rendered ad but also the signals passed to `reportWin()` and `reportResult()`. Here is an example:
+In the [tests](https://github.com/RTBHOUSE/chromium-fledge-tests/blob/master/tests_functional/test.py) we simulate an end-to-end FLEDGE flow, which includes joining interest groups and running ad auctions. The tests launch the latest or custom-built Chromium browser with Selenium. They serve mock servers which provide buyer's and seller's logic including the `joinAdInterestGroup()` and `runAdAuction()` API calls. These mock servers track all requests, so we could verify not just the rendered ad but also the signals passed to `reportWin()` and `reportResult()`. Here is an example:
 
 ```javascript
     def setUp(self) -> None:
@@ -30,8 +29,8 @@ In the [tests](https://github.com/RTBHOUSE/chromium-fledge-tests/blob/master/src
 
 ```javascript
     def test__should_show_ad_our(self):
-        with MockServer(8091, '/home/usertd/src/test/resources/buyer2') as buyer_server,\
-                MockServer(8092, '/home/usertd/src/test/resources/seller2') as seller_server:
+        with MockServer(8091, '/home/usertd/tests/tests_functional/resources/buyer') as buyer_server,\
+                MockServer(8092, '/home/usertd/tests/tests_functional/resources/seller') as seller_server:
 
             with MeasureDuration("joinAdInterestGroup"):
                 self.driver.get(buyer_server.address)
@@ -74,7 +73,7 @@ Some motivation and implementation details were presented in this [issue](https:
 
 ### benchmark 1: tight loop with a warm-up run in V8 engine with jit
 
-In this scenario we run node.js with [js script](https://github.com/RTBHOUSE/chromium-fledge-tests/blob/master/src/test/resources/buyer4/_test.js), which calls `generateBid()` inside a loop including some warm-up phase. Inputs and weights are different for every iteration and generated before the test. Results are output to avoid unwanted optimizations.
+In this scenario we run node.js with [js script](https://github.com/RTBHOUSE/chromium-fledge-tests/blob/master/test_performance/resources/benchmark.js), which calls `generateBid()` inside a loop including some warm-up phase. Inputs and weights are different for every iteration and generated before the test. Results are output to avoid unwanted optimizations.
 
 ```javascript
 function test(warmups, loops) {
@@ -112,27 +111,29 @@ function test(warmups, loops) {
 Result:
 
 ```bash
-$ node src/test/resources/buyer4/_test.js
+$ node tests_performance/resources/benchmark.js
 ...
 time spent on 1 loop in avg: 1.18 ms
 ```
 
 ### benchmark 2: buyer’s js run as a bidding worklet in Chromium
 
-In this scenario we use this testing framework to run [buyer's js script](https://raw.githubusercontent.com/RTBHOUSE/chromium-fledge-tests/master/src/test/resources/buyer4/buyer.js) in a bidding worklet (with these limitations: jitless, v8 pool size set to 1 etc.). In this instance, `generateBid()` is called once with hard-coded weights. In this [test](https://github.com/RTBHOUSE/chromium-fledge-tests/blob/master/src/test/tests.py) we use a custom-built version of chromium with a [patch](https://github.com/RTBHOUSE/chromium/commits/auction_timer), which helps to measure the bidding worklet time. The following example is similar to previous [functional test](#functional-tests):
+In this scenario we use this testing framework to run [buyer's js script](https://raw.githubusercontent.com/RTBHOUSE/chromium-fledge-tests/master/tests_performance/resources/buyer/buyer.js) in a bidding worklet (with these limitations: jitless, v8 pool size set to 1 etc.). In this instance, `generateBid()` is called once with hard-coded weights. In this [test](https://github.com/RTBHOUSE/chromium-fledge-tests/tests/tests_performance/test.py) we use a custom-built version of chromium with a [patch](https://github.com/RTBHOUSE/chromium/commits/auction_timer), which helps to measure the bidding worklet time. The following example is similar to previous [functional test](#functional-tests):
 
 ```javascript
     def test__check_nn_with_static_weights_computation_time(self):
-        with MockServer(9011, '/home/usertd/src/test/resources/buyer4') as buyer_server,\
-                MockServer(9012, '/home/usertd/src/test/resources/seller4') as seller_server:
+        with MockServer(9011, '/home/usertd/tests/tests_performance/resources/buyer') as buyer_server,\
+                MockServer(9012, '/home/usertd/tests/tests_performance/resources/seller') as seller_server:
 
-            self.driver.get(buyer_server.address)
-            self.assertDriverContainsText('body', 'joined interest group')
+            with MeasureDuration("joinAdInterestGroup"):
+                self.driver.get(buyer_server.address)
+                self.assertDriverContainsText('body', 'joined interest group')
 
-            self.driver.get(seller_server.address)
-            WebDriverWait(self.driver, 5)\
-                .until(EC.frame_to_be_available_and_switch_to_it((By.CSS_SELECTOR, 'iframe')))
-            self.assertDriverContainsText('body', 'TC AD')
+            with MeasureDuration("runAdAuction"):
+                self.driver.get(seller_server.address)
+                WebDriverWait(self.driver, 5)\
+                    .until(EC.frame_to_be_available_and_switch_to_it((By.CSS_SELECTOR, 'iframe')))
+                self.assertDriverContainsText('body', 'TC AD')
 
         report_result_signals = seller_server.get_first_request("/reportResult").get_first_json_param('signals')
         logger.info(f"reportResult() signals: {pretty_json(report_result_signals)}")
@@ -152,5 +153,5 @@ Result:
 ```bash
 $ bash run.sh --chromium-url https://github.com/RTBHOUSE/chromium/releases/download/94.0.4588.0-auction-timer/chromium.zip
 ...
-INFO:/home/usertd/src/test/tests.py:generateBid took: 55.68 ms
+INFO:/home/usertd/tests/tests_performance/test.py:generateBid took: 55.68 ms
 ```

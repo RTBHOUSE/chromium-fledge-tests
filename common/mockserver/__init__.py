@@ -77,8 +77,8 @@ class MockServer:
         self.http_server.socket = ssl.wrap_socket(
             self.http_server.socket,
             server_side=True,
-            certfile='test/ssl/fledge-tests.creativecdn.net.crt',
-            keyfile='test/ssl/fledge-tests.creativecdn.net.key',
+            certfile='common/ssl/fledge-tests.creativecdn.net.crt',
+            keyfile='common/ssl/fledge-tests.creativecdn.net.key',
             ssl_version=ssl.PROTOCOL_TLS)
         thread = threading.Thread(target=self.run, args=())
         thread.daemon = True
