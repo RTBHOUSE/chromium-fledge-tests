@@ -73,7 +73,7 @@ Some motivation and implementation details were presented in this [issue](https:
 
 ### benchmark 1: tight loop with a warm-up run in V8 engine with jit
 
-In this scenario we run node.js with [js script](https://github.com/RTBHOUSE/chromium-fledge-tests/blob/master/test_performance/resources/benchmark.js), which calls `generateBid()` inside a loop including some warm-up phase. Inputs and weights are different for every iteration and generated before the test. Results are output to avoid unwanted optimizations.
+In this scenario we run node.js with [js script](https://github.com/RTBHOUSE/chromium-fledge-tests/blob/master/tests_performance/resources/benchmark.js), which calls `generateBid()` inside a loop including some warm-up phase. Inputs and weights are different for every iteration and generated before the test. Results are output to avoid unwanted optimizations.
 
 ```javascript
 function test(warmups, loops) {
@@ -118,7 +118,7 @@ time spent on 1 loop in avg: 1.18 ms
 
 ### benchmark 2: buyer’s js run as a bidding worklet in Chromium
 
-In this scenario we use this testing framework to run [buyer's js script](https://raw.githubusercontent.com/RTBHOUSE/chromium-fledge-tests/master/tests_performance/resources/buyer/buyer.js) in a bidding worklet (with these limitations: jitless, v8 pool size set to 1 etc.). In this instance, `generateBid()` is called once with hard-coded weights. In this [test](https://github.com/RTBHOUSE/chromium-fledge-tests/tests/tests_performance/test.py) we use a custom-built version of chromium with a [patch](https://github.com/RTBHOUSE/chromium/commits/auction_timer), which helps to measure the bidding worklet time. The following example is similar to previous [functional test](#functional-tests):
+In this scenario we use this testing framework to run [buyer's js script](https://raw.githubusercontent.com/RTBHOUSE/chromium-fledge-tests/master/tests_performance/resources/buyer/buyer.js) in a bidding worklet (with these limitations: jitless, v8 pool size set to 1 etc.). In this instance, `generateBid()` is called once with hard-coded weights. In this [test](https://github.com/RTBHOUSE/chromium-fledge-tests/blob/master/tests_performance/test.py) we use a custom-built version of chromium with a [patch](https://github.com/RTBHOUSE/chromium/commits/auction_timer), which helps to measure the bidding worklet time. The following example is similar to previous [functional test](#functional-tests):
 
 ```javascript
     def test__check_nn_with_static_weights_computation_time(self):
