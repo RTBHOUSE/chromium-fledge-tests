@@ -10,7 +10,7 @@ set -e
 OPTIONS=
 LONG_OPTIONS=chromium-directory:,chromium-url:
 
-PARSED=$(getopt --options=$OPTIONS --longoptions=${LONG_OPTIONS} --name "$0" -- "$@")
+PARSED=$(POSIXLY_CORRECT=1 getopt --options=$OPTIONS --longoptions=${LONG_OPTIONS} --name "$0" -- "$@")
 if [[ $? -ne 0 ]]; then
   # getopt has complained about wrong arguments to stdout
   exit 2
@@ -40,11 +40,6 @@ while true; do
     ;;
   esac
 done
-
-if [[ $# -ne 0 ]]; then
-  echo "$0: There is some options unprocessed $@"
-  exit 1
-fi
 
 
 if [[ -n ${CHROMIUM_DIR} ]]; then

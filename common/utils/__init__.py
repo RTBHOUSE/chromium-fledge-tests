@@ -73,6 +73,8 @@ def log_exception(method):
             return method(self, *args, **kwargs)
         except BaseException:
             logger.warning(self.driver.page_source)
+            for entry in self.driver.get_log('browser'):
+                logger.warning(entry)
             raise
     return inner_log_exception
 

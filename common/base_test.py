@@ -8,6 +8,7 @@ import unittest
 
 from selenium import webdriver
 from selenium.webdriver.common.by import By
+from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 
@@ -21,7 +22,7 @@ class BaseTest(unittest.TestCase):
         logging.basicConfig(stream=sys.stderr, level=logging.INFO)
         # https://peter.sh/experiments/chromium-command-line-switches
         options = webdriver.ChromeOptions()
-        if os.path.isfile('/home/usertd/chromium-custom/chrome'):
+        if os.path.isdir('/home/usertd/chromium-custom/'):
             logger.info("using custom chromium build")
             options.binary_location = '/home/usertd/chromium-custom/chrome'
         else:
@@ -37,7 +38,10 @@ class BaseTest(unittest.TestCase):
         options.add_argument('--user-data-dir=/tmp/profile123')
         options.add_argument('--user-agent=rtbfledgetests')
         options.add_argument('--enable-features=FledgeInterestGroups,FledgeInterestGroupAPI')
+        desired_capabilities = DesiredCapabilities.CHROME
+        desired_capabilities['goog:loggingPrefs'] =  { 'browser':'ALL' }
         driver = webdriver.Chrome('/home/usertd/chromedriver_linux64/chromedriver', options=options,
+                                  desired_capabilities=desired_capabilities,
                                   service_args=['--enable-chrome-logs'],
                                   service_log_path=config.get('service_log_path'))
         self.driver = driver
