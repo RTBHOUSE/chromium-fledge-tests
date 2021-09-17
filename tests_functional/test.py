@@ -8,13 +8,13 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 
-from common.utils import print_debug
+from common.base_test import BaseTest
+from common.mockserver import MockServer
+from common.utils import MeasureDuration
 from common.utils import log_exception
 from common.utils import measure_time
 from common.utils import pretty_json
-from common.utils import MeasureDuration
-from common.mockserver import MockServer
-from common.base_test import BaseTest
+from common.utils import print_debug
 
 logger = logging.getLogger(__file__)
 

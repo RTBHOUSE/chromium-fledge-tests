@@ -1,14 +1,19 @@
 #!/bin/bash
 
 # Usage:
-#  ./run.sh  # runs tests with official chrome build
-#  ./run.sh --chromium-directory <path-to-chromium-dir>
-#  ./run.sh --chromium-url <url-to-chromium-zip>
+# ./run.sh
+#   [ --chromium-directory <path-to-chromium-dir> | --chromium-url <url-to-chromium-zip> ]
+#   [ --test <module.Class.test_method> ]
+#
+# Examples:
+# ./run.sh # runs all tests with official chrome build
+# ./run.sh --test tests_functional.test.FunctionalTest.test__should_show_ad_our
+# ./run.sh --chromium-url https://github.com/RTBHOUSE/chromium/releases/download/94.0.4588.0-auction-timer/chromium.zip
 
 set -e
 
 OPTIONS=
-LONG_OPTIONS=chromium-directory:,chromium-url:
+LONG_OPTIONS=chromium-directory:,chromium-url:,test:
 
 PARSED=$(POSIXLY_CORRECT=1 getopt --options=$OPTIONS --longoptions=${LONG_OPTIONS} --name "$0" -- "$@")
 if [[ $? -ne 0 ]]; then
@@ -30,6 +35,10 @@ while true; do
     CHROMIUM_URL="$2"
     shift 2
     ;;
+  --test)
+    TEST="$2"
+    shift 2
+    ;;
   --)
     shift
     break
@@ -40,7 +49,6 @@ while true; do
     ;;
   esac
 done
-
 
 if [[ -n ${CHROMIUM_DIR} ]]; then
   if [[ ! ${CHROMIUM_DIR} == /* ]]; then
@@ -64,7 +72,15 @@ else
   volumeOpt=""
 fi
 
-
 docker build --iidfile .iidfile .
+
 [ -t 0 ] && [ -t 1 ] && termOpt='-t' || termOpt=''
-docker run --rm -i ${termOpt} ${volumeOpt} --shm-size=1gb --add-host fledge-tests.creativecdn.net:127.0.0.1 "$(cat .iidfile)" "$@"
+
+docker run --rm -i \
+  ${termOpt} \
+  ${volumeOpt} \
+  -e TEST="$TEST" \
+  --shm-size=1gb \
+  --add-host fledge-tests.creativecdn.net:127.0.0.1 \
+  "$(cat .iidfile)" \
+  "$@"
