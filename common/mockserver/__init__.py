@@ -2,16 +2,17 @@
 # Use of this source code is governed by a BSD-style license that can be found in the LICENSE file.
 
 import http.server
-import threading
-import ssl
-import logging
 import json
+import logging
+import pathlib
+import ssl
+import threading
 from dataclasses import dataclass
-
-from urllib.parse import parse_qs
 from functools import partial
+from urllib.parse import parse_qs
 
 logger = logging.getLogger(__file__)
+common_dir = str(pathlib.Path(__file__).absolute().parent.parent)
 
 
 class RequestHandler(http.server.SimpleHTTPRequestHandler):
@@ -77,11 +78,12 @@ class MockServer:
         self.http_server = http.server.ThreadingHTTPServer(
             server_address,
             partial(RequestHandler, directory=self.directory, callback=self.requests.append))
+        self.server_port = self.http_server.server_port
         self.http_server.socket = ssl.wrap_socket(
             self.http_server.socket,
             server_side=True,
-            certfile='common/ssl/fledge-tests.creativecdn.net.crt',
-            keyfile='common/ssl/fledge-tests.creativecdn.net.key',
+            certfile=common_dir + '/ssl/fledge-tests.creativecdn.net.crt',
+            keyfile=common_dir + '/ssl/fledge-tests.creativecdn.net.key',
             ssl_version=ssl.PROTOCOL_TLS)
         thread = threading.Thread(target=self.run, args=())
         thread.daemon = True

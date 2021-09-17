@@ -45,8 +45,11 @@ class BaseTest(unittest.TestCase):
                                   service_args=['--enable-chrome-logs'],
                                   service_log_path=config.get('service_log_path'))
         self.driver = driver
+        self.saved_wd = os.getcwd()
+        os.chdir(os.path.dirname(sys.modules[self.__module__].__file__))
 
     def tearDown(self) -> None:
+        os.chdir(self.saved_wd)
         self.driver.quit()
 
     def assertDriverContainsText(self, css_selector, text, timeout=5):
