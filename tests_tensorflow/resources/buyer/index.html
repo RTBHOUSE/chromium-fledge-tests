@@ -10,14 +10,14 @@ function randomVector(n) {
 if (!navigator.joinAdInterestGroup) {
   document.write("your browser doesn't have joinAdInterestGroup -- do you need to set some flags?");
 } else {
+  const buyer_address = window.location.origin;
   navigator.joinAdInterestGroup({
-    owner: "https://fledge-tests.creativecdn.net:9011",
+    owner: buyer_address,
     name: "tc-ig",
-    biddingLogicUrl: "https://fledge-tests.creativecdn.net:9011/buyer.js",
-    userBiddingSignals: {key: "user bidding signals "},
+    biddingLogicUrl: buyer_address + "/buyer.js",
     ads: [
       {
-        renderUrl: "https://fledge-tests.creativecdn.net:9011/ad.html",
+        renderUrl: buyer_address + "/ad.html",
         metadata: {
           input: randomVector(200),
         },

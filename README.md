@@ -118,7 +118,7 @@ $ docker run --rm -it -v $PWD/tests_performance:/tests_performance/ andreburgaud
 time spent on 1 loop in avg: 1.12 ms
 ```
 
-### benchmark 2: buyer’s js run as a bidding worklet in Chromium
+### benchmark 2: buyer's js run as a bidding worklet in Chromium
 
 In this scenario we use this testing framework to run [buyer's js script](https://raw.githubusercontent.com/RTBHOUSE/chromium-fledge-tests/master/tests_performance/resources/buyer/buyer.js) in a bidding worklet (with these limitations: jitless, v8 pool size set to 1 etc.). In this instance, `generateBid()` is called once with hard-coded weights. In this [test](https://github.com/RTBHOUSE/chromium-fledge-tests/blob/master/tests_performance/test.py) we use a custom-built version of chromium with a [patch](https://github.com/RTBHOUSE/chromium/commits/auction_timer), which helps to measure the bidding worklet time. The following example is similar to previous [functional test](#functional-tests):
 
@@ -156,4 +156,17 @@ Result:
 $ bash run.sh --chromium-url https://github.com/RTBHOUSE/chromium/releases/download/94.0.4588.0-auction-timer/chromium.zip
 ...
 INFO:/home/usertd/tests/tests_performance/test.py:generateBid took: 55.68 ms
+```
+
+### benchmark 3: buyer's js using TensorFlowJS models run as a bidding worklet in Chromium
+
+This is a similar scenario but it uses a pre-built TensorflowJS model in [buyer's js script](tests_tensorflow/resources/buyer/buyer.js). It also requires a custom-built version of chromium with a [patch](https://github.com/RTBHOUSE/chromium/commits/async_5000ms), which extends bidding worklets timeout to 5s:
+
+Result:
+
+```bash
+$ bash build.sh
+$ bash run.sh --test tests_tensorflow.test --chromium-url https://github.com/RTBHOUSE/chromium/releases/download/96.0.4644.0-async-5000ms/chromium-async_5000ms.zip
+...
+INFO:/home/usertd/tests/tests_tensorflow/test.py:generateBid took: 370 ms
 ```

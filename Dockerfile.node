@@ -1,0 +1,14 @@
+FROM node:latest
+
+WORKDIR /opt/node
+
+COPY package.json .
+
+RUN npm install
+
+RUN apt update
+RUN apt install -y python3-pip
+RUN pip3 install -U pip
+RUN pip3 install tensorflowjs
+
+COPY . .
