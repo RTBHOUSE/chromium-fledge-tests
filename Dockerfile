@@ -42,4 +42,4 @@ RUN mkdir ~/.vnc; echo turtledove | vncpasswd -f > ~/.vnc/passwd
 ENTRYPOINT [ "/home/usertd/tests/entrypoint.sh" ]
 RUN touch ~/.Xauthority
 
-CMD python3 -m unittest
+CMD /home/usertd/tests/run_tests.sh

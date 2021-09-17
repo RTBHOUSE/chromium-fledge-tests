@@ -8,4 +8,5 @@ function reportResult(auctionConfig, browserSignals) {
     "browserSignals": browserSignals
   };
   sendReportTo("https://fledge-tests.creativecdn.net:8092/reportResult?signals=" + encodeURIComponent(JSON.stringify(signals)));
+  return signals;
 }
