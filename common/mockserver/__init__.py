@@ -16,8 +16,8 @@ logger = logging.getLogger(__file__)
 
 class RequestHandler(http.server.SimpleHTTPRequestHandler):
 
-    def __init__(self, *args, directory, callback_function, **kwargs):
-        self.callback_function = callback_function
+    def __init__(self, *args, directory, callback, **kwargs):
+        self.callback = callback
         super().__init__(*args, directory=directory, **kwargs)
 
     def end_headers(self) -> None:
@@ -33,7 +33,10 @@ class RequestHandler(http.server.SimpleHTTPRequestHandler):
         if '?' in path:
             path, tmp = path.split('?', 1)
             params = parse_qs(tmp)
-        self.callback_function(Request(path, params))
+        self.callback(Request(path, params))
+
+        logger.info(f"request path: {path}, params: {params}")
+
         super().do_GET()
 
 
@@ -73,7 +76,7 @@ class MockServer:
         server_address = ('0.0.0.0', self.server_port)
         self.http_server = http.server.HTTPServer(
             server_address,
-            partial(RequestHandler, directory=self.directory, callback_function=self.requests.append))
+            partial(RequestHandler, directory=self.directory, callback=self.requests.append))
         self.http_server.socket = ssl.wrap_socket(
             self.http_server.socket,
             server_side=True,
