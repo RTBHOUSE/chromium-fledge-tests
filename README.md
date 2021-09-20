@@ -73,7 +73,7 @@ Some motivation and implementation details were presented in this [issue](https:
 
 ### benchmark 1: tight loop with a warm-up run in V8 engine with jit
 
-In this scenario we run node.js with [js script](https://github.com/RTBHOUSE/chromium-fledge-tests/blob/master/tests_performance/resources/benchmark.js), which calls `generateBid()` inside a loop including some warm-up phase. Inputs and weights are different for every iteration and generated before the test. Results are output to avoid unwanted optimizations.
+In this scenario we run [V8 engine](https://github.com/andreburgaud/docker-v8) with [js script](https://github.com/RTBHOUSE/chromium-fledge-tests/blob/master/tests_performance/resources/benchmark.js), which calls `generateBid()` inside a loop including some warm-up phase. Inputs and weights are different for every iteration and generated before the test. Results are output to avoid unwanted optimizations.
 
 ```javascript
 function test(warmups, loops) {
@@ -103,17 +103,19 @@ function test(warmups, loops) {
         bids[i] = generateBid(inputs[i], nn_models_weights[i]);
     }
     let end = new Date().getTime();
+    let avgDuration = ((end - start) / (loops - warmups));
+    avgDuration = Math.round(avgDuration * 100) / 100;
 
-    console.log("results for %d iterations: %s", loops, bids);
-    console.log("time spent on 1 loop in avg: %d ms", ((end - start) / (loops - warmups)));
+    console.log("results for", loops, "iterations: ", bids);
+    console.log("time spent on 1 loop in avg:", avgDuration, "ms");
 }
 ```
 Result:
 
 ```bash
-$ node tests_performance/resources/benchmark.js
+$ docker run --rm -it -v $PWD/tests_performance:/tests_performance/ andreburgaud/d8 /tests_performance/resources/benchmark.js
 ...
-time spent on 1 loop in avg: 1.18 ms
+time spent on 1 loop in avg: 1.12 ms
 ```
 
 ### benchmark 2: buyer’s js run as a bidding worklet in Chromium

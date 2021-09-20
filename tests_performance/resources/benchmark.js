@@ -79,9 +79,11 @@ function test(warmups, loops) {
         bids[i] = generateBid(inputs[i], nn_models_weights[i]);
     }
     let end = new Date().getTime();
+    let avgDuration = ((end - start) / (loops - warmups));
+    avgDuration = Math.round(avgDuration * 100) / 100;
 
-    console.log("results for %d iterations: %s", loops, bids);
-    console.log("time spent on 1 loop in avg: %d ms", ((end - start) / (loops - warmups)));
+    console.log("results for", loops, "iterations: ", bids);
+    console.log("time spent on 1 loop in avg:", avgDuration, "ms");
 
 }
 
