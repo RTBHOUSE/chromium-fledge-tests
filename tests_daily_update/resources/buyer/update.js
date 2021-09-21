@@ -1,0 +1,1 @@
+{ "ads": [ { "renderUrl": "https://fledge-tests.creativecdn.net:8201/ad-2.html", "metadata": { "bid": 1 } } ] }

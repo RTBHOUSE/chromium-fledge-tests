@@ -74,7 +74,7 @@ class MockServer:
     def __enter__(self):
         logger.info(f"server {self.address} starting")
         server_address = ('0.0.0.0', self.server_port)
-        self.http_server = http.server.HTTPServer(
+        self.http_server = http.server.ThreadingHTTPServer(
             server_address,
             partial(RequestHandler, directory=self.directory, callback=self.requests.append))
         self.http_server.socket = ssl.wrap_socket(
@@ -92,6 +92,7 @@ class MockServer:
         self.http_server.serve_forever()
 
     def __exit__(self, exc_type, exc_val, exc_tb):
+        self.http_server.socket.close()
         self.http_server.shutdown()
         logger.info(f"server {self.address} stopped")
 
