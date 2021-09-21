@@ -11,6 +11,7 @@
 # ./run.sh --chromium-url https://github.com/RTBHOUSE/chromium/releases/download/94.0.4588.0-auction-timer/chromium.zip
 
 set -e
+set -x
 
 OPTIONS=
 LONG_OPTIONS=chromium-directory:,chromium-url:,test:
@@ -62,7 +63,7 @@ elif [[ -n ${CHROMIUM_URL} ]]; then
   mkdir -p "_chromium"
   cd "_chromium"
   curl -L -# "${CHROMIUM_URL}" > "chromium-custom.zip"
-  unzip "chromium-custom.zip"
+  unzip "chromium-custom.zip" -d "chromium-custom"
   CHROMIUM_PATH=$(find "${PWD}/" -name chrome -type f)
   CHROMIUM_DIR=$(dirname "${CHROMIUM_PATH}")
   volumeOpt="-v ${CHROMIUM_DIR}:/home/usertd/chromium-custom/"
