@@ -1,0 +1,8 @@
+<script>
+if (!navigator.updateAdInterestGroups) {
+  document.write("your browser doesn't have updateAdInterestGroups -- do you need to set some flags?");
+} else {
+  navigator.updateAdInterestGroups();
+  document.write("updated interest group");
+}
+</script>
