@@ -29,6 +29,7 @@ class BasicTest(BaseTest):
                 MockServer(8083, '/home/usertd/tests/tests_basic/resources/seller') as seller_server:
 
             self.driver.get(buyer_server.address)
+            self.driver.get(buyer_server.address)
             self.assertDriverContainsText('h1', 'Hello')
             self.driver.get(publisher_server.address)
 
