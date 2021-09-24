@@ -16,8 +16,8 @@ class WebassemblyApiTest(BaseTest):
     @measure_time
     @log_exception
     def test__basic_webassembly_api(self):
-        with MockServer(9031, '/home/usertd/tests/tests_webassembly_api/resources/buyer') as buyer_server,\
-                MockServer(9032, '/home/usertd/tests/tests_webassembly_api/resources/seller') as seller_server:
+        with MockServer(9031, 'resources/buyer') as buyer_server,\
+                MockServer(9032, 'resources/seller') as seller_server:
 
             with MeasureDuration("joinAdInterestGroup"):
                 self.driver.get(buyer_server.address)

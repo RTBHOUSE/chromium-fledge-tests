@@ -18,8 +18,8 @@ class WebassemblyTest(BaseTest):
     @log_exception
     @average_benchmarks
     def test__basic_webassembly(self):
-        with MockServer(9021, '/home/usertd/tests/tests_webassembly/resources/buyer') as buyer_server,\
-                MockServer(9022, '/home/usertd/tests/tests_webassembly/resources/seller') as seller_server:
+        with MockServer(9021, 'resources/buyer') as buyer_server,\
+                MockServer(9022, 'resources/seller') as seller_server:
 
             with MeasureDuration("joinAdInterestGroup"):
                 self.driver.get(buyer_server.address)

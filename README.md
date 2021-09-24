@@ -67,8 +67,8 @@ In the [tests](https://github.com/RTBHOUSE/chromium-fledge-tests/blob/master/src
 
 ```python
     def test__should_show_ad_our(self):
-        with MockServer(8091, '/home/usertd/tests/tests_functional/resources/buyer') as buyer_server,\
-                MockServer(8092, '/home/usertd/tests/tests_functional/resources/seller') as seller_server:
+        with MockServer(8091, 'resources/buyer') as buyer_server,\
+                MockServer(8092, 'resources/seller') as seller_server:
 
             with MeasureDuration("joinAdInterestGroup"):
                 self.driver.get(buyer_server.address)
@@ -162,8 +162,8 @@ In this scenario we use this testing framework to run [buyer's js script](https:
 
 ```python
     def test__check_nn_with_static_weights_computation_time(self):
-        with MockServer(9011, '/home/usertd/tests/tests_performance/resources/buyer') as buyer_server,\
-                MockServer(9012, '/home/usertd/tests/tests_performance/resources/seller') as seller_server:
+        with MockServer(9011, 'resources/buyer') as buyer_server,\
+                MockServer(9012, 'resources/seller') as seller_server:
 
             with MeasureDuration("joinAdInterestGroup"):
                 self.driver.get(buyer_server.address)

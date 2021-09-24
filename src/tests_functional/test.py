@@ -22,8 +22,8 @@ class FunctionalTest(BaseTest):
     @measure_time
     @log_exception
     def test__should_show_ad_our(self):
-        with MockServer(8091, '/home/usertd/tests/tests_functional/resources/buyer') as buyer_server,\
-                MockServer(8092, '/home/usertd/tests/tests_functional/resources/seller') as seller_server:
+        with MockServer(8091, 'resources/buyer') as buyer_server,\
+                MockServer(8092, 'resources/seller') as seller_server:
 
             with MeasureDuration("joinAdInterestGroup"):
                 self.driver.get(buyer_server.address)
