@@ -21,8 +21,8 @@ class DailyUpdateTest(BaseTest):
     @measure_time
     @log_exception
     def test__should_update(self):
-        with MockServer(8201, '/home/usertd/tests/tests_daily_update/resources/buyer') as buyer_server,\
-                MockServer(8202, '/home/usertd/tests/tests_daily_update/resources/seller') as seller_server:
+        with MockServer(8201, 'resources/buyer') as buyer_server,\
+                MockServer(8202, 'resources/seller') as seller_server:
 
             # join interest group
             self.driver.get(buyer_server.address)

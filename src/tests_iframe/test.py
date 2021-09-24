@@ -23,7 +23,7 @@ class IframeTest(BaseTest):
     @measure_time
     @log_exception
     def test__should_show_ad_jeff_through_iframe(self):
-        with MockServer(8111, '/home/usertd/tests/tests_iframe/resources/buyer') as buyer_server:
+        with MockServer(8111, 'resources/buyer') as buyer_server:
 
             with MeasureDuration("joinAdInterestGroup"):
                 self.driver.get(buyer_server.address)
