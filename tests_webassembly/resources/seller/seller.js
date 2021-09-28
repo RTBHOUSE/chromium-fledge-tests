@@ -1,5 +1,5 @@
 function scoreAd(adMetadata, bid, auctionConfig, trustedScoringSignals, browserSignals) {
-  return bid;
+  return browserSignals.biddingDurationMsec;
 }
 
 function reportResult(auctionConfig, browserSignals) {
