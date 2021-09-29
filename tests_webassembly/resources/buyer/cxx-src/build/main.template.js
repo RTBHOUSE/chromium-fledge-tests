@@ -53,11 +53,23 @@ function _benchmark_run_bidding_fn() {
 }
 
 (() => {
+  const someFloats = new Array(200);
+  fillWithRandomFloat32Array(someFloats.length, someFloats);
+  const interestGroup = {
+    ads: [{
+      renderUrl: 'https://0.0.0.0/renderUrl123',
+      metadata: {
+        input: someFloats
+      }
+    }]
+  };
+
   const t_begin = performance.now();
 
-  const bid = _benchmark_run_bidding_fn();
+  const bid = generateBid(interestGroup, null, null, null, null).bid;
 
   const t_end = performance.now();
 
-  console.log("all = " + (t_end - t_begin) + "ms");
+  console.log("bid: " + bid);
+  console.log("time spent on generateBid: " + (t_end - t_begin) + "ms");
 })();

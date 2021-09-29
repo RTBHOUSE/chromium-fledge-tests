@@ -73,7 +73,7 @@ else
   volumeOpt=""
 fi
 
-docker build --iidfile .iidfile .
+docker build --no-cache --iidfile .iidfile .
 
 [ -t 0 ] && [ -t 1 ] && termOpt='-t' || termOpt=''
 
