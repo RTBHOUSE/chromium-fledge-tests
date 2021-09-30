@@ -3,13 +3,15 @@ const tf = require('@tensorflow/tfjs-node');
 const fs = require('fs');
 const child_process = require('child_process');
 
-Promise.all([...Array(5).keys()].map(idx => {
+eval(fs.readFileSync(__dirname + '/../../../tests_performance/resources/buyer/buyer.js', { encoding: 'UTF-8' }));
+
+Promise.all([nn_model_weights_0, nn_model_weights_1, nn_model_weights_2, nn_model_weights_3, nn_model_weights_4].map((layer_weights, idx) => {
   let model = tf.sequential({
     layers: [
-      tf.layers.dense({ inputShape: [200], units: 200, activation: 'relu', useBias: false, weights: [tf.randomNormal([200, 200])] }),
-      tf.layers.dense({ units: 100, activation: 'relu', useBias: false, weights: [tf.randomNormal([200, 100])] }),
-      tf.layers.dense({ units: 50, activation: 'relu', useBias: false, weights: [tf.randomNormal([100, 50])] }),
-      tf.layers.dense({ units: 1, activation: 'relu', useBias: false, weights: [tf.randomNormal([50, 1])] })
+      tf.layers.dense({ inputShape: [200], units: 200, activation: 'relu', useBias: false, weights: [tf.tensor(layer_weights[0]).transpose()] }),
+      tf.layers.dense({ units: 100, activation: 'relu', useBias: false, weights: [tf.tensor(layer_weights[1]).transpose()] }),
+      tf.layers.dense({ units: 50, activation: 'relu', useBias: false, weights: [tf.tensor(layer_weights[2]).transpose()] }),
+      tf.layers.dense({ units: 1, activation: 'relu', useBias: false, weights: [tf.tensor(layer_weights[3]).transpose()] })
     ]
   });
   const modelDir = __dirname + "/model" + idx + "/";
