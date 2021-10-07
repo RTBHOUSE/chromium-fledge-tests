@@ -4,4 +4,5 @@
 .venv
 .vscode
 _chromium
+_chromium_versions
 **/__pycache__

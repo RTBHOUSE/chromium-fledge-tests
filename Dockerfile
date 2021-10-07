@@ -27,7 +27,7 @@ RUN export REVISION=$(curl -s -S 'https://www.googleapis.com/download/storage/v1
     pip3 install --user selenium assertpy; \
     mkdir /home/usertd/logs
 
-COPY --chown=usertd:usertd . tests
+COPY --chown=usertd:usertd src/. tests
 
 RUN mkdir -p /home/usertd/.pki/nssdb && \
     certutil -d /home/usertd/.pki/nssdb -N --empty-password && \

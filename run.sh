@@ -14,7 +14,10 @@ set -e
 set -x
 
 OPTIONS=
-LONG_OPTIONS=chromium-directory:,chromium-url:,test:
+LONG_OPTIONS=chromium-directory:,chromium-url:,test:,skip-build
+
+CHROMIUM_CUSTOM_VERSIONS_DIR="_chromium_versions"
+SKIP_BUILD="false"
 
 PARSED=$(POSIXLY_CORRECT=1 getopt --options=$OPTIONS --longoptions=${LONG_OPTIONS} --name "$0" -- "$@")
 if [[ $? -ne 0 ]]; then
@@ -28,6 +31,10 @@ eval set -- "$PARSED"
 # process options until we see --
 while true; do
   case "$1" in
+  --skip-build)
+    SKIP_BUILD="true"
+    shift 1
+    ;;
   --chromium-directory)
     CHROMIUM_DIR="$2"
     shift 2
@@ -51,29 +58,38 @@ while true; do
   esac
 done
 
-if [[ -n ${CHROMIUM_DIR} ]]; then
-  if [[ ! ${CHROMIUM_DIR} == /* ]]; then
-    echo "chromium directory must be an absolute path!"
-    exit 1
-  fi
-  echo "using chromium build from local directory ${CHROMIUM_DIR}"
-  volumeOpt="-v ${CHROMIUM_DIR}:/home/usertd/chromium-custom/"
-elif [[ -n ${CHROMIUM_URL} ]]; then
-  echo "using chromium build from URL ${CHROMIUM_URL}"
-  mkdir -p "_chromium"
-  cd "_chromium"
-  curl -L -# "${CHROMIUM_URL}" > "chromium-custom.zip"
-  unzip "chromium-custom.zip" -d "chromium-custom"
-  CHROMIUM_PATH=$(find "${PWD}/" -name chrome -type f)
-  CHROMIUM_DIR=$(dirname "${CHROMIUM_PATH}")
-  volumeOpt="-v ${CHROMIUM_DIR}:/home/usertd/chromium-custom/"
-  cd ../
-else
-  echo "using official chrome build"
-  volumeOpt=""
-fi
+if [ "${SKIP_BUILD}" != "true" ]; then
+  if [[ -n ${CHROMIUM_DIR} ]]; then
+    if [[ ! ${CHROMIUM_DIR} == /* ]]; then
+      echo "chromium directory must be an absolute path!"
+      exit 1
+    fi
+    echo "using chromium build from local directory ${CHROMIUM_DIR}"
+    volumeOpt="-v ${CHROMIUM_DIR}:/home/usertd/chromium-custom/"
+  elif [[ -n ${CHROMIUM_URL} ]]; then
+    echo "using chromium build from URL ${CHROMIUM_URL}"
+    rm -r "_chromium"
+    mkdir -p "_chromium"
+    mkdir -p ${CHROMIUM_CUSTOM_VERSIONS_DIR}
 
-docker build --iidfile .iidfile .
+    CUSTOM_VERSION_ZIP="${CHROMIUM_CUSTOM_VERSIONS_DIR}/`basename ${CHROMIUM_URL}`"
+    if [ ! -f "${CUSTOM_VERSION_ZIP}" ]; then
+      curl -L -# "${CHROMIUM_URL}" > "${CUSTOM_VERSION_ZIP}"
+    fi
+    unzip "${CUSTOM_VERSION_ZIP}" -d "_chromium/chromium-custom"
+
+    cd "_chromium"
+    CHROMIUM_PATH=$(find "${PWD}/" -name chrome -type f)
+    CHROMIUM_DIR=$(dirname "${CHROMIUM_PATH}")
+    volumeOpt="-v ${CHROMIUM_DIR}:/home/usertd/chromium-custom/"
+    cd ../
+  else
+    echo "using official chrome build"
+    volumeOpt=""
+  fi
+
+  docker build --iidfile .iidfile -t chromium-fledge-tests .
+fi
 
 [ -t 0 ] && [ -t 1 ] && termOpt='-t' || termOpt=''
 
