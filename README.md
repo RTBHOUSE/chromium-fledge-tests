@@ -113,7 +113,7 @@ function test(warmups, loops) {
 Result:
 
 ```bash
-$ docker run --rm -it -v $PWD/tests_performance:/tests_performance/ andreburgaud/d8 /tests_performance/resources/benchmark.js
+$ docker run --rm -it -v $PWD/src/tests_performance:/tests_performance/ andreburgaud/d8 /tests_performance/resources/benchmark.js
 ...
 time spent on 1 loop in avg: 1.12 ms
 ```
