@@ -1,7 +1,3 @@
-let wasm_module = undefined;
-const t_mid = performance.now();
-let time_instantiate = -1;
-let time_parse = -1;
 
 function fillWithRandomFloat32Array(n, vector) {
   for (let i = 0; i < n; i++) {
@@ -38,7 +34,7 @@ function generateBid(interestGroup, auctionSignals, perBuyerSignals, trustedBidd
   
 }
 
-function _benchmark_run_bidding_fn() {
+(() => {
   const someFloats = new Array(200);
   fillWithRandomFloat32Array(someFloats.length, someFloats);
   const interestGroup = {
@@ -49,15 +45,15 @@ function _benchmark_run_bidding_fn() {
       }
     }]
   };
-  return generateBid(interestGroup, null, null, null, null).bid;
-}
 
-(() => {
   const t_begin = performance.now();
 
-  const bid = _benchmark_run_bidding_fn();
+  const bid = generateBid(interestGroup, null, null, null, null).bid;
 
   const t_end = performance.now();
 
-  console.log("all = " + (t_end - t_begin) + "ms");
+  console.log("bid: " + bid);
+  console.log("time spent on parsing: " + (t_parse_end - t_parse_start) + "ms");
+  console.log("time spent on generateBid: " + (t_end - t_begin) + "ms");
+  console.log("[sum] time spent on script: " + (t_end - t_parse_start) + "ms");
 })();
