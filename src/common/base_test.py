@@ -37,7 +37,12 @@ class BaseTest(unittest.TestCase):
         options.add_argument('--disable-gpu')
         options.add_argument('--user-data-dir=/tmp/profile123')
         options.add_argument('--user-agent=rtbfledgetests')
-        options.add_argument('--enable-features=FledgeInterestGroups,FledgeInterestGroupAPI')
+        # ver <= 96.x
+        # options.add_argument('--enable-features=FledgeInterestGroups,FledgeInterestGroupAPI')
+        # ver >= 97.x
+        options.add_argument('--enable-features=InterestGroupStorage,AdInterestGroupAPI,Fledge')
+        # TODO: at some point in the future FLEDGE won't work with disabled FencedFrames
+        options.add_argument('--disable-features=FencedFrames')
         desired_capabilities = DesiredCapabilities.CHROME
         desired_capabilities['goog:loggingPrefs'] =  { 'browser':'ALL' }
         driver = webdriver.Chrome('/home/usertd/chromedriver_linux64/chromedriver', options=options,
