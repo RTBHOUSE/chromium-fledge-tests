@@ -8,6 +8,8 @@ implementation capabilities in [Chromium](https://chromium-review.googlesource.c
 - [Performance benchmarks](#performance-benchmarks)
   - [benchmark 1: tight loop with a warm-up run in V8 engine with jit](#benchmark-1-tight-loop-with-a-warm-up-run-in-v8-engine-with-jit)
   - [benchmark 2: buyer’s js run as a bidding worklet in Chromium](#benchmark-2-buyers-js-run-as-a-bidding-worklet-in-chromium)
+  - [benchmark 3: buyer’s js without wasm run in V8 engine](#benchmark-3-buyers-js-without-wasm-run-in-V8-engine)
+  - [benchmark 4: buyer’s js with wasm run in V8 engine](#benchmark-4-buyers-js-with-wasm-run-in-V8-engine)
 
 ## How to run tests  
 
@@ -17,9 +19,9 @@ implementation capabilities in [Chromium](https://chromium-review.googlesource.c
 
 ## Functional tests
 
-In the [tests](https://github.com/RTBHOUSE/chromium-fledge-tests/blob/master/tests_functional/test.py) we simulate an end-to-end FLEDGE flow, which includes joining interest groups and running ad auctions. The tests launch the latest or custom-built Chromium browser with Selenium. They serve mock servers which provide buyer's and seller's logic including the `joinAdInterestGroup()` and `runAdAuction()` API calls. These mock servers track all requests, so we could verify not just the rendered ad but also the signals passed to `reportWin()` and `reportResult()`. Here is an example:
+In the [tests](https://github.com/RTBHOUSE/chromium-fledge-tests/blob/master/src/tests_functional/test.py) we simulate an end-to-end FLEDGE flow, which includes joining interest groups and running ad auctions. The tests launch the latest or custom-built Chromium browser with Selenium. They serve mock servers which provide buyer's and seller's logic including the `joinAdInterestGroup()` and `runAdAuction()` API calls. These mock servers track all requests, so we could verify not just the rendered ad but also the signals passed to `reportWin()` and `reportResult()`. Here is an example:
 
-```javascript
+```python
     def setUp(self) -> None:
         options = webdriver.ChromeOptions()
         ...
@@ -27,7 +29,7 @@ In the [tests](https://github.com/RTBHOUSE/chromium-fledge-tests/blob/master/tes
         self.driver = webdriver.Chrome(...)
 ```
 
-```javascript
+```python
     def test__should_show_ad_our(self):
         with MockServer(8091, '/home/usertd/tests/tests_functional/resources/buyer') as buyer_server,\
                 MockServer(8092, '/home/usertd/tests/tests_functional/resources/seller') as seller_server:
@@ -59,7 +61,7 @@ In the [tests](https://github.com/RTBHOUSE/chromium-fledge-tests/blob/master/tes
 
 ## Performance benchmarks
 
-We test the same `generateBid()` in two different environments:
+We test the same `generateBid()` in different environments:
 
 ```javascript
 function generateBid(input, nn_models_weights) {
@@ -73,7 +75,7 @@ Some motivation and implementation details were presented in this [issue](https:
 
 ### benchmark 1: tight loop with a warm-up run in V8 engine with jit
 
-In this scenario we run [V8 engine](https://github.com/andreburgaud/docker-v8) with [js script](https://github.com/RTBHOUSE/chromium-fledge-tests/blob/master/tests_performance/resources/benchmark.js), which calls `generateBid()` inside a loop including some warm-up phase. Inputs and weights are different for every iteration and generated before the test. Results are output to avoid unwanted optimizations.
+In this scenario we run [V8 engine](https://github.com/andreburgaud/docker-v8) with [js script](https://github.com/RTBHOUSE/chromium-fledge-tests/blob/master/src/tests_performance/resources/benchmark.js), which calls `generateBid()` inside a loop including some warm-up phase. Inputs and weights are different for every iteration and generated before the test. Results are output to avoid unwanted optimizations.
 
 ```javascript
 function test(warmups, loops) {
@@ -120,9 +122,9 @@ time spent on 1 loop in avg: 1.12 ms
 
 ### benchmark 2: buyer's js run as a bidding worklet in Chromium
 
-In this scenario we use this testing framework to run [buyer's js script](https://raw.githubusercontent.com/RTBHOUSE/chromium-fledge-tests/master/tests_performance/resources/buyer/buyer.js) in a bidding worklet (with these limitations: jitless, v8 pool size set to 1 etc.). In this instance, `generateBid()` is called once with hard-coded weights. In this [test](https://github.com/RTBHOUSE/chromium-fledge-tests/blob/master/tests_performance/test.py) we use a custom-built version of chromium with a [patch](https://github.com/RTBHOUSE/chromium/commits/auction_timer), which helps to measure the bidding worklet time. The following example is similar to previous [functional test](#functional-tests):
+In this scenario we use this testing framework to run [buyer's js script](https://raw.githubusercontent.com/RTBHOUSE/chromium-fledge-tests/master/src/tests_performance/resources/buyer/buyer.js) in a bidding worklet (with these limitations: jitless, v8 pool size set to 1 etc.). In this instance, `generateBid()` is called once with hard-coded weights. In this [test](https://github.com/RTBHOUSE/chromium-fledge-tests/blob/master/src/tests_performance/test.py) we use a custom-built version of chromium with a [patch](https://github.com/RTBHOUSE/chromium/commits/auction_timer), which helps to measure the bidding worklet time. The following example is similar to previous [functional test](#functional-tests):
 
-```javascript
+```python
     def test__check_nn_with_static_weights_computation_time(self):
         with MockServer(9011, '/home/usertd/tests/tests_performance/resources/buyer') as buyer_server,\
                 MockServer(9012, '/home/usertd/tests/tests_performance/resources/seller') as seller_server:
@@ -158,15 +160,62 @@ $ bash run.sh --chromium-url https://github.com/RTBHOUSE/chromium/releases/downl
 INFO:/home/usertd/tests/tests_performance/test.py:generateBid took: 55.68 ms
 ```
 
-### benchmark 3: buyer's js using TensorFlowJS models run as a bidding worklet in Chromium
+### benchmark 3: buyer’s js without wasm run in V8 engine
 
-This is a similar scenario but it uses a pre-built TensorflowJS model in [buyer's js script](tests_tensorflow/resources/buyer/buyer.js). It also requires a custom-built version of chromium with a [patch](https://github.com/RTBHOUSE/chromium/commits/async_5000ms), which extends bidding worklets timeout to 5s:
+In this scenario we run [js script](https://github.com/RTBHOUSE/chromium-fledge-tests/blob/master/src/tests_performance/resources/benchmark.js) in V8 engine. It is the same script which was used in benchmark 1 but we do not use jit this time.
 
 Result:
 
 ```bash
-$ bash build.sh
-$ bash run.sh --test tests_tensorflow.test --chromium-url https://github.com/RTBHOUSE/chromium/releases/download/96.0.4644.0-async-5000ms/chromium-async_5000ms.zip
+$ docker run --rm -it -v $PWD/src/tests_performance:/tests_performance/ andreburgaud/d8 /tests_performance/resources/benchmark.js --jitless --optimize_for_size --no-expose-wasm
 ...
-INFO:/home/usertd/tests/tests_tensorflow/test.py:generateBid took: 370 ms
+time spent on 1 loop in avg: 54.56 ms
+```
+### benchmark 4: buyer’s js with wasm run in V8 engine
+
+In this scenario we run [js script with wasm binary hardcoded](https://github.com/RTBHOUSE/chromium-fledge-tests/blob/master/src/tests_webassembly/resources/buyer/cxx-src/build/main.js). It uses the same `generateBid()` but model weights and matrix multiplication are [implemented in C++](https://github.com/RTBHOUSE/chromium-fledge-tests/blob/master/src/tests_webassembly/resources/buyer/cxx-src/functions.c), compiled and hardcoded as a wasm binary:
+
+```javascript
+const wasm_code = Uint8Array.from([0,97,115, ... , ]);
+
+function generateBid(interestGroup, auctionSignals, perBuyerSignals, trustedBiddingSignals, browserSignals) {
+  let ad = interestGroup.ads[0];
+  let input = ad.metadata.input;
+
+  const module = new WebAssembly.Module(wasm_code);
+  const instance = new WebAssembly.Instance(module);
+
+  const memory = instance.exports.memory;
+  const input_in_memory = new Float32Array(memory.buffer, 0, 200);
+  for (let i = 0; i < input.length; ++i) {
+    input_in_memory[i] = input[i];
+  }
+  const results = [
+    instance.exports.nn_forward_model0(input_in_memory.length, input_in_memory),
+    instance.exports.nn_forward_model1(input_in_memory.length, input_in_memory),
+    instance.exports.nn_forward_model2(input_in_memory.length, input_in_memory),
+    instance.exports.nn_forward_model3(input_in_memory.length, input_in_memory),
+    instance.exports.nn_forward_model4(input_in_memory.length, input_in_memory),
+  ];
+  const bid = results.map(x => Math.max(x, 1)).reduce((x, y) => x * y);
+  return {
+    ad: 'example',
+    bid: bid,
+    render: ad.renderUrl
+  }
+  
+}
+```
+
+Result:
+
+```bash
+$ cd src/tests_webassembly/resources/buyer/cxx-src
+$ bash compile.sh
+$ cd ../../../../../
+$ docker run --rm -it -v $PWD/src/tests_webassembly:/tests_webassembly/ andreburgaud/d8 /tests_webassembly/resources/buyer/cxx-src/build/main.js --optimize_for_size
+...
+time spent on parsing: 1.1640000000000157ms
+time spent on generateBid: 3.6059999999999945ms
+[sum] time spent on script: 4.927999999999997ms
 ```
