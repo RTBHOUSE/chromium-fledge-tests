@@ -22,12 +22,7 @@ class BaseTest(unittest.TestCase):
         logging.basicConfig(stream=sys.stderr, level=logging.INFO)
         # https://peter.sh/experiments/chromium-command-line-switches
         options = webdriver.ChromeOptions()
-        if os.path.isdir('/home/usertd/chromium-custom/'):
-            logger.info("using custom chromium build")
-            options.binary_location = '/home/usertd/chromium-custom/chrome'
-        else:
-            logger.info("using official chrome build")
-            options.binary_location = '/home/usertd/chrome-linux/chrome'
+        options.binary_location = '/home/usertd/chromium/chrome'
         # FIXME headless chrome does not work with fledge, https://bugs.chromium.org/p/chromium/issues/detail?id=1229652
         # options.headless = True
         options.add_argument('--no-sandbox')
@@ -44,8 +39,8 @@ class BaseTest(unittest.TestCase):
         # TODO: at some point in the future FLEDGE won't work with disabled FencedFrames
         options.add_argument('--disable-features=FencedFrames')
         desired_capabilities = DesiredCapabilities.CHROME
-        desired_capabilities['goog:loggingPrefs'] =  { 'browser':'ALL' }
-        driver = webdriver.Chrome('/home/usertd/chromedriver_linux64/chromedriver', options=options,
+        desired_capabilities['goog:loggingPrefs'] = {'browser': 'ALL'}
+        driver = webdriver.Chrome('/home/usertd/chromium/chromedriver', options=options,
                                   desired_capabilities=desired_capabilities,
                                   service_args=['--enable-chrome-logs'],
                                   service_log_path=config.get('service_log_path'))
