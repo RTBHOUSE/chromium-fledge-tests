@@ -12,7 +12,7 @@ implementation capabilities in [Chromium](https://chromium-review.googlesource.c
 ## How to run tests  
 
 - `bash run.sh` - runs all tests with the latest chromium version
-- `bash run.sh --chromium-directory <path-to-chromium-dir>` - runs tests with custom-built chromium from given local path
+- `bash run.sh --chromium-dir <path-to-chromium-dir>` - runs tests with custom-built chromium from given local path
 - `bash run.sh --chromium-url <url-to-chromium-zip>`  - downloads chromium from the given location and runs tests with it
 
 ## Functional tests

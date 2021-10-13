@@ -18,13 +18,7 @@ RUN apt-get update && \
 USER usertd
 WORKDIR /home/usertd
 
-RUN export REVISION=$(curl -s -S 'https://www.googleapis.com/download/storage/v1/b/chromium-browser-snapshots/o/Linux_x64%2FLAST_CHANGE?alt=media'); \
-    echo "Building for chromium revision ${REVISION}"; \
-    curl -# "https://www.googleapis.com/download/storage/v1/b/chromium-browser-snapshots/o/Linux_x64%2F${REVISION}%2Fchrome-linux.zip?alt=media" > chromium.zip; \
-    unzip chromium.zip; \
-    curl -# "https://www.googleapis.com/download/storage/v1/b/chromium-browser-snapshots/o/Linux_x64%2F${REVISION}%2Fchromedriver_linux64.zip?alt=media" > chromiumdriver.zip; \
-    unzip chromiumdriver.zip; \
-    pip3 install --user selenium assertpy; \
+RUN pip3 install --user selenium assertpy; \
     mkdir /home/usertd/logs
 
 COPY --chown=usertd:usertd src/. tests
