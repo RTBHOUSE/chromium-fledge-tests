@@ -68,7 +68,7 @@ if [ "${SKIP_BUILD}" != "true" ]; then
     volumeOpt="-v ${CHROMIUM_DIR}:/home/usertd/chromium-custom/"
   elif [[ -n ${CHROMIUM_URL} ]]; then
     echo "using chromium build from URL ${CHROMIUM_URL}"
-    rm -r "_chromium"
+    rm -rf "_chromium"
     mkdir -p "_chromium"
     mkdir -p ${CHROMIUM_CUSTOM_VERSIONS_DIR}
 
