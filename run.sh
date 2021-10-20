@@ -3,11 +3,12 @@
 # Usage:
 # ./run.sh
 #   [ --chromium-dir <path-to-chromium-dir> | --chromium-url <url-to-chromium-zip> ]
-#   [ --test <module.Class.test_method> ]
+#   [ --test <module.Class.test_method> | <module> ]
 #
 # Examples:
 # ./run.sh # runs all tests with official chrome build
 # ./run.sh --test tests_functional.test.FunctionalTest.test__should_show_ad_our
+# ./run.sh --test tests_functional.test
 # ./run.sh --chromium-url https://github.com/RTBHOUSE/chromium/releases/download/94.0.4588.0-auction-timer/chromium.zip
 
 set -e
@@ -70,7 +71,7 @@ function downloadChromiumWithDriver() {
     CHROMEDRIVER_URL=$3
     CHROMEDRIVER_ZIP_FILENAME=$4
 
-    rm -r "_chromium"
+    rm -rf "_chromium"
     mkdir -p "_chromium"
     mkdir -p ${CHROMIUM_DOWNLOADS}
 
