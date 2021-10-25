@@ -1819,6 +1819,14 @@ nn_model_weights_2 = [nn_model_weights_20, nn_model_weights_21, nn_model_weights
 nn_model_weights_3 = [nn_model_weights_30, nn_model_weights_31, nn_model_weights_32, nn_model_weights_33];
 nn_model_weights_4 = [nn_model_weights_40, nn_model_weights_41, nn_model_weights_42, nn_model_weights_43];
 
+function randomVector(n) {
+  const vector = new Array(n);
+  for (let i = 0; i < n; i++) {
+    vector[i] = (Math.random() * 2) - 1;
+  }
+  return vector;
+}
+
 function multiply(a, b) {
   if (a[0].length !== b.length) {
      throw new Error("invalid matrix dimensions");
@@ -1851,26 +1859,37 @@ function nn_forward(input, nn_model_weights) {
     return X[0];
 }
 
-function generateBid(interestGroup, auctionSignals, perBuyerSignals, trustedBiddingSignals, browserSignals) {
-
-  let ad = interestGroup.ads[0];
-  let input = ad.metadata.input;
-
-  let bid = nn_forward(input, nn_model_weights_0) * nn_forward(input, nn_model_weights_1)
+function generateBid(input) {
+  return nn_forward(input, nn_model_weights_0) * nn_forward(input, nn_model_weights_1)
             * nn_forward(input, nn_model_weights_2) * nn_forward(input, nn_model_weights_3)
             * nn_forward(input, nn_model_weights_4);
-
-  return {'ad': 'example',
-          'bid': bid + 1,
-          'render': ad.renderUrl};
 }
 
-function reportWin(auctionSignals, perBuyerSignals, sellerSignals, browserSignals) {
-  const signals = {
-    "auctionSignals": auctionSignals,
-    "perBuyerSignals": perBuyerSignals,
-    "sellerSignals": sellerSignals,
-    "browserSignals": browserSignals
-  };
-  sendReportTo("https://fledge-tests.creativecdn.net:9011/reportWin?signals=" + encodeURIComponent(JSON.stringify(signals)));
+function test(warmups, loops) {
+    if (warmups > loops) {
+        throw new Error("warmups greater than loops");
+    }
+
+    let inputs = new Array(loops);
+    for (let i = 0; i < loops; i++) {
+        inputs[i] = randomVector(200);
+    }
+
+    let start = 0;
+    let bids = new Array(loops);
+    for (let i = 0; i < loops; i++) {
+        if (i == warmups) {
+            start = new Date().getTime();
+        }
+        bids[i] = generateBid(inputs[i]);
+    }
+    let end = new Date().getTime();
+    let avgDuration = ((end - start) / (loops - warmups));
+    avgDuration = Math.round(avgDuration * 100) / 100;
+
+    console.log("results for", loops, "iterations: ", bids);
+    console.log("time spent on 1 loop in avg:", avgDuration, "ms");
+
 }
+
+test(10, 100);

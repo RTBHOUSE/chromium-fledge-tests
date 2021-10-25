@@ -2,7 +2,7 @@
 function randomVector(n) {
   const vector = new Array(n);
   for (let i = 0; i < n; i++) {
-    vector[i] = Math.random();
+    vector[i] = (Math.random() * 2) - 1;
   }
   return vector;
 }

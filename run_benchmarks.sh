@@ -12,7 +12,7 @@ if [ $BENCHMARK == 1 ]; then
 elif [ $BENCHMARK == 2 ]; then
   echo "### benchmark 2: buyer's js run as a bidding worklet in Chromium"
   bash run.sh --test tests_performance.test \
-    --chromium-url https://github.com/RTBHOUSE/chromium/releases/download/96.0.4644.0-5000ms-auction-timer/chromium-bid_duration_5s.zip
+    --chromium-url https://github.com/RTBHOUSE/chromium/releases/download/97.0.4674.0-rtb-master/chromium-97.0.4674.0-rtb-master.zip
 elif [ $BENCHMARK == 3 ]; then
   echo "### benchmark 3: buyer’s js without warm-up run in V8 engine"
   docker run --rm -it -v $PWD/src/tests_performance:/tests_performance/ andreburgaud/d8 /tests_performance/resources/benchmark.js --jitless --optimize_for_size --no-expose-wasm
@@ -23,7 +23,7 @@ elif [ $BENCHMARK == 4 ]; then
 elif [ $BENCHMARK == 5 ]; then
   echo "### benchmark 5: buyer’s js with wasm binary run as a bidding worklet in Chromium"
   bash run.sh --test tests_webassembly.test \
-    --chromium-url https://github.com/RTBHOUSE/chromium/releases/download/96.0.4651.0-5000ms-wasm-auction-timer/chromium-wasm.zip
+    --chromium-url https://github.com/RTBHOUSE/chromium/releases/download/97.0.4674.0-rtb-wasm/chromium-97.0.4674.0-rtb-wasm.zip
 else
   echo "unknown benchmark: $BENCHMARK"
   exit 2
