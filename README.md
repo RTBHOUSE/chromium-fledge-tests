@@ -156,7 +156,7 @@ In this scenario we use this testing framework to run [buyer's js script](https:
 Result:
 
 ```bash
-$ bash run.sh --chromium-url https://github.com/RTBHOUSE/chromium/releases/download/94.0.4588.0-auction-timer/chromium.zip
+$ bash run.sh --test tests_performance.test --chromium-url https://github.com/RTBHOUSE/chromium/releases/download/97.0.4674.0-rtb-master/chromium-97.0.4674.0-rtb-master.zip
 ...
 INFO:/home/usertd/tests/tests_performance/test.py:generateBid took: 55.68 ms
 ```
