@@ -15,7 +15,7 @@ set -euo pipefail
 set -x
 
 OPTIONS=
-LONG_OPTIONS=chromium-dir:,chromium-url:,test:,test-dir:
+LONG_OPTIONS=chromium-dir:,chromium-url:,chromedriver-url:,test:,test-dir:
 
 CHROMIUM_DOWNLOADS="_chromium_downloads"
 SKIP_BUILD="false"
@@ -38,6 +38,10 @@ while true; do
     ;;
   --chromium-url)
     CHROMIUM_URL="$2"
+    shift 2
+    ;;
+  --chromedriver-url)
+    CHROMEDRIVER_URL="$2"
     shift 2
     ;;
   --test)
@@ -74,7 +78,7 @@ function downloadIfNotExists() {
 
 function downloadChromiumWithDriver() {
     CHROMIUM_URL=$1
-    CHROMIUM_ZIP_FILENAME=$2
+    CHROMIUM_FILENAME=$2
     CHROMEDRIVER_URL=${3:-}
     CHROMEDRIVER_ZIP_FILENAME=${4:-}
 
@@ -82,9 +86,13 @@ function downloadChromiumWithDriver() {
     mkdir -p "_chromium"
     mkdir -p ${CHROMIUM_DOWNLOADS}
 
-    CHROMIUM_ZIP="${CHROMIUM_DOWNLOADS}/${CHROMIUM_ZIP_FILENAME}"
-    downloadIfNotExists ${CHROMIUM_URL} ${CHROMIUM_ZIP}
-    unzip "${CHROMIUM_ZIP}" -d "_chromium/chromium"
+    CHROMIUM_FILE_PATH="${CHROMIUM_DOWNLOADS}/${CHROMIUM_FILENAME}"
+    downloadIfNotExists ${CHROMIUM_URL} ${CHROMIUM_FILE_PATH}
+    if [[ "${CHROMIUM_FILE_PATH}" = *.deb ]]; then
+      dpkg -x "${CHROMIUM_FILE_PATH}" "_chromium/chromium"
+    else
+      unzip "${CHROMIUM_FILE_PATH}" -d "_chromium/chromium"
+    fi
 
     CHROMIUM_PATH=$(find "${PWD}/_chromium/chromium/" -name chrome -type f)
     CHROMIUM_DIR=$(dirname "${CHROMIUM_PATH}")
@@ -102,7 +110,7 @@ if [[ -n ${CHROMIUM_DIR:-} ]]; then
   echo "using chromium build from local directory ${CHROMIUM_DIR}"
 elif [[ -n ${CHROMIUM_URL:-} ]]; then
   echo "using chromium build from URL ${CHROMIUM_URL}"
-  downloadChromiumWithDriver ${CHROMIUM_URL} $(basename ${CHROMIUM_URL})
+  downloadChromiumWithDriver ${CHROMIUM_URL} ${CHROMIUM_URL//\//_} ${CHROMEDRIVER_URL:+${CHROMEDRIVER_URL} ${CHROMEDRIVER_URL//\//_}}
 else
   REVISION=$(curl -s -S 'https://www.googleapis.com/download/storage/v1/b/chromium-browser-snapshots/o/Linux_x64%2FLAST_CHANGE?alt=media')
   echo "using official chrome build (REVISION: ${REVISION})"
