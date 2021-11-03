@@ -17,8 +17,41 @@ implementation capabilities in [Chromium](https://chromium-review.googlesource.c
 - `bash run.sh` - runs all tests with the latest chromium version
 - `bash run.sh --test <module>` - runs all tests from given module (e.g. tests_functional.test)
 - `bash run.sh --test-dir <path-to-python-test>` - runs all tests from given local path
-- `bash run.sh --chromium-dir <path-to-chromium-dir>` - runs tests with custom-built chromium from given local path
-- `bash run.sh --chromium-url <url-to-chromium-zip>`  - downloads chromium from the given location and runs tests with it
+- `bash run.sh --chromium-dir <path-to-chromium-dir>` - runs tests with from given local path containing Chrome/Chromium with proper chromedriver
+- `bash run.sh --chromium-url <url-to-chromium-zip>`  - downloads custom-built chromium from the given location and runs tests with it
+- `bash run.sh --chromium-url <url-to-chrome-deb> --chromedriver-url <url-to-chromedriver-zip>`  - downloads official Chrome and chromedriver from specified locations and runs tests with them
+
+### Example (use previously downloaded version)
+
+- `bash run.sh --chromium-dir "$(find -name chrome -type f -exec dirname {} \;)"`
+
+### Example (Chrome Stable)
+```
+bash ./run.sh \
+    --chromedriver-url \
+    "https://chromedriver.storage.googleapis.com/$(curl https://chromedriver.storage.googleapis.com/LATEST_RELEASE)/chromedriver_linux64.zip" \
+    --chromium-url \
+    https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+```
+
+### Example (Chrome Beta, while it has version 97)
+```
+bash ./run.sh \
+    --chromedriver-url \
+    "https://chromedriver.storage.googleapis.com/$(curl https://chromedriver.storage.googleapis.com/LATEST_RELEASE_97)/chromedriver_linux64.zip" \
+    --chromium-url \
+    https://dl.google.com/linux/direct/google-chrome-beta_current_amd64.deb
+```
+
+### Example (Chrome Dev)
+```
+bash ./run.sh \
+    --chromedriver-url \
+    "https://www.googleapis.com/download/storage/v1/b/chromium-browser-snapshots/o/Linux_x64%2F$(curl -s -S 'https://www.googleapis.com/download/storage/v1/b/chromium-browser-snapshots/o/Linux_x64%2FLAST_CHANGE?alt=media')%2Fchromedriver_linux64.zip?alt=media" \
+    --chromium-url \
+    https://dl.google.com/linux/direct/google-chrome-unstable_current_amd64.deb
+```
+
 
 ## Functional tests
 
