@@ -40,6 +40,8 @@ class FunctionalTest(BaseTest):
         report_win_signals = buyer_server.get_first_request("/reportWin").get_first_json_param('signals')
         logger.debug(f"reportWin() signals: {pretty_json(report_win_signals)}")
 
-        # we use stub scoreAd() that returns generateBid() duration in ms as its result
-        bid_duration_ms = report_result_signals['browserSignals']['desirability']
-        logger.info(f"generateBid took: {bid_duration_ms} ms")
+        # to be able to measure bidding worklet time you should use custom-built version of chromium
+        # with a patch like this: https://github.com/RTBHOUSE/chromium/commits/rtb_wasm
+        if 'bid_duration' in report_result_signals.get('browserSignals'):
+            bid_duration_ms = int(report_result_signals.get('browserSignals').get('bid_duration')) / 1000
+            logger.info(f"generateBid took: {bid_duration_ms} ms")

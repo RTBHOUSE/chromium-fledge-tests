@@ -26,7 +26,7 @@ elif [ $BENCHMARK == 5 ]; then
   echo "### benchmark 5: buyer’s js with wasm binary run as a bidding worklet in Chromium"
   src/tests_webassembly/resources/buyer/compile.sh
   bash run.sh --test tests_webassembly.test \
-    --chromium-url https://github.com/RTBHOUSE/chromium/releases/download/97.0.4674.0-rtb-wasm/chromium-97.0.4674.0-rtb-wasm.zip
+    --chromium-url https://github.com/RTBHOUSE/chromium/releases/download/97.0.4674.0-rtb-wasm-without-asserts/chromium-97.0.4674.0-rtb-wasm-without-asserts.zip
 else
   echo "unknown benchmark: $BENCHMARK"
   exit 2
