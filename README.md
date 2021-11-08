@@ -10,6 +10,7 @@ implementation capabilities in [Chromium](https://chromium-review.googlesource.c
   - [benchmark 2: buyer’s js run as a bidding worklet in Chromium](#benchmark-2-buyers-js-run-as-a-bidding-worklet-in-chromium)
   - [benchmark 3: buyer’s js without wasm run in V8 engine](#benchmark-3-buyers-js-without-wasm-run-in-V8-engine)
   - [benchmark 4: buyer’s js with wasm run in V8 engine](#benchmark-4-buyers-js-with-wasm-run-in-V8-engine)
+  - [benchmark 5: buyer’s js with wasm run as a bidding worklet in Chromium](#benchmark-5-buyers-js-with-wasm-run-as-a-bidding-worklet-in-chromium)
 
 ## How to run tests  
 
@@ -217,4 +218,20 @@ $ docker run --rm -it -v $PWD/src/tests_webassembly:/tests_webassembly andreburg
 time spent on parsing: 1.1640000000000157ms
 time spent on generateBid: 3.6059999999999945ms
 [sum] time spent on script: 4.927999999999997ms
+```
+
+### benchmark 5: buyer’s js with wasm run as a bidding worklet in Chromium
+
+In this [test](https://github.com/RTBHOUSE/chromium-fledge-tests/blob/master/src/tests_webassembly/test.py) we use an another [patch](https://github.com/RTBHOUSE/chromium/commits/rtb_wasm) which turns on webassembly in Chromium, so we were able to run [js script with wasm binary hardcoded](https://github.com/RTBHOUSE/chromium-fledge-tests/blob/master/src/tests_webassembly/resources/buyer/buyer-chromium.js) in a bidding worklet: 
+
+```bash
+$ bash src/tests_webassembly/resources/buyer/compile.sh
+$ bash run.sh --test tests_webassembly.test --chromium-url https://github.com/RTBHOUSE/chromium/releases/download/97.0.4674.0-rtb-wasm-without-asserts/chromium-97.0.4674.0-rtb-wasm-without-asserts.zip
+...
+INFO:/home/usertd/tests/common/utils/__init__.py:[rtb-chromium-debug] generateBid run() duration: 3.814 ms
+INFO:/home/usertd/tests/common/utils/__init__.py:[rtb-chromium-debug] generateBid get() duration: 0.005 ms
+INFO:/home/usertd/tests/common/utils/__init__.py:[rtb-chromium-debug] generateBid call() duration: 2.245 ms
+...
+INFO:/home/usertd/tests/tests_webassembly/test.py:generateBid took: 6.065 ms
+
 ```
