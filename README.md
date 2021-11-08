@@ -222,7 +222,7 @@ time spent on generateBid: 3.6059999999999945ms
 
 ### benchmark 5: buyer’s js with wasm run as a bidding worklet in Chromium
 
-In this [test](https://github.com/RTBHOUSE/chromium-fledge-tests/blob/master/src/tests_webassembly/test.py) we use an another [patch](https://github.com/RTBHOUSE/chromium/commits/rtb_wasm) which turns on webassembly in Chromium, so we were able to run [js script with wasm binary hardcoded](https://github.com/RTBHOUSE/chromium-fledge-tests/blob/master/src/tests_webassembly/resources/buyer/buyer-chromium.js) in a bidding worklet: 
+In this [scenario](https://github.com/RTBHOUSE/chromium-fledge-tests/blob/master/src/tests_webassembly/test.py) we run [js script with wasm binary hardcoded](https://github.com/RTBHOUSE/chromium-fledge-tests/blob/master/src/tests_webassembly/resources/buyer/buyer-chromium.js) in a bidding worklet. We have provided another [patch](https://github.com/RTBHOUSE/chromium/commits/rtb_wasm) which turns on webassembly in Chromium. We do not rely on snapshots and we do not take advantage of warm-up. Eventually support for async is not necessary to instantiate webassembly. However, webassembly itself has certain consequences, i.e. it is not possible to turn off `--no-expose-wasm` option without turning off `--jitless`.
 
 ```bash
 $ bash src/tests_webassembly/resources/buyer/compile.sh
@@ -233,5 +233,4 @@ INFO:/home/usertd/tests/common/utils/__init__.py:[rtb-chromium-debug] generateBi
 INFO:/home/usertd/tests/common/utils/__init__.py:[rtb-chromium-debug] generateBid call() duration: 2.245 ms
 ...
 INFO:/home/usertd/tests/tests_webassembly/test.py:generateBid took: 6.065 ms
-
 ```
