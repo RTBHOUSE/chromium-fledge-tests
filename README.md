@@ -123,7 +123,7 @@ time spent on 1 loop in avg: 1.12 ms
 
 ### benchmark 2: buyer's js run as a bidding worklet in Chromium
 
-In this scenario we use this testing framework to run [buyer's js script](https://raw.githubusercontent.com/RTBHOUSE/chromium-fledge-tests/master/src/tests_performance/resources/buyer/buyer.js) in a bidding worklet (with these limitations: jitless, v8 pool size set to 1 etc.). In this instance, `generateBid()` is called once with hard-coded weights. In this [test](https://github.com/RTBHOUSE/chromium-fledge-tests/blob/master/src/tests_performance/test.py) we use a custom-built version of chromium with a [patch](https://github.com/RTBHOUSE/chromium/commits/auction_timer), which helps to measure the bidding worklet time. The following example is similar to previous [functional test](#functional-tests):
+In this scenario we use this testing framework to run [buyer's js script](https://raw.githubusercontent.com/RTBHOUSE/chromium-fledge-tests/master/src/tests_performance/resources/buyer/buyer.js) in a bidding worklet (with these limitations: jitless, v8 pool size set to 1 etc.). In this instance, `generateBid()` is called once with hard-coded weights. In this [test](https://github.com/RTBHOUSE/chromium-fledge-tests/blob/master/src/tests_performance/test.py) we use a custom-built version of chromium with a [patch](https://github.com/RTBHOUSE/chromium/commits/rtb_master), which helps to measure the bidding worklet time. The following example is similar to previous [functional test](#functional-tests):
 
 ```python
     def test__check_nn_with_static_weights_computation_time(self):
@@ -174,7 +174,7 @@ time spent on 1 loop in avg: 54.56 ms
 ```
 ### benchmark 4: buyer’s js with wasm run in V8 engine
 
-In this scenario we run [js script with wasm binary hardcoded](https://github.com/RTBHOUSE/chromium-fledge-tests/blob/master/src/tests_webassembly/resources/buyer/cxx-src/build/main.js). It uses the same `generateBid()` but model weights and matrix multiplication are [implemented in C++](https://github.com/RTBHOUSE/chromium-fledge-tests/blob/master/src/tests_webassembly/resources/buyer/cxx-src/functions.c), compiled and hardcoded as a wasm binary:
+In this scenario we run [js script with wasm binary hardcoded](https://github.com/RTBHOUSE/chromium-fledge-tests/blob/master/src/tests_webassembly/resources/buyer/buyer-v8.js). It uses the same `generateBid()` but model weights and matrix multiplication are [implemented in C++](https://github.com/RTBHOUSE/chromium-fledge-tests/blob/master/src/tests_webassembly/resources/buyer/cxx-src/functions.c), compiled and hardcoded as a wasm binary:
 
 ```javascript
 const wasm_code = Uint8Array.from([0,97,115, ... , ]);
@@ -211,10 +211,8 @@ function generateBid(interestGroup, auctionSignals, perBuyerSignals, trustedBidd
 Result:
 
 ```bash
-$ cd src/tests_webassembly/resources/buyer/cxx-src
-$ bash compile.sh
-$ cd ../../../../../
-$ docker run --rm -it -v $PWD/src/tests_webassembly:/tests_webassembly/ andreburgaud/d8 /tests_webassembly/resources/buyer/cxx-src/build/main.js --optimize_for_size
+$ bash src/tests_webassembly/resources/buyer/compile.sh
+$ docker run --rm -it -v $PWD/src/tests_webassembly:/tests_webassembly andreburgaud/d8 /tests_webassembly/resources/buyer/buyer-v8.js --optimize_for_size
 ...
 time spent on parsing: 1.1640000000000157ms
 time spent on generateBid: 3.6059999999999945ms
