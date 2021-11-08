@@ -68,8 +68,8 @@ function downloadIfNotExists() {
 function downloadChromiumWithDriver() {
     CHROMIUM_URL=$1
     CHROMIUM_ZIP_FILENAME=$2
-    CHROMEDRIVER_URL=$3
-    CHROMEDRIVER_ZIP_FILENAME=$4
+    CHROMEDRIVER_URL=${3:-}
+    CHROMEDRIVER_ZIP_FILENAME=${4:-}
 
     rm -rf "_chromium"
     mkdir -p "_chromium"
