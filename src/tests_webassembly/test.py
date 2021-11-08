@@ -34,10 +34,11 @@ class FunctionalTest(BaseTest):
                 self.assertDriverContainsText('body', 'TC AD')
 
         report_result_signals = seller_server.get_first_request("/reportResult").get_first_json_param('signals')
-        logger.info(f"reportResult() signals: {pretty_json(report_result_signals)}")
+        logger.debug(f"reportResult() signals: {pretty_json(report_result_signals)}")
+        logger.info(f"reportResult() bid_duration: {pretty_json(report_result_signals['browserSignals']['bid_duration'])}")
 
         report_win_signals = buyer_server.get_first_request("/reportWin").get_first_json_param('signals')
-        logger.info(f"reportWin() signals: {pretty_json(report_win_signals)}")
+        logger.debug(f"reportWin() signals: {pretty_json(report_win_signals)}")
 
         # we use stub scoreAd() that returns generateBid() duration in ms as its result
         bid_duration_ms = report_result_signals['browserSignals']['desirability']

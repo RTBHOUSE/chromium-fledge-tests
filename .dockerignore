@@ -4,4 +4,5 @@
 Dockerfile
 .dockerignore
 _chromium
+_chromium_downloads
 run.sh

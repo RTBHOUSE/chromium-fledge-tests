@@ -18,10 +18,13 @@ elif [ $BENCHMARK == 3 ]; then
   docker run --rm -it -v $PWD/src/tests_performance:/tests_performance/ andreburgaud/d8 /tests_performance/resources/benchmark.js --jitless --optimize_for_size --no-expose-wasm
 elif [ $BENCHMARK == 4 ]; then
   echo "### benchmark 4: buyer’s js with wasm binary but without warm-up run in V8 engine"
-  cd src/tests_webassembly/resources/buyer/cxx-src; bash compile.sh; cd ../../../../../
-  docker run --rm -it -v $PWD/src/tests_webassembly:/tests_webassembly/ andreburgaud/d8 /tests_webassembly/resources/buyer/cxx-src/build/main.js --optimize_for_size
+  src/tests_webassembly/resources/buyer/compile.sh
+  docker run \
+      --rm -it -v $PWD/src/tests_webassembly:/tests_webassembly/ \
+      andreburgaud/d8 /tests_webassembly/resources/buyer/buyer-v8.js --optimize_for_size
 elif [ $BENCHMARK == 5 ]; then
   echo "### benchmark 5: buyer’s js with wasm binary run as a bidding worklet in Chromium"
+  src/tests_webassembly/resources/buyer/compile.sh
   bash run.sh --test tests_webassembly.test \
     --chromium-url https://github.com/RTBHOUSE/chromium/releases/download/96.0.4651.0-5000ms-wasm-auction-timer/chromium-wasm.zip
 else
