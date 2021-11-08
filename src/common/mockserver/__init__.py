@@ -36,9 +36,12 @@ class RequestHandler(http.server.SimpleHTTPRequestHandler):
             params = parse_qs(tmp)
         self.callback(Request(path, params))
 
-        logger.info(f"request path: {path}, params: {params}")
+        logger.debug(f"request path: {path}, params: {params}")
 
-        super().do_GET()
+        if path.startswith("/report") or path.startswith('/favicon'):
+            pass
+        else:
+            super().do_GET()
 
 
 @dataclass(init=True, repr=True, eq=False, frozen=True)
@@ -64,7 +67,7 @@ class MockServer:
         self.http_server = None
         self.requests = []
 
-        logger.info(f"server {self.address} initializing")
+        logger.debug(f"server {self.address} initializing")
         server_address = ('0.0.0.0', self.server_port)
         self.http_server = http.server.ThreadingHTTPServer(
             server_address,
@@ -86,7 +89,7 @@ class MockServer:
         return self.server_directory
 
     def __enter__(self):
-        logger.info(f"server {self.address} starting")
+        logger.debug(f"server {self.address} starting")
         thread = threading.Thread(target=self.run, args=())
         thread.daemon = True
         thread.start()
@@ -98,7 +101,7 @@ class MockServer:
     def __exit__(self, exc_type, exc_val, exc_tb):
         self.http_server.socket.close()
         self.http_server.shutdown()
-        logger.info(f"server {self.address} stopped")
+        logger.debug(f"server {self.address} stopped")
 
     def get_requests(self):
         return self.requests

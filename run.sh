@@ -11,7 +11,7 @@
 # ./run.sh --test tests_functional.test
 # ./run.sh --chromium-url https://github.com/RTBHOUSE/chromium/releases/download/94.0.4588.0-auction-timer/chromium.zip
 
-set -e
+set -euo pipefail
 set -x
 
 OPTIONS=
@@ -94,13 +94,13 @@ function downloadChromiumWithDriver() {
     CHROMIUM_DIR=$(dirname "${CHROMIUM_PATH}")
 }
 
-if [[ -n ${CHROMIUM_DIR} ]]; then
+if [[ -n ${CHROMIUM_DIR:-} ]]; then
   if [[ ! ${CHROMIUM_DIR} == /* ]]; then
     echo "chromium directory must be an absolute path!"
     exit 1
   fi
   echo "using chromium build from local directory ${CHROMIUM_DIR}"
-elif [[ -n ${CHROMIUM_URL} ]]; then
+elif [[ -n ${CHROMIUM_URL:-} ]]; then
   echo "using chromium build from URL ${CHROMIUM_URL}"
   downloadChromiumWithDriver ${CHROMIUM_URL} $(basename ${CHROMIUM_URL})
 else
@@ -117,7 +117,7 @@ fi
 
 [ -f "${CHROMIUM_DIR}/chromedriver" ] || { echo "chromium dir [${CHROMIUM_DIR}] does not contain chromedriver"; exit 1; }
 
-docker build --iidfile .iidfile -t chromium-fledge-tests .
+docker build --iidfile .iidfile -t chromium-fledge-tests . &> /dev/null
 
 [ -t 0 ] && [ -t 1 ] && termOpt='-t' || termOpt=''
 

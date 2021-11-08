@@ -1,10 +1,11 @@
 # Copyright 2021 RTBHOUSE. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be found in the LICENSE file.
 
-import sys
 import logging
 import os
+import sys
 import unittest
+import warnings
 
 from selenium import webdriver
 from selenium.webdriver.common.by import By
@@ -19,6 +20,7 @@ logger = logging.getLogger(__file__)
 
 class BaseTest(unittest.TestCase):
     def setUp(self) -> None:
+        warnings.filterwarnings("ignore")
         logging.basicConfig(stream=sys.stderr, level=logging.INFO)
         # https://peter.sh/experiments/chromium-command-line-switches
         options = webdriver.ChromeOptions()
@@ -38,7 +40,6 @@ class BaseTest(unittest.TestCase):
             # ver >= 97.x
             'InterestGroupStorage', 'AdInterestGroupAPI', 'Fledge']
         options.add_argument(f"--enable-features={','.join(enable_features)}")
-        print(f"--enable-features={','.join(enable_features)}")
         # TODO: at some point in the future FLEDGE won't work with disabled FencedFrames
         options.add_argument('--disable-features=FencedFrames')
         desired_capabilities = DesiredCapabilities.CHROME
