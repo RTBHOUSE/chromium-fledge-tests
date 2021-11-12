@@ -162,17 +162,17 @@ $ bash run.sh --test tests_performance.test --chromium-url https://github.com/RT
 INFO:/home/usertd/tests/tests_performance/test.py:generateBid took: 55.68 ms
 ```
 
-EDIT: In this benchmark we used Chromium with default flags which add debug asserts and have some overhead (reference: [this comment](https://github.com/WICG/turtledove/issues/215#issuecomment-963618254)). The same benchmark run with a new Chromium build without debug asserts:
+EDIT: In this benchmark we used Chromium with default flags which add debug asserts and have some overhead, mainly in the case of [benchmark 5](#benchmark-5-buyers-js-with-wasm-run-as-a-bidding-worklet-in-chromium) (reference: [this comment](https://github.com/WICG/turtledove/issues/215#issuecomment-963618254)). The same benchmark run with a new Chromium build without debug asserts:
 
 ```bash
-$ bash run.sh --test tests_performance.test --chromium-url https://github.com/RTBHOUSE/chromium/releases/download/98.0.4697.0-rtb-master-without-asserts/chromium-98.0.4697.0-rtb-wasm-without-asserts.zip
+$ bash run.sh --test tests_performance.test --chromium-url https://github.com/RTBHOUSE/chromium/releases/download/98.0.4697.0-rtb-master-without-asserts/chromium-98.0.4697.0-rtb-master-without-asserts.zip
 ...
-INFO:/home/usertd/tests/common/utils/__init__.py:[rtb-chromium-debug] AuctionV8Helper::Compile() https://fledge-tests.creativecdn.net:9011/buyer.js duration: 87.7 ms
-INFO:/home/usertd/tests/common/utils/__init__.py:[rtb-chromium-debug] AuctionV8Helper::RunScript() generateBid run() duration: 3.729 ms
-INFO:/home/usertd/tests/common/utils/__init__.py:[rtb-chromium-debug] AuctionV8Helper::RunScript() generateBid get() duration: 0.003 ms
-INFO:/home/usertd/tests/common/utils/__init__.py:[rtb-chromium-debug] AuctionV8Helper::RunScript() generateBid call() duration: 18.682 ms
+INFO:/home/usertd/tests/common/utils/__init__.py:[rtb-chromium-debug] AuctionV8Helper::Compile() https://fledge-tests.creativecdn.net:9011/buyer.js duration: 86.875 ms
+INFO:/home/usertd/tests/common/utils/__init__.py:[rtb-chromium-debug] AuctionV8Helper::RunScript() generateBid run() duration: 3.448 ms
+INFO:/home/usertd/tests/common/utils/__init__.py:[rtb-chromium-debug] AuctionV8Helper::RunScript() generateBid get() duration: 0.002 ms
+INFO:/home/usertd/tests/common/utils/__init__.py:[rtb-chromium-debug] AuctionV8Helper::RunScript() generateBid call() duration: 50.11 ms
 ...
-INFO:/home/usertd/tests/tests_performance/test.py:generateBid took: 22.414 ms
+INFO:/home/usertd/tests/tests_performance/test.py:generateBid took: 53.56 ms
 ```
 
 ### benchmark 3: buyer’s js without wasm run in V8 engine
