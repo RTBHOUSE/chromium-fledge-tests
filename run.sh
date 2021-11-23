@@ -33,7 +33,7 @@ eval set -- "$PARSED"
 while true; do
   case "$1" in
   --chromium-dir)
-    CHROMIUM_DIR="$2"
+    CHROMIUM_DIR=`cd "$2"; pwd`
     shift 2
     ;;
   --chromium-url)
@@ -94,16 +94,9 @@ function downloadChromiumWithDriver() {
       CHROMEDRIVER_PATH=$(find "${PWD}/_chromium/chromedriver/" -name chromedriver -type f)
       mv ${CHROMEDRIVER_PATH} "${CHROMIUM_DIR}/chromedriver"
     fi
-
-    CHROMIUM_PATH=$(find "${PWD}/_chromium/chromium/" -name chrome -type f)
-    CHROMIUM_DIR=$(dirname "${CHROMIUM_PATH}")
 }
 
 if [[ -n ${CHROMIUM_DIR:-} ]]; then
-  if [[ ! ${CHROMIUM_DIR} == /* ]]; then
-    echo "chromium directory must be an absolute path!"
-    exit 1
-  fi
   echo "using chromium build from local directory ${CHROMIUM_DIR}"
 elif [[ -n ${CHROMIUM_URL:-} ]]; then
   echo "using chromium build from URL ${CHROMIUM_URL}"
