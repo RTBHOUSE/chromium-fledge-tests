@@ -21,7 +21,7 @@ WORKDIR /home/usertd
 RUN pip3 install --user selenium assertpy; \
     mkdir /home/usertd/logs
 
-COPY --chown=usertd:usertd src/. tests
+COPY src/common/ssl/ca/ca.crt tests/common/ssl/ca/ca.crt
 
 RUN mkdir -p /home/usertd/.pki/nssdb && \
     certutil -d /home/usertd/.pki/nssdb -N --empty-password && \
@@ -31,9 +31,9 @@ WORKDIR /home/usertd/tests
 VOLUME /home/usertd/logs
 
 # This is a hack due to https://bugs.chromium.org/p/chromium/issues/detail?id=1229652
-# Set a password to VNC server in case you want to connect to it (port 5900).
-RUN mkdir ~/.vnc; echo turtledove | vncpasswd -f > ~/.vnc/passwd
-ENTRYPOINT [ "/home/usertd/tests/entrypoint.sh" ]
-RUN touch ~/.Xauthority
+RUN mkdir -p ~/.vnc && echo turtledove | vncpasswd -f > ~/.vnc/passwd && touch ~/.Xauthority
 
+COPY src/. .
+
+ENTRYPOINT [ "/home/usertd/tests/entrypoint.sh" ]
 CMD /home/usertd/tests/run_tests.sh
