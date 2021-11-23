@@ -15,7 +15,7 @@ set -euo pipefail
 set -x
 
 OPTIONS=
-LONG_OPTIONS=chromium-dir:,chromium-url:,test:
+LONG_OPTIONS=chromium-dir:,chromium-url:,test:,test-dir:
 
 CHROMIUM_DOWNLOADS="_chromium_downloads"
 SKIP_BUILD="false"
@@ -42,6 +42,11 @@ while true; do
     ;;
   --test)
     TEST="$2"
+    shift 2
+    ;;
+  --test-dir)
+    TEST_DIR=`cd "$2"; pwd`
+    TEST="discover -s $(basename "${TEST_DIR}")"
     shift 2
     ;;
   --)
@@ -124,7 +129,8 @@ docker build --iidfile .iidfile -t chromium-fledge-tests . &> /dev/null
 docker run --rm -i \
   ${termOpt} \
   -v "${CHROMIUM_DIR}:/home/usertd/chromium/" \
-  -e TEST="$TEST" \
+  ${TEST_DIR:+-v "${TEST_DIR}:/home/usertd/tests/`basename "${TEST_DIR}"`"} \
+  ${TEST:+-e TEST="$TEST"} \
   --shm-size=1gb \
   --add-host fledge-tests.creativecdn.net:127.0.0.1 \
   "$(cat .iidfile)" \
