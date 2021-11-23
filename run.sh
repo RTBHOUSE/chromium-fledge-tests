@@ -60,6 +60,8 @@ while true; do
   esac
 done
 
+cd "$(dirname "$0")"
+
 function downloadIfNotExists() {
   URL=$1
   LOCAL_PATH=$2
