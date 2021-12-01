@@ -38,14 +38,14 @@ class FunctionalTest(BaseTest):
                     .until(EC.frame_to_be_available_and_switch_to_it((By.CSS_SELECTOR, 'iframe')))
                 self.assertDriverContainsText('body', 'TC AD 1')
 
-        report_result_signals = seller_server.get_first_request("/reportResult").get_first_json_param('signals')
+        report_result_signals = seller_server.get_last_request("/reportResult").get_first_json_param('signals')
         logger.info(f"reportResult() signals: {pretty_json(report_result_signals)}")
         assert_that(report_result_signals.get('browserSignals').get('interestGroupOwner'))\
             .is_equal_to("https://fledge-tests.creativecdn.net:8091")
         assert_that(report_result_signals.get('browserSignals').get('renderUrl')) \
             .is_equal_to("https://fledge-tests.creativecdn.net:8091/ad-1.html")
 
-        report_win_signals = buyer_server.get_first_request("/reportWin").get_first_json_param('signals')
+        report_win_signals = buyer_server.get_last_request("/reportWin").get_first_json_param('signals')
         logger.info(f"reportWin() signals: {pretty_json(report_win_signals)}")
         assert_that(report_win_signals.get('browserSignals').get('interestGroupOwner')) \
             .is_equal_to("https://fledge-tests.creativecdn.net:8091")

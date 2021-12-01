@@ -1,0 +1,21 @@
+<script>
+if (!navigator.joinAdInterestGroup) {
+  document.write("your browser doesn't have joinAdInterestGroup -- do you need to set some flags?");
+} else {
+  const buyer_address = window.location.origin;
+  navigator.joinAdInterestGroup({
+    owner: buyer_address,
+    name: "tc-ig",
+    biddingLogicUrl: buyer_address + "/buyer.js",
+    ads: [
+      {
+        renderUrl: buyer_address + "/ad.html",
+        metadata: {
+          bid: parseInt(new URLSearchParams(window.location.search).get('bid'))
+        },
+      },
+    ],
+  }, 10000);
+  document.write("joined interest group");
+}
+</script>

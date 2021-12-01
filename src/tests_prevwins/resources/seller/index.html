@@ -1,0 +1,27 @@
+  <h1>run ad auction</h1>
+
+<script>
+if (!navigator.runAdAuction) {
+  document.write("your browser doesn't have runAdAuction -- do you need to set some flags?");
+}
+</script>
+
+  <script type=module>
+if (navigator.runAdAuction) {
+  const seller_address = window.location.origin;
+  const buyer_address = new URLSearchParams(window.location.search).get('buyer');
+  const ar = await navigator.runAdAuction({
+    seller: seller_address,
+    decisionLogicUrl: seller_address + '/seller.js',
+    interestGroupBuyers: [buyer_address],
+  });
+
+  if (ar === null) {
+    document.write("No turtledove winner");
+  } else {
+    const iframe = document.createElement('iframe');
+    iframe.src = ar;
+    document.body.appendChild(iframe);
+  }
+}
+  </script>

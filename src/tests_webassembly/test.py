@@ -33,11 +33,11 @@ class FunctionalTest(BaseTest):
                     .until(EC.frame_to_be_available_and_switch_to_it((By.CSS_SELECTOR, 'iframe')))
                 self.assertDriverContainsText('body', 'TC AD')
 
-        report_result_signals = seller_server.get_first_request("/reportResult").get_first_json_param('signals')
+        report_result_signals = seller_server.get_last_request("/reportResult").get_first_json_param('signals')
         logger.debug(f"reportResult() signals: {pretty_json(report_result_signals)}")
         logger.info(f"reportResult() bid_duration: {pretty_json(report_result_signals['browserSignals']['bid_duration'])}")
 
-        report_win_signals = buyer_server.get_first_request("/reportWin").get_first_json_param('signals')
+        report_win_signals = buyer_server.get_last_request("/reportWin").get_first_json_param('signals')
         logger.debug(f"reportWin() signals: {pretty_json(report_win_signals)}")
 
         # to be able to measure bidding worklet time you should use custom-built version of chromium
