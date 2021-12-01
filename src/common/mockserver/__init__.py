@@ -107,7 +107,9 @@ class MockServer:
     def get_requests(self):
         return self.requests
 
-    def get_first_request(self, path):
+    def get_last_request(self, path):
+        result = None
         for request in self.get_requests():
             if request.path == path:
-                return request
+                result = request
+        return result

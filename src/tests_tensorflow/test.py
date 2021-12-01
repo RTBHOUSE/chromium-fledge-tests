@@ -21,6 +21,7 @@ from common.utils import print_debug
 logger = logging.getLogger(__file__)
 here = os.path.dirname(__file__)
 
+
 class TensorflowTest(BaseTest):
 
     @print_debug
@@ -40,10 +41,10 @@ class TensorflowTest(BaseTest):
                     .until(EC.frame_to_be_available_and_switch_to_it((By.CSS_SELECTOR, 'iframe')))
                 self.assertDriverContainsText('body', 'TC AD')
 
-        report_result_signals = seller_server.get_first_request("/reportResult").get_first_json_param('signals')
+        report_result_signals = seller_server.get_last_request("/reportResult").get_first_json_param('signals')
         logger.info(f"reportResult() signals: {pretty_json(report_result_signals)}")
 
-        report_win_signals = buyer_server.get_first_request("/reportWin").get_first_json_param('signals')
+        report_win_signals = buyer_server.get_last_request("/reportWin").get_first_json_param('signals')
         logger.info(f"reportWin() signals: {pretty_json(report_win_signals)}")
 
         # we use stub scoreAd() that returns generateBid() duration in ms as its result
