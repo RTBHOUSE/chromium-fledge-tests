@@ -19,9 +19,8 @@ logger = logging.getLogger(__file__)
 
 
 class BaseTest(unittest.TestCase):
-    def setUp(self) -> None:
-        warnings.filterwarnings("ignore")
-        logging.basicConfig(stream=sys.stderr, level=logging.INFO)
+
+    def options(self) -> webdriver.ChromeOptions:
         # https://peter.sh/experiments/chromium-command-line-switches
         options = webdriver.ChromeOptions()
         options.binary_location = '/home/usertd/chromium/chrome'
@@ -38,13 +37,19 @@ class BaseTest(unittest.TestCase):
             # ver <= 96.x
             'FledgeInterestGroups', 'FledgeInterestGroupAPI',
             # ver >= 97.x
-            'InterestGroupStorage', 'AdInterestGroupAPI', 'Fledge']
+            'InterestGroupStorage', 'AdInterestGroupAPI', 'Fledge'
+        ]
         options.add_argument(f"--enable-features={','.join(enable_features)}")
         # TODO: at some point in the future FLEDGE won't work with disabled FencedFrames
         options.add_argument('--disable-features=FencedFrames')
+        return options
+
+    def setUp(self) -> None:
+        warnings.filterwarnings("ignore")
+        logging.basicConfig(stream=sys.stderr, level=logging.INFO)
         desired_capabilities = DesiredCapabilities.CHROME
         desired_capabilities['goog:loggingPrefs'] = {'browser': 'ALL'}
-        driver = webdriver.Chrome('/home/usertd/chromium/chromedriver', options=options,
+        driver = webdriver.Chrome('/home/usertd/chromium/chromedriver', options=self.options(),
                                   desired_capabilities=desired_capabilities,
                                   service_args=['--enable-chrome-logs'],
                                   service_log_path=config.get('service_log_path'))
