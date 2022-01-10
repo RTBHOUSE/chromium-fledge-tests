@@ -6,9 +6,6 @@ import os
 import urllib.parse
 
 from assertpy import assert_that
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.support.ui import WebDriverWait
 
 from common.base_test import BaseTest
 from common.mockserver import MockServer
@@ -16,7 +13,6 @@ from common.utils import MeasureDuration
 from common.utils import log_exception
 from common.utils import measure_time
 from common.utils import print_debug
-from common.utils import pretty_json
 
 logger = logging.getLogger(__file__)
 here = os.path.dirname(__file__)
@@ -32,14 +28,12 @@ class PrevWinsTest(BaseTest):
     def runAdAuction(self, seller_server, buyer_server):
         with MeasureDuration("runAdAuction"):
             self.driver.get(seller_server.address + "?buyer=" + urllib.parse.quote_plus(buyer_server.address))
-            WebDriverWait(self.driver, 6) \
-                .until(EC.frame_to_be_available_and_switch_to_it((By.CSS_SELECTOR, 'iframe')))
-            self.assertDriverContainsText('body', 'TC AD')
+            self.assertDriverContainsFencedFrame()
 
     @print_debug
     @measure_time
     @log_exception
-    def test__tensorflow(self):
+    def test__prevwins(self):
         with MockServer(0, 'resources/buyer') as buyer_server,\
                 MockServer(0, 'resources/seller') as seller_server:
 

@@ -1,4 +1,5 @@
-  <h1>run ad auction</h1>
+<h1>run ad auction</h1>
+<div id="ad" style="width: 1500px; height: 1000px;"> Ad should be placed here</div>
 
 <script>
 if (!navigator.runAdAuction) {
@@ -6,7 +7,7 @@ if (!navigator.runAdAuction) {
 }
 </script>
 
-  <script type=module>
+<script type=module>
 if (navigator.runAdAuction) {
   const ar = await navigator.runAdAuction({
     seller: 'https://fledge-tests.creativecdn.net:8102',
@@ -18,12 +19,16 @@ if (navigator.runAdAuction) {
     perBuyerSignals: {"https://fledge-tests.creativecdn.net:8101": {key: "tc signals"}},
   });
 
+  console.log("winning url " + ar);
+  const adDiv = document.getElementById('ad');
+  adDiv.innerHTML = "";
   if (ar === null) {
-    document.write("No turtledove winner");
+    adDiv.appendChild(document.createTextNode("No turtledove winner"));
   } else {
-    const iframe = document.createElement('iframe');
-    iframe.src = ar;
-    document.body.appendChild(iframe);
+    const fframe = document.createElement('fencedframe');
+    fframe.setAttribute('src', ar);
+    fframe.setAttribute('style', 'width: 100px; height: 100px');
+    adDiv.appendChild(fframe);
   }
 }
-  </script>
+</script>

@@ -33,15 +33,7 @@ class BaseTest(unittest.TestCase):
         options.add_argument('--disable-gpu')
         options.add_argument('--user-data-dir=/tmp/profile123')
         options.add_argument('--user-agent=rtbfledgetests')
-        enable_features = [
-            # ver <= 96.x
-            'FledgeInterestGroups', 'FledgeInterestGroupAPI',
-            # ver >= 97.x
-            'InterestGroupStorage', 'AdInterestGroupAPI', 'Fledge'
-        ]
-        options.add_argument(f"--enable-features={','.join(enable_features)}")
-        # TODO: at some point in the future FLEDGE won't work with disabled FencedFrames
-        options.add_argument('--disable-features=FencedFrames')
+        options.add_argument(f"--enable-features=InterestGroupStorage,AdInterestGroupAPI,Fledge")
         return options
 
     def setUp(self) -> None:
@@ -66,3 +58,10 @@ class BaseTest(unittest.TestCase):
                   f'in given time {timeout} seconds.'
         WebDriverWait(self.driver, timeout)\
             .until(EC.text_to_be_present_in_element((By.CSS_SELECTOR, css_selector), text), exc_msg)
+
+    def assertDriverContainsFencedFrame(self, timeout=5):
+        exc_msg = f'Failed to find fenced frame in given time {timeout} seconds.'
+        WebDriverWait(self.driver, timeout) \
+            .until(EC.presence_of_element_located((By.TAG_NAME, 'fencedframe')), exc_msg)
+        fframe = self.driver.find_element_by_tag_name('fencedframe')
+        logger.info(f"fencedframe.src: {fframe.get_attribute('src')}")

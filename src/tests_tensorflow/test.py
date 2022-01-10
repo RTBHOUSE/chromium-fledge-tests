@@ -37,9 +37,7 @@ class TensorflowTest(BaseTest):
 
             with MeasureDuration("runAdAuction"):
                 self.driver.get(seller_server.address + "?buyer=" + urllib.parse.quote_plus(buyer_server.address))
-                WebDriverWait(self.driver, 6)\
-                    .until(EC.frame_to_be_available_and_switch_to_it((By.CSS_SELECTOR, 'iframe')))
-                self.assertDriverContainsText('body', 'TC AD')
+                self.assertDriverContainsFencedFrame()
 
         report_result_signals = seller_server.get_last_request("/reportResult").get_first_json_param('signals')
         logger.info(f"reportResult() signals: {pretty_json(report_result_signals)}")
