@@ -1,7 +1,4 @@
 function generateBid(interestGroup, auctionSignals, perBuyerSignals, trustedBiddingSignals, browserSignals) {
-
-  console.log("!!!!!!!!!!!!!!!!!!!!!!!!! generateBid !!!!!!!!!!!!!!!!!!!!!!!!! generateBid ");
-
   const ad = interestGroup.ads[0];
   return {'ad': 'example',
           'bid': ad.metadata.bid,
