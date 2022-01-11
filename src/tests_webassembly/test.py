@@ -3,10 +3,6 @@
 
 import logging
 
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.support.ui import WebDriverWait
-
 from common.base_test import BaseTest
 from common.mockserver import MockServer
 from common.utils import print_debug, measure_time, log_exception, MeasureDuration, pretty_json
