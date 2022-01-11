@@ -12,7 +12,6 @@ if (navigator.runAdAuction) {
   const ar = await navigator.runAdAuction({
     seller: 'https://fledge-tests.creativecdn.net:9022',
     decisionLogicUrl: 'https://fledge-tests.creativecdn.net:9022/seller.js',
-    trustedScoringSignalsUrl: 'https://fledge-tests.creativecdn.net:9022/trusted-scoring.json',
     interestGroupBuyers: ["https://fledge-tests.creativecdn.net:9021"],
     auctionSignals: {key: "auction signals"},
     sellerSignals: {key: "seller signals"},
