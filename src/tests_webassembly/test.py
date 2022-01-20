@@ -3,10 +3,6 @@
 
 import logging
 
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.support.ui import WebDriverWait
-
 from common.base_test import BaseTest
 from common.mockserver import MockServer
 from common.utils import print_debug, measure_time, log_exception, MeasureDuration, pretty_json
@@ -14,7 +10,7 @@ from common.utils import print_debug, measure_time, log_exception, MeasureDurati
 logger = logging.getLogger(__file__)
 
 
-class FunctionalTest(BaseTest):
+class WebassemblyTest(BaseTest):
 
     @print_debug
     @measure_time
@@ -29,16 +25,13 @@ class FunctionalTest(BaseTest):
 
             with MeasureDuration("runAdAuction"):
                 self.driver.get(seller_server.address)
-                WebDriverWait(self.driver, 5) \
-                    .until(EC.frame_to_be_available_and_switch_to_it((By.CSS_SELECTOR, 'iframe')))
-                self.assertDriverContainsText('body', 'TC AD')
+                self.assertDriverContainsFencedFrame()
 
         report_result_signals = seller_server.get_last_request("/reportResult").get_first_json_param('signals')
-        logger.debug(f"reportResult() signals: {pretty_json(report_result_signals)}")
-        logger.info(f"reportResult() bid_duration: {pretty_json(report_result_signals['browserSignals']['bid_duration'])}")
+        logger.info(f"reportResult() signals: {pretty_json(report_result_signals)}")
 
         report_win_signals = buyer_server.get_last_request("/reportWin").get_first_json_param('signals')
-        logger.debug(f"reportWin() signals: {pretty_json(report_win_signals)}")
+        logger.info(f"reportWin() signals: {pretty_json(report_win_signals)}")
 
         # to be able to measure bidding worklet time you should use custom-built version of chromium
         # with a patch like this: https://github.com/RTBHOUSE/chromium/commits/rtb_wasm

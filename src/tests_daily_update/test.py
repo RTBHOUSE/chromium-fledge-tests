@@ -4,9 +4,7 @@
 import logging
 import time
 
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.support.ui import WebDriverWait
+from assertpy import assert_that
 
 from common.base_test import BaseTest
 from common.mockserver import MockServer
@@ -32,9 +30,10 @@ class DailyUpdateTest(BaseTest):
 
             # run auction
             self.driver.get(seller_server.address)
-            WebDriverWait(self.driver, 5)\
-                .until(EC.frame_to_be_available_and_switch_to_it((By.CSS_SELECTOR, 'iframe')))
-            self.assertDriverContainsText('body', 'TC AD 1')
+            self.assertDriverContainsFencedFrame()
+            report_win_signals = buyer_server.get_last_request("/reportWin").get_first_json_param('signals')
+            assert_that(report_win_signals.get('browserSignals').get('renderUrl')) \
+                .is_equal_to("https://fledge-tests.creativecdn.net:8201/ad-1.html")
 
             # update interest group
             self.driver.get(buyer_server.address + "/do_update.html")
@@ -46,6 +45,7 @@ class DailyUpdateTest(BaseTest):
             # run auction again to check if the update was successful
             # (note that now we expect a different ad to win)
             self.driver.get(seller_server.address)
-            WebDriverWait(self.driver, 5) \
-                .until(EC.frame_to_be_available_and_switch_to_it((By.CSS_SELECTOR, 'iframe')))
-            self.assertDriverContainsText('body', 'TC AD 2')
+            self.assertDriverContainsFencedFrame()
+            report_win_signals = buyer_server.get_last_request("/reportWin").get_first_json_param('signals')
+            assert_that(report_win_signals.get('browserSignals').get('renderUrl')) \
+                .is_equal_to("https://fledge-tests.creativecdn.net:8201/ad-2.html")

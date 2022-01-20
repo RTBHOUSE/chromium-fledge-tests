@@ -3,14 +3,10 @@
 
 import logging
 
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.support.ui import WebDriverWait
-
-from common.utils import print_debug
-from common.utils import log_exception
-from common.mockserver import MockServer
 from common.base_test import BaseTest
+from common.mockserver import MockServer
+from common.utils import log_exception
+from common.utils import print_debug
 
 logger = logging.getLogger(__file__)
 
@@ -39,7 +35,5 @@ class BasicTest(BaseTest):
         self.assertDriverContainsText('body', 'joined interest group')
 
         self.driver.get('https://www.jefftk.com/test/td/auction.html')
-        WebDriverWait(self.driver, 5) \
-            .until(EC.frame_to_be_available_and_switch_to_it((By.CSS_SELECTOR, 'iframe')))
-        logger.info(self.driver.page_source)
-        self.assertDriverContainsText('body', 'TC AD 1')
+        self.driver.find_element_by_tag_name('button').click()
+        self.assertDriverContainsFencedFrame()
