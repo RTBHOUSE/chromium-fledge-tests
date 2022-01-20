@@ -1,0 +1,30 @@
+<script>
+function randomVector(n) {
+  const vector = new Array(n);
+  for (let i = 0; i < n; i++) {
+    vector[i] = Math.random();
+  }
+  return vector;
+}
+
+if (!navigator.joinAdInterestGroup) {
+  document.write("your browser doesn't have joinAdInterestGroup -- do you need to set some flags?");
+} else {
+  navigator.joinAdInterestGroup({
+    owner: "https://fledge-tests.creativecdn.net:9031",
+    name: "tc-ig",
+    biddingLogicUrl: "https://fledge-tests.creativecdn.net:9031/buyer.js",
+    biddingWasmHelperUrl: "https://fledge-tests.creativecdn.net:9031/cxx-src/build/functions.wasm",
+    userBiddingSignals: {key: "user bidding signals "},
+    ads: [
+      {
+        renderUrl: "https://fledge-tests.creativecdn.net:9031/ad.html",
+        metadata: {
+          input: randomVector(200),
+        },
+      },
+    ],
+  }, 10000);
+  document.write("joined interest group");
+}
+</script>
