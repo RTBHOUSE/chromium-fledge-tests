@@ -1,12 +1,15 @@
 # Copyright 2021 RTBHOUSE. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be found in the LICENSE file.
 
+from typing import Any, Dict, Optional
 import json
 import logging
 import threading
 import time
 from datetime import datetime
 from functools import wraps
+import statistics
+from collections import defaultdict
 
 from common.config import config
 
@@ -58,6 +61,40 @@ class TrackFile:
                     logger.info(line.rstrip())
 
 
+class AverageBenchmarks:
+    MEAN = "mean"
+    MEDIAN = "median"
+    AVERAGE_FUN = {
+        MEAN: statistics.mean,
+        MEDIAN: statistics.median,
+    }
+
+    def __init__(self, method, method_self, *args, **kwargs):
+        self.method = method
+        self.method_self = method_self
+        self.args = args
+        self.kwargs = kwargs
+        self.results = defaultdict(list)
+
+    def run(self, times: int):
+        for _ in range(times):
+            one_run_results_json = self.method(self.method_self, *self.args, **self.kwargs)
+            one_run_results = json.loads(one_run_results_json)
+            for k, v in one_run_results.items():
+                try:
+                    f = float(v)
+                    self.results[k].append(f)
+                except ValueError:
+                    pass
+
+    def log_averaged_results(self, mode: str = MEDIAN):
+        avg_fun = AverageBenchmarks.AVERAGE_FUN[mode]
+        logger.info(f"{self.method.__name__} benchmarks ({mode})")
+        for k, lst in self.results.items():
+            av = avg_fun(lst)
+            logger.info(f"  - {k}: {av / 1000} ms      {lst}")
+
+
 def measure_time(method):
     @wraps(method)
     def inner_measure_time(self, *args, **kwargs):
@@ -89,3 +126,20 @@ def print_debug(method):
 
 def pretty_json(data):
     return json.dumps(data, indent=2, sort_keys=True)
+
+
+def extract_rtbh_test_stats_json(signals: Dict[str, Any]) -> Optional[str]:
+    try:
+        return signals['browserSignals']['rtbh_test_stats']
+    except KeyError:
+        logger.warning("No test statistics", exc_info=True)
+        return None
+
+
+def average_benchmarks(method):
+    @wraps(method)
+    def inner_average_benchmarks(self, *args, **kwargs):
+        ab = AverageBenchmarks(method, self, *args, **kwargs)
+        ab.run(times=10)
+        ab.log_averaged_results()
+    return inner_average_benchmarks
