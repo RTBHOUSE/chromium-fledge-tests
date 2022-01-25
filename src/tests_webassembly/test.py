@@ -5,7 +5,8 @@ import logging
 
 from common.base_test import BaseTest
 from common.mockserver import MockServer
-from common.utils import print_debug, measure_time, log_exception, MeasureDuration, pretty_json
+from common.utils import print_debug, measure_time, log_exception, MeasureDuration, pretty_json,\
+    average_benchmarks, extract_rtbh_test_stats_json
 
 logger = logging.getLogger(__file__)
 
@@ -15,6 +16,7 @@ class WebassemblyTest(BaseTest):
     @print_debug
     @measure_time
     @log_exception
+    @average_benchmarks
     def test__basic_webassembly(self):
         with MockServer(9021, '/home/usertd/tests/tests_webassembly/resources/buyer') as buyer_server,\
                 MockServer(9022, '/home/usertd/tests/tests_webassembly/resources/seller') as seller_server:
@@ -38,3 +40,5 @@ class WebassemblyTest(BaseTest):
         if 'bid_duration' in report_result_signals.get('browserSignals'):
             bid_duration_ms = int(report_result_signals.get('browserSignals').get('bid_duration')) / 1000
             logger.info(f"generateBid took: {bid_duration_ms} ms")
+
+        return extract_rtbh_test_stats_json(report_result_signals)

@@ -10,6 +10,8 @@ from common.utils import log_exception
 from common.utils import measure_time
 from common.utils import pretty_json
 from common.utils import print_debug
+from common.utils import average_benchmarks
+from common.utils import extract_rtbh_test_stats_json
 
 logger = logging.getLogger(__file__)
 
@@ -19,6 +21,7 @@ class PerformanceTest(BaseTest):
     @print_debug
     @measure_time
     @log_exception
+    @average_benchmarks
     def test__check_nn_with_static_weights_computation_time(self):
         with MockServer(9011, '/home/usertd/tests/tests_performance/resources/buyer') as buyer_server,\
                 MockServer(9012, '/home/usertd/tests/tests_performance/resources/seller') as seller_server:
@@ -42,3 +45,6 @@ class PerformanceTest(BaseTest):
         if 'bid_duration' in report_result_signals.get('browserSignals'):
             bid_duration_ms = int(report_result_signals.get('browserSignals').get('bid_duration')) / 1000
             logger.info(f"generateBid took: {bid_duration_ms} ms")
+
+        return extract_rtbh_test_stats_json(report_result_signals)
+
