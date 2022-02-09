@@ -24,6 +24,7 @@ class RequestHandler(http.server.SimpleHTTPRequestHandler):
     def end_headers(self) -> None:
         self.send_header('X-Allow-FLEDGE', 'true')
         self.send_header('Access-Control-Allow-Origin', '*')
+        self.send_header('Supports-Loading-Mode', 'fenced-frame')
         return super().end_headers()
 
     def address_string(self):

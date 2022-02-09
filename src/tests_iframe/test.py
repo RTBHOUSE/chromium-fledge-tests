@@ -27,11 +27,11 @@ class IframeTest(BaseTest):
 
             with MeasureDuration("joinAdInterestGroup"):
                 self.driver.get(buyer_server.address)
-                WebDriverWait(self.driver, 5)\
-                    .until(EC.frame_to_be_available_and_switch_to_it((By.CSS_SELECTOR, 'iframe')))
+                self.findFrameAndSwitchToIt()
                 self.assertDriverContainsText('body', 'joined interest group')
 
             with MeasureDuration("runAdAuction"):
                 self.driver.get('https://www.jefftk.com/test/td/auction.html')
                 self.driver.find_element_by_tag_name('button').click()
-                self.assertDriverContainsFencedFrame()
+                self.findFrameAndSwitchToIt()
+                self.assertDriverContainsText('body', 'TC AD 1')

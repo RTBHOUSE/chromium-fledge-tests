@@ -27,7 +27,8 @@ class WebassemblyTest(BaseTest):
 
             with MeasureDuration("runAdAuction"):
                 self.driver.get(seller_server.address)
-                self.assertDriverContainsFencedFrame()
+                self.findFrameAndSwitchToIt()
+                self.assertDriverContainsText('body', 'TC AD')
 
         report_result_signals = seller_server.get_last_request("/reportResult").get_first_json_param('signals')
         logger.info(f"reportResult() signals: {pretty_json(report_result_signals)}")

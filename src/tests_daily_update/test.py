@@ -30,7 +30,8 @@ class DailyUpdateTest(BaseTest):
 
             # run auction
             self.driver.get(seller_server.address)
-            self.assertDriverContainsFencedFrame()
+            self.findFrameAndSwitchToIt()
+            self.assertDriverContainsText('body', 'TC AD 1')
             report_win_signals = buyer_server.get_last_request("/reportWin").get_first_json_param('signals')
             assert_that(report_win_signals.get('browserSignals').get('renderUrl')) \
                 .is_equal_to("https://fledge-tests.creativecdn.net:8201/ad-1.html")
@@ -45,7 +46,8 @@ class DailyUpdateTest(BaseTest):
             # run auction again to check if the update was successful
             # (note that now we expect a different ad to win)
             self.driver.get(seller_server.address)
-            self.assertDriverContainsFencedFrame()
+            self.findFrameAndSwitchToIt()
+            self.assertDriverContainsText('body', 'TC AD 2')
             report_win_signals = buyer_server.get_last_request("/reportWin").get_first_json_param('signals')
             assert_that(report_win_signals.get('browserSignals').get('renderUrl')) \
                 .is_equal_to("https://fledge-tests.creativecdn.net:8201/ad-2.html")
