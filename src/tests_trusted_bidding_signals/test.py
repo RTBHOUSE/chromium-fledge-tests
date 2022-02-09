@@ -31,7 +31,8 @@ class TrustedBiddingSignalsTest(BaseTest):
 
             with MeasureDuration("runAdAuction"):
                 self.driver.get(seller_server.address)
-                self.assertDriverContainsFencedFrame()
+                self.findFrameAndSwitchToIt()
+                self.assertDriverContainsText('body', 'TC AD 1')
 
         report_win_signals = buyer_server.get_last_request("/reportWin").get_first_json_param('signals')
         logger.info(f"reportWin() signals: {pretty_json(report_win_signals)}")

@@ -34,5 +34,6 @@ class BasicTest(BaseTest):
         self.assertDriverContainsText('body', 'joined interest group')
 
         self.driver.get('https://www.jefftk.com/test/td/auction.html')
-        self.driver.find_element_by_tag_name('button').click()
-        self.assertDriverContainsFencedFrame()
+        self.findFrameAndSwitchToIt()
+        logger.info(self.driver.page_source)
+        self.assertDriverContainsText('body', 'TC AD 1')

@@ -28,7 +28,8 @@ class PrevWinsTest(BaseTest):
     def runAdAuction(self, seller_server, buyer_server):
         with MeasureDuration("runAdAuction"):
             self.driver.get(seller_server.address + "?buyer=" + urllib.parse.quote_plus(buyer_server.address))
-            self.assertDriverContainsFencedFrame()
+            self.findFrameAndSwitchToIt()
+            self.assertDriverContainsText('body', 'TC AD')
 
     @print_debug
     @measure_time

@@ -1,3 +1,3 @@
 #!/bin/bash
 
-python3 -m unittest $TEST
+python3 -m unittest $TEST --verbose

@@ -3,10 +3,10 @@
 
 import logging
 import os
-import sys
 import unittest
 import warnings
 
+import sys
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
@@ -32,8 +32,12 @@ class BaseTest(unittest.TestCase):
         # options.add_argument('--headless')
         options.add_argument('--disable-gpu')
         options.add_argument('--user-data-dir=/tmp/profile123')
-        options.add_argument('--user-agent=rtbfledgetests')
-        options.add_argument(f"--enable-features=InterestGroupStorage,AdInterestGroupAPI,Fledge")
+        enabled_features = [
+            'InterestGroupStorage', 'AdInterestGroupAPI', 'Fledge',
+            'AllowURNsInIframes', # FOT#1
+            'FencedFrames:implementation_type/mparch',
+        ]
+        options.add_argument(f"--enable-features={','.join(enabled_features)}")
         return options
 
     def setUp(self) -> None:
@@ -54,14 +58,14 @@ class BaseTest(unittest.TestCase):
         self.driver.quit()
 
     def assertDriverContainsText(self, css_selector, text, timeout=5):
-        exc_msg = f'Failed to find text "{text}" in element "{css_selector}" '\
+        exc_msg = f'Failed to find text "{text}" in element "{css_selector}" ' \
                   f'in given time {timeout} seconds.'
-        WebDriverWait(self.driver, timeout)\
+        WebDriverWait(self.driver, timeout) \
             .until(EC.text_to_be_present_in_element((By.CSS_SELECTOR, css_selector), text), exc_msg)
 
-    def assertDriverContainsFencedFrame(self, timeout=5):
-        exc_msg = f'Failed to find fenced frame in given time {timeout} seconds.'
-        WebDriverWait(self.driver, timeout) \
-            .until(EC.presence_of_element_located((By.TAG_NAME, 'fencedframe')), exc_msg)
-        fframe = self.driver.find_element_by_tag_name('fencedframe')
-        logger.info(f"fencedframe.src: {fframe.get_attribute('src')}")
+    def findFrameAndSwitchToIt(self, timeout=5):
+        exc_msg = f'Failed to find frame in given time {timeout} seconds.'
+        frame = WebDriverWait(self.driver, timeout) \
+            .until(EC.presence_of_element_located((By.XPATH, '//iframe|//fencedframe')), exc_msg)
+        logger.info(f"{frame.tag_name}.src: {frame.get_attribute('src')}")
+        self.driver.switch_to.frame(frame)
