@@ -1,7 +1,12 @@
 #!/bin/bash
 
-# starting real x server as chromium headless mode is buggy
-vncserver -SecurityTypes VncAuth -passwd ~/.vnc/passwd :0 -- xterm &> /dev/null &
-export DISPLAY=:0
+# using real x server as chromium headless mode is buggy
+if [ -v DISPLAY ] && [ -v XAUTH ]; then
+  xauth add ${XAUTH#*/}  # with hostname info dropped
+else
+  vncserver -passwd ~/.vnc/passwd -noxstartup :20 &> /dev/null &
+  export DISPLAY=:20
+fi
+
 exec "$@"
 

@@ -15,10 +15,11 @@ set -euo pipefail
 set -x
 
 OPTIONS=
-LONG_OPTIONS=chromium-dir:,chromium-url:,chromedriver-url:,test:,test-dir:
+LONG_OPTIONS=chromium-dir:,chromium-url:,chromedriver-url:,test:,test-dir:,gui
 
 CHROMIUM_DOWNLOADS="_chromium_downloads"
-SKIP_BUILD="false"
+
+DOCKER_EXTRA_ARGS=()
 
 PARSED=$(POSIXLY_CORRECT=1 getopt --options=$OPTIONS --longoptions=${LONG_OPTIONS} --name "$0" -- "$@")
 if [[ $? -ne 0 ]]; then
@@ -53,8 +54,26 @@ while true; do
     TEST="discover -s $(basename "${TEST_DIR}")"
     shift 2
     ;;
-  --)
+  --gui)
+    DOCKER_EXTRA_ARGS=("${DOCKER_EXTRA_ARGS[@]}"
+      -e DISPLAY -v /tmp/.X11-unix/:/tmp/.X11-unix -e "XAUTH=`xauth list $DISPLAY`"
+    )
     shift
+    ;;
+  --)
+    # Non-option arguments are passed to docker container as a command
+    # You can also pass extra docker-run parameters after --:
+    #  run.sh [usual run.sh parameters] -- [docker-run parameters]
+    #  run.sh [usual run.sh parameters] -- [docker-run parameters] -- [container command]
+    #  run.sh [usual run.sh parameters] [container command]
+    shift
+    if [[ "${1:-}" = -* ]]; then
+      for ((i=1; i <= $#; i++)); do
+        [ "${!i}" == "--" ] && break
+      done
+      DOCKER_EXTRA_ARGS=("${DOCKER_EXTRA_ARGS[@]}" "${@:1:i}")
+      set -- "${@:i+1}"
+    fi
     break
     ;;
   *)
@@ -136,5 +155,6 @@ docker run --rm -i \
   ${TEST:+-e TEST="$TEST"} \
   --shm-size=1gb \
   --add-host fledge-tests.creativecdn.net:127.0.0.1 \
+  ${DOCKER_EXTRA_ARGS[@]+"${DOCKER_EXTRA_ARGS[@]}"} \
   "$(cat .iidfile)" \
   "$@"
