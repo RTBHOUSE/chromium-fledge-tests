@@ -36,6 +36,7 @@ class BaseTest(unittest.TestCase):
             'InterestGroupStorage', 'AdInterestGroupAPI', 'Fledge',
             'AllowURNsInIframes', # FOT#1
             'FencedFrames:implementation_type/mparch',
+            'BiddingAndScoringDebugReportingAPI',
         ]
         options.add_argument(f"--enable-features={','.join(enabled_features)}")
         return options
