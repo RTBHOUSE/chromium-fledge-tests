@@ -38,9 +38,9 @@ class RequestHandler(http.server.SimpleHTTPRequestHandler):
             params = parse_qs(tmp)
         self.callback(Request(path, params))
 
-        logger.debug(f"request path: {path}, params: {params}")
+        logger.info(f"request path: {path}, params: {params}")
 
-        if path.startswith("/report") or path.startswith('/favicon'):
+        if path.startswith("/report") or path.startswith("/debug") or path.startswith('/favicon'):
             pass
         else:
             super().do_GET()
