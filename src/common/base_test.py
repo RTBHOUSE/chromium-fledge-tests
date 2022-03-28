@@ -37,6 +37,7 @@ class BaseTest(unittest.TestCase):
             'AllowURNsInIframes', # FOT#1
             'FencedFrames:implementation_type/mparch',
             'BiddingAndScoringDebugReportingAPI',
+            'PrivacySandboxAdsAPIsOverride'
         ]
         options.add_argument(f"--enable-features={','.join(enabled_features)}")
         return options
