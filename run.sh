@@ -85,13 +85,13 @@ done
 
 cd "$(dirname "$0")"
 
-function downloadIfNotExists() {
+function downloadIfOutdated() {
   URL=$1
   LOCAL_PATH=$2
   if [ -f "${LOCAL_PATH}" ]; then
-    echo "file exists (skip downloading): ${LOCAL_PATH}"
+    curl --location --progress-bar --output "${LOCAL_PATH}" "${URL}" --time-cond "${LOCAL_PATH}"
   else
-    curl -L -# "${URL}" > "${LOCAL_PATH}"
+    curl --location --progress-bar --output "${LOCAL_PATH}" "${URL}"
   fi
 }
 
@@ -106,7 +106,7 @@ function downloadChromiumWithDriver() {
     mkdir -p ${CHROMIUM_DOWNLOADS}
 
     CHROMIUM_FILE_PATH="${CHROMIUM_DOWNLOADS}/${CHROMIUM_FILENAME}"
-    downloadIfNotExists ${CHROMIUM_URL} ${CHROMIUM_FILE_PATH}
+    downloadIfOutdated ${CHROMIUM_URL} ${CHROMIUM_FILE_PATH}
     if [[ "${CHROMIUM_FILE_PATH}" = *.deb ]]; then
       dpkg -x "${CHROMIUM_FILE_PATH}" "_chromium/chromium"
     else
@@ -118,7 +118,7 @@ function downloadChromiumWithDriver() {
 
     if [ ! -z "${CHROMEDRIVER_URL}" ]; then
       CHROMEDRIVER_ZIP="${CHROMIUM_DOWNLOADS}/${CHROMEDRIVER_ZIP_FILENAME}"
-      downloadIfNotExists ${CHROMEDRIVER_URL} ${CHROMEDRIVER_ZIP}
+      downloadIfOutdated ${CHROMEDRIVER_URL} ${CHROMEDRIVER_ZIP}
       unzip "${CHROMEDRIVER_ZIP}" -d "_chromium/chromedriver"
       CHROMEDRIVER_PATH=$(find "${PWD}/_chromium/chromedriver/" -name chromedriver -type f)
       mv ${CHROMEDRIVER_PATH} "${CHROMIUM_DIR}/chromedriver"
