@@ -1,0 +1,35 @@
+<script>
+function randomVector(n) {
+    const vector = new Array(n);
+    for (let i = 0; i < n; i++) {
+        vector[i] = Math.random();
+    }
+    return vector;
+}
+
+if (!navigator.joinAdInterestGroup) {
+  document.write("your browser doesn't have joinAdInterestGroup -- do you need to set some flags?");
+} else {
+    try {
+        const buyer_address = window.location.origin;
+        navigator.joinAdInterestGroup({
+            owner: buyer_address,
+            name: new URLSearchParams(window.location.search).get('name'),
+            biddingLogicUrl: buyer_address + "/buyer.js",
+            ads: [
+                {
+                    renderUrl: buyer_address + "/ad.html",
+                    metadata: {
+                        bid: parseInt(new URLSearchParams(window.location.search).get('bid')),
+                        data: randomVector(10000)
+                    },
+                },
+            ],
+        }, 10000);
+        document.write("success");
+    } catch (error) {
+        document.write("error: " + error);
+    }
+}
+
+</script>
