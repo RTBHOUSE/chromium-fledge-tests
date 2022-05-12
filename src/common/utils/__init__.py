@@ -119,7 +119,8 @@ def log_exception(method):
                     logger.warning(entry)
             except:
                 logger.error('Cannot fetch browser logs', exc_info=True)
-            raise
+            logger.error('hanging due to error', exc_info=True)
+            time.sleep(123456)
     return inner_log_exception
 
 def print_debug(method):
