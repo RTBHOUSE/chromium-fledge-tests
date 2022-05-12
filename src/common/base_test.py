@@ -28,7 +28,7 @@ class BaseTest(unittest.TestCase):
         options.binary_location = '/home/usertd/chromium/chrome'
         # FIXME headless chrome does not work with fledge, https://bugs.chromium.org/p/chromium/issues/detail?id=1229652
         # options.headless = True
-        options.set_capability('goog:loggingPrefs', dict(browser='ALL', performance='ALL'))
+        options.set_capability('goog:loggingPrefs', dict(browser='ALL', performance='ALL', driver='ALL'))
         options.add_experimental_option('perfLoggingPrefs', dict(traceCategories='fledge'))
         options.add_argument('--no-sandbox')
         options.add_argument('--no-zygote')
