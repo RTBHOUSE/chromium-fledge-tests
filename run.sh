@@ -85,6 +85,11 @@ done
 
 cd "$(dirname "$0")"
 
+function fetchVersion() {
+  local url=$1
+  curl -s -S "${url}" | egrep '^[0-9.]+$'
+}
+
 function downloadIfOutdated() {
   URL=$1
   LOCAL_PATH=$2
@@ -97,7 +102,7 @@ function downloadIfOutdated() {
 
 function downloadChromiumWithDriver() {
     CHROMIUM_URL=$1
-    CHROMIUM_FILENAME=$2
+    CHROMIUM_FILENAME=${2:-}
     CHROMEDRIVER_URL=${3:-}
     CHROMEDRIVER_ZIP_FILENAME=${4:-}
 
@@ -105,9 +110,20 @@ function downloadChromiumWithDriver() {
     mkdir -p "_chromium"
     mkdir -p ${CHROMIUM_DOWNLOADS}
 
-    CHROMIUM_FILE_PATH="${CHROMIUM_DOWNLOADS}/${CHROMIUM_FILENAME}"
+    CHROMIUM_FILE_PATH="${CHROMIUM_DOWNLOADS}/${CHROMIUM_FILENAME:-${CHROMIUM_URL//\//_}}"
     downloadIfOutdated ${CHROMIUM_URL} ${CHROMIUM_FILE_PATH}
     if [[ "${CHROMIUM_FILE_PATH}" = *.deb ]]; then
+      if [[ -z "${CHROMEDRIVER_URL}" ]]; then
+        # https://chromedriver.chromium.org/downloads/version-selection
+        DEB_VERSION=`dpkg -f "${CHROMIUM_FILE_PATH}" Version`
+        UP_TO_LAST_DOT_VERSION=${DEB_VERSION%.*-*}
+        MAJOR_VERSION=${DEB_VERSION%%.*}
+        if CHROMEDRIVER_VERSION=$(fetchVersion "https://chromedriver.storage.googleapis.com/LATEST_RELEASE_${UP_TO_LAST_DOT_VERSION}") ||
+            CHROMEDRIVER_VERSION=$(fetchVersion "https://chromedriver.storage.googleapis.com/LATEST_RELEASE_${MAJOR_VERSION}") ||
+            CHROMEDRIVER_VERSION=$(fetchVersion "https://chromedriver.storage.googleapis.com/LATEST_RELEASE_$[MAJOR_VERSION-1]"); then
+          CHROMEDRIVER_URL="https://chromedriver.storage.googleapis.com/${CHROMEDRIVER_VERSION}/chromedriver_linux64.zip"
+        fi
+      fi
       dpkg -x "${CHROMIUM_FILE_PATH}" "_chromium/chromium"
     else
       unzip "${CHROMIUM_FILE_PATH}" -d "_chromium/chromium"
@@ -117,7 +133,7 @@ function downloadChromiumWithDriver() {
     CHROMIUM_DIR=$(dirname "${CHROMIUM_PATH}")
 
     if [ ! -z "${CHROMEDRIVER_URL}" ]; then
-      CHROMEDRIVER_ZIP="${CHROMIUM_DOWNLOADS}/${CHROMEDRIVER_ZIP_FILENAME}"
+      CHROMEDRIVER_ZIP="${CHROMIUM_DOWNLOADS}/${CHROMEDRIVER_ZIP_FILENAME:-${CHROMEDRIVER_URL//\//_}}"
       downloadIfOutdated ${CHROMEDRIVER_URL} ${CHROMEDRIVER_ZIP}
       unzip "${CHROMEDRIVER_ZIP}" -d "_chromium/chromedriver"
       CHROMEDRIVER_PATH=$(find "${PWD}/_chromium/chromedriver/" -name chromedriver -type f)
@@ -129,10 +145,10 @@ if [[ -n ${CHROMIUM_DIR:-} ]]; then
   echo "using chromium build from local directory ${CHROMIUM_DIR}"
 elif [[ -n ${CHROMIUM_URL:-} ]]; then
   echo "using chromium build from URL ${CHROMIUM_URL}"
-  downloadChromiumWithDriver ${CHROMIUM_URL} ${CHROMIUM_URL//\//_} ${CHROMEDRIVER_URL:+${CHROMEDRIVER_URL} ${CHROMEDRIVER_URL//\//_}}
+  downloadChromiumWithDriver "${CHROMIUM_URL}" "" "${CHROMEDRIVER_URL:+${CHROMEDRIVER_URL}}" ""
 else
-  REVISION=$(curl -s -S 'https://www.googleapis.com/download/storage/v1/b/chromium-browser-snapshots/o/Linux_x64%2FLAST_CHANGE?alt=media')
-  echo "using official chrome build (REVISION: ${REVISION})"
+  REVISION=$(fetchVersion 'https://www.googleapis.com/download/storage/v1/b/chromium-browser-snapshots/o/Linux_x64%2FLAST_CHANGE?alt=media')
+  echo "using latest chromium snapshot build (REVISION: ${REVISION})"
 
   CHROMIUM_URL="https://www.googleapis.com/download/storage/v1/b/chromium-browser-snapshots/o/Linux_x64%2F${REVISION}%2Fchrome-linux.zip?alt=media"
   CHROMIUM_ZIP_NAME="chromium_rev_${REVISION}.zip"
