@@ -20,7 +20,7 @@ logger = logging.getLogger(__file__)
 
 class BaseTest(unittest.TestCase):
 
-    def options(self) -> webdriver.ChromeOptions:
+    def non_feature_options(self) -> webdriver.ChromeOptions:
         # https://peter.sh/experiments/chromium-command-line-switches
         options = webdriver.ChromeOptions()
         options.binary_location = '/home/usertd/chromium/chrome'
@@ -32,6 +32,11 @@ class BaseTest(unittest.TestCase):
         # options.add_argument('--headless')
         options.add_argument('--disable-gpu')
         options.add_argument('--user-data-dir=/tmp/profile123')
+        options.add_argument('--disable-features=ChromeWhatsNewUI')
+        return options
+
+    def options(self) -> webdriver.ChromeOptions:
+        options = self.non_feature_options()
         enabled_features = [
             'InterestGroupStorage', 'AdInterestGroupAPI', 'Fledge',
             'AllowURNsInIframes', # FOT#1
