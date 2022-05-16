@@ -19,8 +19,8 @@ implementation capabilities in [Chromium](https://chromium-review.googlesource.c
 - `bash run.sh --test-dir <path-to-python-test>` - runs all tests from given local path
 - `bash run.sh --gui` - runs tests with Chromium connecting to local X server (useful for debugging)
 - `bash run.sh --chromium-dir <path-to-chromium-dir>` - runs tests with from given local path containing Chrome/Chromium with proper chromedriver
-- `bash run.sh --chromium-url <url-to-chromium-zip>`  - downloads custom-built chromium from the given location and runs tests with it
-- `bash run.sh --chromium-url <url-to-chrome-deb> --chromedriver-url <url-to-chromedriver-zip>`  - downloads official Chrome and chromedriver from specified locations and runs tests with them
+- `bash run.sh --chromium-url <url-to-chromium-zip>`  - downloads custom-built chromium with chromedriver from the given location and runs tests with it
+- `bash run.sh --chromium-url <url-to-chrome-deb> [--chromedriver-url <url-to-chromedriver-zip>]`  - downloads official Chrome release from specified location and runs tests with it. Proper chromedriver is automatically detected and downloaded, but may be overridden.
 
 ### Example (use previously downloaded version)
 
@@ -29,17 +29,13 @@ implementation capabilities in [Chromium](https://chromium-review.googlesource.c
 ### Example (Chrome Stable)
 ```
 bash ./run.sh \
-    --chromedriver-url \
-    "https://chromedriver.storage.googleapis.com/$(curl https://chromedriver.storage.googleapis.com/LATEST_RELEASE)/chromedriver_linux64.zip" \
     --chromium-url \
     https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
 ```
 
-### Example (Chrome Beta, while it has version 97)
+### Example (Chrome Beta)
 ```
 bash ./run.sh \
-    --chromedriver-url \
-    "https://chromedriver.storage.googleapis.com/$(curl https://chromedriver.storage.googleapis.com/LATEST_RELEASE_97)/chromedriver_linux64.zip" \
     --chromium-url \
     https://dl.google.com/linux/direct/google-chrome-beta_current_amd64.deb
 ```
@@ -47,8 +43,6 @@ bash ./run.sh \
 ### Example (Chrome Dev)
 ```
 bash ./run.sh \
-    --chromedriver-url \
-    "https://www.googleapis.com/download/storage/v1/b/chromium-browser-snapshots/o/Linux_x64%2F$(curl -s -S 'https://www.googleapis.com/download/storage/v1/b/chromium-browser-snapshots/o/Linux_x64%2FLAST_CHANGE?alt=media')%2Fchromedriver_linux64.zip?alt=media" \
     --chromium-url \
     https://dl.google.com/linux/direct/google-chrome-unstable_current_amd64.deb
 ```
