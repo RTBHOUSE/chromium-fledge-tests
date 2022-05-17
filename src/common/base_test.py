@@ -62,6 +62,20 @@ class BaseTest(unittest.TestCase):
         self.saved_wd = os.getcwd()
         os.chdir(os.path.dirname(sys.modules[self.__module__].__file__))
 
+        # Workaround for 'target frame attached'
+        # https://bugs.chromium.org/p/chromedriver/issues/detail?id=4048
+        # https://groups.google.com/g/chromedriver-users/c/Z_CaHJTJnLw
+        buggyDriverExecute = self.driver.execute
+        def suppressingDriverExecute(*args, **kwargs):
+            while True:
+                try:
+                    return buggyDriverExecute(*args, **kwargs)
+                except Exception as e:
+                    if 'target frame detached' not in str(e):
+                        raise
+                    logger.warning("Supressing 'target frame detached'", exc_info=True)
+        self.driver.execute = suppressingDriverExecute
+
     def tearDown(self) -> None:
         os.chdir(self.saved_wd)
         self.driver.quit()
