@@ -15,7 +15,7 @@ set -euo pipefail
 set -x
 
 OPTIONS=
-LONG_OPTIONS=chromium-dir:,chromium-url:,chromedriver-url:,chromium-revision:,chromium-channel:,downloaded,test:,test-dir:
+LONG_OPTIONS=chromium-dir:,chromium-url:,chromedriver-url:,chromium-revision:,chromium-channel:,chrome-stable-release:,downloaded,test:,test-dir:
 
 HERE="$(cd "$(dirname "$0")"; pwd)"
 
@@ -37,7 +37,7 @@ eval set -- "$PARSED"
 # process options until we see --
 while true; do
   case "$1" in
-  --chromium-url|--chromedriver-url|--chromium-revision|--chromium-channel)
+  --chromium-url|--chromedriver-url|--chromium-revision|--chromium-channel|--chrome-stable-release)
     CHROMIUM_DIR=
     GET_CHROMIUM_PARAMS+=("$1" "$2")
     shift 2

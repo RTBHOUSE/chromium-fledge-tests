@@ -16,7 +16,7 @@ set -euo pipefail
 set -x
 
 OPTIONS=
-LONG_OPTIONS=chromium-url:,chromedriver-url:,chromium-revision:,chromium-channel:
+LONG_OPTIONS=chromium-url:,chromedriver-url:,chromium-revision:,chromium-channel:,chrome-stable-release:
 
 DOWNLOADS_DIR="_chromium_downloads"
 UNPACK_DIR="_chromium_unpack"
@@ -54,6 +54,10 @@ while true; do
     ;;
   --chromium-channel)
     CHROMIUM_CHANNEL="$2"
+    shift 2
+    ;;
+  --chrome-stable-release)
+    CHROME_STABLE_RELEASE="$2"
     shift 2
     ;;
   --)
@@ -159,6 +163,19 @@ elif [[ -n ${CHROMIUM_CHANNEL:-} ]]; then
   fi
   echo "using chrome for testing channel ${CHROMIUM_CHANNEL}" >&2
   downloadChromeForTesting
+elif [[ -n "${CHROME_STABLE_RELEASE:-}" ]]; then
+  if [[ "${CHROME_STABLE_RELEASE:-}" =~ ^[0-9]+$ ]]; then
+    RELEASE_VERSION=$(fetchVersion "https://chromedriver.storage.googleapis.com/LATEST_RELEASE_${CHROME_STABLE_RELEASE}")
+    echo "using latest official Chrome ${CHROME_STABLE_RELEASE} Stable release: ${RELEASE_VERSION}"
+  else
+    RELEASE_VERSION=${CHROME_STABLE_RELEASE}
+    echo "using official Chrome Stable release ${CHROME_STABLE_RELEASE}"
+  fi
+
+  CHROMIUM_URL="https://dl.google.com/linux/chrome/deb/pool/main/g/google-chrome-stable/google-chrome-stable_${RELEASE_VERSION}-1_amd64.deb"
+  CHROMEDRIVER_URL="https://chromedriver.storage.googleapis.com/${RELEASE_VERSION}/chromedriver_linux64.zip"
+
+  downloadChromiumWithDriver "${CHROMIUM_URL}" "" "${CHROMEDRIVER_URL}" ""
 else
   if [[ "${REVISION}" == latest ]]; then
     REVISION=$(fetchVersion 'https://www.googleapis.com/download/storage/v1/b/chromium-browser-snapshots/o/Linux_x64%2FLAST_CHANGE?alt=media')
