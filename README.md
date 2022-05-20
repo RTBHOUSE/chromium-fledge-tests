@@ -14,17 +14,15 @@ implementation capabilities in [Chromium](https://chromium-review.googlesource.c
 
 ## How to run tests  
 
-- `bash run.sh` - runs all tests with the latest chromium version
+- `bash run.sh [--chromium-revision latest]` - runs all tests with the latest chromium version
+- `bash run.sh --downloaded` - runs all tests with previously downloaded browser version
 - `bash run.sh --test <module>` - runs all tests from given module (e.g. tests_functional.test)
 - `bash run.sh --test-dir <path-to-python-test>` - runs all tests from given local path
 - `bash run.sh --gui` - runs tests with Chromium connecting to local X server (useful for debugging)
+- `bash run.sh --chromium-revision <chromium-snaphot-revision>` - runs tests with specified chromium revision
 - `bash run.sh --chromium-dir <path-to-chromium-dir>` - runs tests with from given local path containing Chrome/Chromium with proper chromedriver
 - `bash run.sh --chromium-url <url-to-chromium-zip>`  - downloads custom-built chromium with chromedriver from the given location and runs tests with it
 - `bash run.sh --chromium-url <url-to-chrome-deb> [--chromedriver-url <url-to-chromedriver-zip>]`  - downloads official Chrome release from specified location and runs tests with it. Proper chromedriver is automatically detected and downloaded, but may be overridden.
-
-### Example (use previously downloaded version)
-
-- `bash run.sh --chromium-dir "$(find -name chrome -type f -exec dirname {} \;)"`
 
 ### Example (Chrome Stable)
 ```
