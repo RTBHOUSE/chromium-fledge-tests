@@ -11,7 +11,7 @@ from common.utils import measure_time
 from common.utils import pretty_json
 from common.utils import print_debug
 from common.utils import average_benchmarks
-from common.utils import extract_rtbh_test_stats_json
+from common.utils import extract_rtbh_test_stats
 
 logger = logging.getLogger(__file__)
 
@@ -47,5 +47,5 @@ class PerformanceTest(BaseTest):
             bid_duration_ms = int(report_result_signals.get('browserSignals').get('bid_duration')) / 1000
             logger.info(f"generateBid took: {bid_duration_ms} ms")
 
-        return extract_rtbh_test_stats_json(report_result_signals)
+        return extract_rtbh_test_stats(report_result_signals)
 

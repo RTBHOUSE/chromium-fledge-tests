@@ -6,7 +6,7 @@ import logging
 from common.base_test import BaseTest
 from common.mockserver import MockServer
 from common.utils import print_debug, measure_time, log_exception, MeasureDuration, pretty_json,\
-    average_benchmarks, extract_rtbh_test_stats_json
+    average_benchmarks, extract_rtbh_test_stats
 
 logger = logging.getLogger(__file__)
 
@@ -42,4 +42,4 @@ class WebassemblyApiTest(BaseTest):
             bid_duration_ms = int(report_result_signals.get('browserSignals').get('bid_duration')) / 1000
             logger.info(f"generateBid took: {bid_duration_ms} ms")
 
-        return extract_rtbh_test_stats_json(report_result_signals)
+        return extract_rtbh_test_stats(report_result_signals)
