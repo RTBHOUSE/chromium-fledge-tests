@@ -4,6 +4,7 @@
 from typing import Any, Dict, Optional
 import json
 import logging
+import os
 import threading
 import time
 from datetime import datetime
@@ -78,21 +79,16 @@ class AverageBenchmarks:
 
     def run(self, times: int):
         for _ in range(times):
-            one_run_results_json = self.method(self.method_self, *self.args, **self.kwargs)
-            one_run_results = json.loads(one_run_results_json)
-            for k, v in one_run_results.items():
-                try:
-                    f = float(v)
-                    self.results[k].append(f)
-                except ValueError:
-                    pass
+            one_run_results = self.method(self.method_self, *self.args, **self.kwargs)
+            for k, f in one_run_results.items():
+                self.results[k].append(f)
 
     def log_averaged_results(self, mode: str = MEDIAN):
         avg_fun = AverageBenchmarks.AVERAGE_FUN[mode]
         logger.info(f"{self.method.__name__} benchmarks ({mode})")
         for k, lst in self.results.items():
             av = avg_fun(lst)
-            logger.info(f"  - {k}: {av / 1000} ms      {lst}")
+            logger.info(f"  - {k}: {av}      {lst}")
 
 
 def measure_time(method):
@@ -128,9 +124,17 @@ def pretty_json(data):
     return json.dumps(data, indent=2, sort_keys=True)
 
 
-def extract_rtbh_test_stats_json(signals: Dict[str, Any]) -> Optional[str]:
+def extract_rtbh_test_stats(signals: Dict[str, Any]) -> Optional[Dict[str, float]]:
     try:
-        return signals['browserSignals']['rtbh_test_stats']
+        results = {}
+        one_run_results = json.loads(signals['browserSignals']['rtbh_test_stats'])
+        for k, v in one_run_results.items():
+            try:
+                results[k + '_ms'] = float(v) / 1000
+            except ValueError:
+                pass
+
+        return results
     except KeyError:
         logger.warning("No test statistics", exc_info=True)
         return None
@@ -140,6 +144,7 @@ def average_benchmarks(method):
     @wraps(method)
     def inner_average_benchmarks(self, *args, **kwargs):
         ab = AverageBenchmarks(method, self, *args, **kwargs)
-        ab.run(times=10)
+        ab.run(times=int(os.environ.get('average_benchmarks_times', '5')))
         ab.log_averaged_results()
+
     return inner_average_benchmarks
