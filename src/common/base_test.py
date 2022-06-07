@@ -3,6 +3,7 @@
 
 import logging
 import os
+import shutil
 import unittest
 import warnings
 
@@ -17,6 +18,7 @@ from common.config import config
 
 logger = logging.getLogger(__file__)
 
+PROFILE_DIR = '/tmp/profile123'
 
 class BaseTest(unittest.TestCase):
 
@@ -31,7 +33,7 @@ class BaseTest(unittest.TestCase):
         # FIXME headless chrome does not work with fledge, https://bugs.chromium.org/p/chromium/issues/detail?id=1229652
         # options.add_argument('--headless')
         options.add_argument('--disable-gpu')
-        options.add_argument('--user-data-dir=/tmp/profile123')
+        options.add_argument(f'--user-data-dir={PROFILE_DIR}')
         options.add_argument('--disable-features=ChromeWhatsNewUI')
         return options
 
@@ -63,6 +65,7 @@ class BaseTest(unittest.TestCase):
     def tearDown(self) -> None:
         os.chdir(self.saved_wd)
         self.driver.quit()
+        shutil.rmtree(PROFILE_DIR)
 
     def assertDriverContainsText(self, css_selector, text, timeout=5):
         exc_msg = f'Failed to find text "{text}" in element "{css_selector}" ' \
