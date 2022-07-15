@@ -50,6 +50,8 @@ class BaseTest(unittest.TestCase):
             options.add_argument('--headless=new')
         options.add_argument('--disable-gpu')
         options.add_argument(f'--user-data-dir={PROFILE_DIR}')
+        options.add_argument('--v=1')
+        options.add_argument('--auto-open-devtools-for-tabs')
         options.add_argument('--disable-features=ChromeWhatsNewUI')
         options.add_argument(f'--privacy-sandbox-enrollment-overrides={",".join(PRIVACY_SANDBOX_ENROLLMENT_OVERRIDES)}')
         return options
