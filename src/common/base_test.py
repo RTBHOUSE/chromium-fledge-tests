@@ -36,6 +36,9 @@ class BaseTest(unittest.TestCase):
         # options.add_argument('--headless')
         options.add_argument('--disable-gpu')
         options.add_argument(f'--user-data-dir={PROFILE_DIR}')
+        options.add_argument('--enable-logging')
+        options.add_argument('--v')
+        options.add_argument('--auto-open-devtools-for-tabs')
         options.add_argument('--disable-features=ChromeWhatsNewUI')
         return options
 
