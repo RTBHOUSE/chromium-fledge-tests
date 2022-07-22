@@ -1,6 +1,5 @@
 # Copyright 2021 RTBHOUSE. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be found in the LICENSE file.
-
 import http.server
 import json
 import logging
@@ -9,7 +8,8 @@ import ssl
 import threading
 from dataclasses import dataclass
 from functools import partial
-from urllib.parse import parse_qs
+from typing import Dict, List, Optional
+from urllib.parse import parse_qs, urlsplit
 
 logger = logging.getLogger(__file__)
 common_dir = str(pathlib.Path(__file__).absolute().parent.parent)
@@ -30,26 +30,33 @@ class RequestHandler(http.server.SimpleHTTPRequestHandler):
     def address_string(self):
         return f'{self.client_address[0]} -> :{self.server.server_port}'
 
+    def parse_request(self) -> bool:
+        if not super().parse_request():
+            return False
+        self.path, query = urlsplit(self.path)[2:4]
+        self.query_params = parse_qs(query)
+        logger.info(
+            f"{self.command} request path: {self.path}, query params: {self.query_params}")
+        return True
+
     def do_GET(self):
-        params = {}
-        path = self.path
-        if '?' in path:
-            path, tmp = path.split('?', 1)
-            params = parse_qs(tmp)
-        self.callback(Request(path, params))
+        self.callback(Request(self.path, self.query_params))
 
-        logger.info(f"request path: {path}, params: {params}")
-
-        if path.startswith("/report") or path.startswith("/debug") or path.startswith('/favicon'):
+        if self.path.startswith("/report") or self.path.startswith("/debug") or self.path.startswith('/favicon'):
             pass
         else:
             super().do_GET()
+
+    def do_POST(self):
+        body = self.rfile.read(int(self.headers['Content-Length']))
+        self.callback(Request(self.path, self.query_params, body))
 
 
 @dataclass(init=True, repr=True, eq=False, frozen=True)
 class Request:
     path: str
-    params: map
+    params: Dict[str, List[str]]
+    body: Optional[bytes] = None
 
     def get_params(self, key):
         return self.params[key]
@@ -108,7 +115,7 @@ class MockServer:
     def get_requests(self):
         return self.requests
 
-    def get_last_request(self, path):
+    def get_last_request(self, path) -> Optional[Request]:
         result = None
         for request in self.get_requests():
             if request.path == path:
