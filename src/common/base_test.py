@@ -42,11 +42,12 @@ class BaseTest(unittest.TestCase):
     def options(self) -> webdriver.ChromeOptions:
         options = self.non_feature_options()
         enabled_features = [
-            'InterestGroupStorage', 'AdInterestGroupAPI', 'Fledge',
+            'InterestGroupStorage',
             'AllowURNsInIframes', # FOT#1
             'FencedFrames:implementation_type/mparch',
             'BiddingAndScoringDebugReportingAPI',
-            'PrivacySandboxAdsAPIsOverride'
+            'PrivacySandboxAdsAPIsOverride',
+            'OverridePrivacySandboxSettingsLocalTesting'
         ]
         options.add_argument(f"--enable-features={','.join(enabled_features)}")
         return options
