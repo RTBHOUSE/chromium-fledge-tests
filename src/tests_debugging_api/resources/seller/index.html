@@ -24,6 +24,7 @@ if (navigator.runAdAuction) {
     adDiv.appendChild(document.createTextNode("No turtledove winner"));
   } else {
     const fframe = document.createElement('fencedframe');
+    fframe.setAttribute('mode', 'opaque-ads');
     fframe.setAttribute('src', ar);
     fframe.setAttribute('style', 'width: 100px; height: 100px');
     adDiv.appendChild(fframe);
