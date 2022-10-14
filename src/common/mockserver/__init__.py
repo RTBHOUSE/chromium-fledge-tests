@@ -10,18 +10,42 @@ import time
 from dataclasses import dataclass
 from functools import partial
 from http import HTTPStatus
-from typing import Dict, List, Optional, Union, Iterator, Tuple
+from typing import Dict, List, Optional, Union, Iterable, Tuple, Callable
 from urllib.parse import parse_qs, urlsplit
 
 logger = logging.getLogger(__file__)
 common_dir = str(pathlib.Path(__file__).absolute().parent.parent)
 
 
-class RequestHandler(http.server.SimpleHTTPRequestHandler):
+@dataclass(init=True, repr=True, eq=False, frozen=True)
+class Request:
+    path: str
+    params: Dict[str, List[str]]
+    timestamp: float
+    body: Optional[bytes] = None
 
-    def __init__(self, *args, directory=None, callback=None, response_provider=None, **kwargs):
+    def get_params(self, key):
+        return self.params[key]
+
+    def get_first_param(self, key):
+        return self.get_params(key)[0]
+
+    def get_first_json_param(self, key):
+        return json.loads(self.get_first_param(key))
+
+
+@dataclass
+class Response:
+    status: HTTPStatus
+    headers: Iterable[Tuple[str, str]]
+    body: Union[None, str, bytes]
+
+
+class RequestHandler(http.server.SimpleHTTPRequestHandler):
+    callback: Callable[[Request], Optional[Response]]
+
+    def __init__(self, *args, directory=None, callback=None, **kwargs):
         self.callback = callback or (lambda request: None)
-        self.response_provider = response_provider or (lambda path, query_params: None)
         super().__init__(*args, directory=directory, **kwargs)
 
     def end_headers(self) -> None:
@@ -44,25 +68,23 @@ class RequestHandler(http.server.SimpleHTTPRequestHandler):
         return True
 
     def do_GET(self):
-        self.callback(Request(self.path, self.query_params, self.timestamp))
-        response = self.response_provider(self.path, self.query_params)
-        response: Union[None, str, Tuple[int, Iterator[Tuple[str, str]], Union[None, str, bytes]]]
+        response = self.callback(Request(self.path, self.query_params, self.timestamp))
         if response is None:
             return super().do_GET()
-        elif isinstance(response, str):
-            response = HTTPStatus.OK, [], response
-        code, headers, body = response
-        self.send_response(code)
+        self.send_response(response.status)
         content_type_sent = False
-        for key, value in headers:
+        for key, value in response.headers:
             self.send_header(key, value)
             if key.lower() == 'content-type':
                 content_type_sent = True
-        if body is None:
+        if response.body is None:
             self.end_headers()
         else:
-            if isinstance(body, str):
-                body = body.encode()
+            body: bytes
+            if isinstance(response.body, str):
+                body = response.body.encode()
+            else:
+                body = response.body
             if not content_type_sent:
                 self.send_header("Content-Type", self.guess_type(self.path))
             self.send_header("Content-Length", str(len(body)))
@@ -71,28 +93,14 @@ class RequestHandler(http.server.SimpleHTTPRequestHandler):
 
     def do_POST(self):
         body = self.rfile.read(int(self.headers['Content-Length']))
-        self.callback(Request(self.path, self.query_params, self.timestamp, body))
-
-
-@dataclass(init=True, repr=True, eq=False, frozen=True)
-class Request:
-    path: str
-    params: Dict[str, List[str]]
-    timestamp: float
-    body: Optional[bytes] = None
-
-    def get_params(self, key):
-        return self.params[key]
-
-    def get_first_param(self, key):
-        return self.get_params(key)[0]
-
-    def get_first_json_param(self, key):
-        return json.loads(self.get_first_param(key))
+        response = self.callback(Request(self.path, self.query_params, self.timestamp, body))
+        if not response:
+            self.send_response(HTTPStatus.OK)
+            self.end_headers()
 
 
 class MockServer:
-    def __init__(self, port=0, directory='.', response_provider=None):
+    def __init__(self, port=0, directory='.', response_provider: Callable[[Request], Optional[Response]] = None):
         self.server_name = 'https://fledge-tests.creativecdn.net'
         self.server_port = port
         self.server_directory = directory
@@ -100,10 +108,15 @@ class MockServer:
 
         logger.debug(f"server {self.address} initializing")
         server_address = ('0.0.0.0', self.server_port)
+
+        def callback(request: Request):
+            self.requests.append(request)
+            if response_provider:
+                return response_provider(request)
+
         self.http_server = http.server.ThreadingHTTPServer(
             server_address,
-            partial(RequestHandler, directory=self.server_directory, response_provider=response_provider,
-                    callback=self.requests.append))
+            partial(RequestHandler, directory=self.server_directory, callback=callback))
         self.server_port = self.http_server.server_port
         self.http_server.socket = ssl.wrap_socket(
             self.http_server.socket,
