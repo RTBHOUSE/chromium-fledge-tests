@@ -124,7 +124,7 @@ def pretty_json(data):
     return json.dumps(data, indent=2, sort_keys=True)
 
 
-def extract_rtbh_test_stats(signals: Dict[str, Any]) -> Optional[Dict[str, float]]:
+def extract_rtbh_test_stats(signals: Dict[str, Any]) -> Dict[str, float]:
     try:
         results = {}
         one_run_results = json.loads(signals['browserSignals']['rtbh_test_stats'])
@@ -136,15 +136,19 @@ def extract_rtbh_test_stats(signals: Dict[str, Any]) -> Optional[Dict[str, float
 
         return results
     except KeyError:
-        logger.warning("No test statistics", exc_info=True)
-        return None
+        # If we set AVERAGE_BENCHMARKS_TIMES we apparently wanted to get measurements,
+        # so without them we can't do anything reasonable and just raise an exception.
+        # Otherwise, we don't care about the test statistcs and simply return an empty dictionary.
+        if 'AVERAGE_BENCHMARKS_TIMES' in os.environ:
+            raise RuntimeError("No test statistics in browser singals.")
+        return {}
 
 
 def average_benchmarks(method):
     @wraps(method)
     def inner_average_benchmarks(self, *args, **kwargs):
         ab = AverageBenchmarks(method, self, *args, **kwargs)
-        ab.run(times=int(os.environ.get('average_benchmarks_times', '5')))
+        ab.run(times=int(os.environ.get('AVERAGE_BENCHMARKS_TIMES', '1')))
         ab.log_averaged_results()
 
     return inner_average_benchmarks
