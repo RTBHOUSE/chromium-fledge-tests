@@ -15,7 +15,7 @@ set -euo pipefail
 set -x
 
 OPTIONS=
-LONG_OPTIONS=chromium-dir:,chromium-url:,chromedriver-url:,chromium-revision:,downloaded,test:,test-dir:,gui,average-benchmarks-times:
+LONG_OPTIONS=chromium-dir:,chromium-url:,chromedriver-url:,chromium-revision:,downloaded,test:,test-dir:,gui
 
 CHROMIUM_DOWNLOADS="_chromium_downloads"
 UNPACK_DIR="_chromium"
@@ -71,10 +71,6 @@ while true; do
       -e DISPLAY -v /tmp/.X11-unix/:/tmp/.X11-unix -e "XAUTH=`xauth list $DISPLAY`"
     )
     shift
-    ;;
-  --average-benchmarks-times)
-    AVERAGE_BENCHMARKS_TIMES="$2"
-    shift 2
     ;;
   --)
     # Non-option arguments are passed to docker container as a command
@@ -188,7 +184,6 @@ docker run --rm -i \
   -v "${CHROMIUM_DIR}:/home/usertd/chromium/" \
   ${TEST_DIR:+-v "${TEST_DIR}:/home/usertd/tests/`basename "${TEST_DIR}"`"} \
   ${TEST:+-e TEST="$TEST"} \
-  ${AVERAGE_BENCHMARKS_TIMES:+-e AVERAGE_BENCHMARKS_TIMES="$AVERAGE_BENCHMARKS_TIMES"} \
   --shm-size=1gb \
   --add-host fledge-tests.creativecdn.net:127.0.0.1 \
   ${DOCKER_EXTRA_ARGS[@]+"${DOCKER_EXTRA_ARGS[@]}"} \
