@@ -18,7 +18,7 @@ RUN apt-get update && \
 USER usertd
 WORKDIR /home/usertd
 
-RUN pip3 install --user selenium assertpy; \
+RUN pip3 install --user selenium assertpy influxdb; \
     mkdir /home/usertd/logs
 
 COPY src/common/ssl/ca/ca.crt tests/common/ssl/ca/ca.crt
