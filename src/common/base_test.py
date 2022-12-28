@@ -65,7 +65,8 @@ class BaseTest(unittest.TestCase):
     def tearDown(self) -> None:
         os.chdir(self.saved_wd)
         self.driver.quit()
-        shutil.rmtree(PROFILE_DIR)
+        if os.path.exists(PROFILE_DIR):
+            shutil.rmtree(PROFILE_DIR)
 
     def assertDriverContainsText(self, css_selector, text, timeout=5):
         exc_msg = f'Failed to find text "{text}" in element "{css_selector}" ' \
