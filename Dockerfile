@@ -1,11 +1,11 @@
-FROM ubuntu:20.04
+FROM ubuntu:22.04
 
 RUN apt-get update && \
     DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends -y \
         curl ca-certificates software-properties-common unzip libnss3-tools \
-        xorg \
+        xorg xterm \
         `# we use actual x server as chromium headless mode is buggy` \
-        tigervnc-common tigervnc-standalone-server \
+        tigervnc-common tigervnc-standalone-server tigervnc-tools \
         python3 python3-pip \
         `# chromium dependencies` \
         libglib2.0-0 libnss3 libatk1.0-0 libatk-bridge2.0-0 libcups2 libdrm2 \
