@@ -4,13 +4,12 @@ import json
 import logging
 import os
 import shutil
+import sys
 import unittest
 import warnings
 
-import sys
 from selenium import webdriver
 from selenium.webdriver.common.by import By
-from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 
@@ -19,6 +18,7 @@ from common.config import config
 logger = logging.getLogger(__file__)
 
 PROFILE_DIR = '/tmp/profile123'
+
 
 class BaseTest(unittest.TestCase):
 
@@ -30,6 +30,7 @@ class BaseTest(unittest.TestCase):
         # options.headless = True
         options.set_capability('goog:loggingPrefs', dict(browser='ALL', performance='ALL'))
         options.add_experimental_option('perfLoggingPrefs', dict(traceCategories='fledge'))
+        options.add_argument('--enable-stats-collection-bindings')  # for histograms
         options.add_argument('--no-sandbox')
         options.add_argument('--no-zygote')
         # FIXME headless chrome does not work with fledge, https://bugs.chromium.org/p/chromium/issues/detail?id=1229652
@@ -88,3 +89,9 @@ class BaseTest(unittest.TestCase):
             if data.get('message', {}).get('method') == 'Tracing.dataCollected':
                 trace_events.append(data['message']['params'])
         return trace_events
+
+    def extract_browser_histogram(self, histogram, timeout=5):
+        js = 'return statsCollectionController.getBrowserHistogram("%s")' % histogram
+
+        return WebDriverWait(self.driver, timeout) \
+            .until(lambda driver: json.loads(driver.execute_script(js)))
