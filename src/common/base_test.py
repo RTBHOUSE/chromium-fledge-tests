@@ -41,7 +41,7 @@ class BaseTest(unittest.TestCase):
         options = webdriver.ChromeOptions()
         if CHROMIUM_DIR:
             options.binary_location = CHROMIUM_DIR + '/chrome'
-        options.set_capability('goog:loggingPrefs', dict(browser='ALL', performance='ALL'))
+        options.set_capability('goog:loggingPrefs', dict(browser='ALL', performance='ALL', driver='ALL'))
         options.add_experimental_option('perfLoggingPrefs', dict(traceCategories='fledge'))
         options.add_argument('--enable-stats-collection-bindings')  # for histograms
         options.add_argument('--no-sandbox')

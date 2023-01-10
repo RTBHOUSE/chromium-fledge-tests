@@ -105,10 +105,17 @@ def log_exception(method):
     def inner_log_exception(self, *args, **kwargs):
         try:
             return method(self, *args, **kwargs)
-        except BaseException:
-            logger.warning(self.driver.page_source)
-            for entry in self.driver.get_log('browser'):
-                logger.warning(entry)
+        except:
+            try:
+                for entry in self.driver.get_log('driver'):
+                    logger.warning(entry)
+            except:
+                logger.error('Cannot fetch driver logs', exc_info=True)
+            try:
+                for entry in self.driver.get_log('browser'):
+                    logger.warning(entry)
+            except:
+                logger.error('Cannot fetch browser logs', exc_info=True)
             raise
 
     return inner_log_exception
