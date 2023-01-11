@@ -1,18 +1,18 @@
 # Copyright 2021 RTBHOUSE. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be found in the LICENSE file.
 
-from typing import Any, Dict, Optional
 import json
 import logging
 import os
+import statistics
 import threading
 import time
+from collections import defaultdict
 from datetime import datetime
 from functools import wraps
-import statistics
-from collections import defaultdict
+from typing import Any, Dict
 
-from common.config import config
+from common.base_test import CHROMEDRIVER_LOG_PATH
 
 logger = logging.getLogger(__file__)
 
@@ -96,6 +96,7 @@ def measure_time(method):
     def inner_measure_time(self, *args, **kwargs):
         with MeasureDuration(f"{self.__class__.__name__}.{method.__name__,}") as m:
             return method(self, *args, **kwargs)
+
     return inner_measure_time
 
 
@@ -109,14 +110,16 @@ def log_exception(method):
             for entry in self.driver.get_log('browser'):
                 logger.warning(entry)
             raise
+
     return inner_log_exception
 
 
 def print_debug(method):
     @wraps(method)
     def inner_print_debug(self, *args, **kwargs):
-        with TrackFile(config.get('service_log_path')):
+        with TrackFile(CHROMEDRIVER_LOG_PATH):
             return method(self, *args, **kwargs)
+
     return inner_print_debug
 
 

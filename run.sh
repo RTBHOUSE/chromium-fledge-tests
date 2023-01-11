@@ -179,10 +179,16 @@ docker build --iidfile .iidfile -t chromium-fledge-tests . &> /dev/null
 
 [ -t 0 ] && [ -t 1 ] && termOpt='-t' || termOpt=''
 
+# container uses a different user
+touch "${HERE}/chromedriver.log"
+chmod a+w "${HERE}/chromedriver.log"
+
 docker run --rm -i \
   ${termOpt} \
   -v "${CHROMIUM_DIR}:/home/usertd/chromium/" \
   -e PROFILE_DIR=/home/usertd/profile \
+  -v "${HERE}/chromedriver.log":/home/usertd/chromedriver.log \
+  -e CHROMEDRIVER_LOG_PATH=/home/usertd/chromedriver.log \
   ${TEST_DIR:+-v "${TEST_DIR}:/home/usertd/tests/`basename "${TEST_DIR}"`"} \
   ${TEST:+-e TEST="$TEST"} \
   --shm-size=1gb \

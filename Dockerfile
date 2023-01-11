@@ -18,8 +18,7 @@ RUN apt-get update && \
 USER usertd
 WORKDIR /home/usertd
 
-RUN pip3 install --user selenium assertpy; \
-    mkdir /home/usertd/logs
+RUN pip3 install --user selenium assertpy
 
 COPY src/common/ssl/ca/ca.crt tests/common/ssl/ca/ca.crt
 
@@ -28,7 +27,6 @@ RUN mkdir -p /home/usertd/.pki/nssdb && \
     certutil -d sql:/home/usertd/.pki/nssdb/ -A -t TC -n "fledge-tests CA" -i /home/usertd/tests/common/ssl/ca/ca.crt
 
 WORKDIR /home/usertd/tests
-VOLUME /home/usertd/logs
 
 # This is a hack due to https://bugs.chromium.org/p/chromium/issues/detail?id=1229652
 RUN mkdir -p ~/.vnc && echo turtledove | vncpasswd -f > ~/.vnc/passwd && touch ~/.Xauthority
