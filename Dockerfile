@@ -18,7 +18,8 @@ RUN apt-get update && \
 USER usertd
 WORKDIR /home/usertd/tests
 
-RUN pip3 install --user selenium assertpy
+COPY src/requirements.txt .
+RUN pip3 install --user -r requirements.txt
 
 # This is a hack due to https://bugs.chromium.org/p/chromium/issues/detail?id=1229652
 RUN mkdir -p ~/.vnc && echo turtledove | vncpasswd -f > ~/.vnc/passwd && touch ~/.Xauthority
