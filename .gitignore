@@ -6,3 +6,4 @@
 _chromium
 _chromium_downloads
 **/__pycache__
+/profile

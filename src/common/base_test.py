@@ -3,6 +3,7 @@
 import json
 import logging
 import os
+import pathlib
 import shutil
 import sys
 import unittest
@@ -17,7 +18,9 @@ from common.config import config
 
 logger = logging.getLogger(__file__)
 
-PROFILE_DIR = '/tmp/profile123'
+ROOT_DIR = pathlib.Path(__file__).absolute().parent.parent.parent
+
+PROFILE_DIR = os.environ.get('PROFILE_DIR') or str(ROOT_DIR / "profile")
 
 
 class BaseTest(unittest.TestCase):
@@ -44,7 +47,7 @@ class BaseTest(unittest.TestCase):
         options = self.non_feature_options()
         enabled_features = [
             'InterestGroupStorage',
-            'AllowURNsInIframes', # FOT#1
+            'AllowURNsInIframes',  # FOT#1
             'FencedFrames:implementation_type/mparch',
             'BiddingAndScoringDebugReportingAPI',
             'PrivacySandboxAdsAPIsOverride',
@@ -54,6 +57,9 @@ class BaseTest(unittest.TestCase):
         return options
 
     def setUp(self) -> None:
+        if os.path.exists(PROFILE_DIR):
+            shutil.rmtree(PROFILE_DIR)
+
         warnings.filterwarnings("ignore")
         logging.basicConfig(stream=sys.stderr, level=logging.INFO)
         driver = webdriver.Chrome('/home/usertd/chromium/chromedriver', options=self.options(),
