@@ -11,14 +11,14 @@ if (!navigator.joinAdInterestGroup) {
   document.write("your browser doesn't have joinAdInterestGroup -- do you need to set some flags?");
 } else {
   navigator.joinAdInterestGroup({
-    owner: "https://fledge-tests.creativecdn.net:9031",
+    owner: "https://localhost:9031",
     name: "tc-ig",
-    biddingLogicUrl: "https://fledge-tests.creativecdn.net:9031/buyer.js",
-    biddingWasmHelperUrl: "https://fledge-tests.creativecdn.net:9031/cxx-src/build/functions.wasm",
+    biddingLogicUrl: "https://localhost:9031/buyer.js",
+    biddingWasmHelperUrl: "https://localhost:9031/cxx-src/build/functions.wasm",
     userBiddingSignals: {key: "user bidding signals "},
     ads: [
       {
-        renderUrl: "https://fledge-tests.creativecdn.net:9031/ad.html",
+        renderUrl: "https://localhost:9031/ad.html",
         metadata: {
           input: randomVector(200),
         },

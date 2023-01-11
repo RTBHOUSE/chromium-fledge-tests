@@ -12,5 +12,5 @@ function reportWin(auctionSignals, perBuyerSignals, sellerSignals, browserSignal
     "sellerSignals": sellerSignals,
     "browserSignals": browserSignals
   };
-  sendReportTo("https://fledge-tests.creativecdn.net:8091/reportWin?signals=" + encodeURIComponent(JSON.stringify(signals)));
+  sendReportTo("https://localhost:8091/reportWin?signals=" + encodeURIComponent(JSON.stringify(signals)));
 }

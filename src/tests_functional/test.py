@@ -22,8 +22,8 @@ class FunctionalTest(BaseTest):
     @measure_time
     @log_exception
     def test__should_show_ad_our(self):
-        with MockServer(8091, 'resources/buyer') as buyer_server,\
-                MockServer(8092, 'resources/seller') as seller_server:
+        with MockServer(port=8091, directory='resources/buyer') as buyer_server,\
+                MockServer(port=8092, directory='resources/seller') as seller_server:
 
             with MeasureDuration("joinAdInterestGroup"):
                 self.driver.get(buyer_server.address)
@@ -37,13 +37,13 @@ class FunctionalTest(BaseTest):
         report_result_signals = seller_server.get_last_request("/reportResult").get_first_json_param('signals')
         logger.info(f"reportResult() signals: {pretty_json(report_result_signals)}")
         assert_that(report_result_signals.get('browserSignals').get('interestGroupOwner'))\
-            .is_equal_to("https://fledge-tests.creativecdn.net:8091")
+            .is_equal_to("https://localhost:8091")
         assert_that(report_result_signals.get('browserSignals').get('renderUrl')) \
-            .is_equal_to("https://fledge-tests.creativecdn.net:8091/ad-1.html")
+            .is_equal_to("https://localhost:8091/ad-1.html")
 
         report_win_signals = buyer_server.get_last_request("/reportWin").get_first_json_param('signals')
         logger.info(f"reportWin() signals: {pretty_json(report_win_signals)}")
         assert_that(report_win_signals.get('browserSignals').get('interestGroupOwner')) \
-            .is_equal_to("https://fledge-tests.creativecdn.net:8091")
+            .is_equal_to("https://localhost:8091")
         assert_that(report_win_signals.get('browserSignals').get('renderUrl')) \
-            .is_equal_to("https://fledge-tests.creativecdn.net:8091/ad-1.html")
+            .is_equal_to("https://localhost:8091/ad-1.html")

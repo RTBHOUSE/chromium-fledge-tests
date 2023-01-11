@@ -100,14 +100,10 @@ class RequestHandler(http.server.SimpleHTTPRequestHandler):
 
 
 class MockServer:
-    def __init__(self, port=0, directory='.', response_provider: Callable[[Request], Optional[Response]] = None):
-        self.server_name = 'https://fledge-tests.creativecdn.net'
-        self.server_port = port
+    def __init__(self, port=0, directory='.', name='localhost',
+                 response_provider: Callable[[Request], Optional[Response]] = None):
         self.server_directory = directory
         self.requests = []
-
-        logger.debug(f"server {self.address} initializing")
-        server_address = ('0.0.0.0', self.server_port)
 
         def callback(request: Request):
             self.requests.append(request)
@@ -115,19 +111,21 @@ class MockServer:
                 return response_provider(request)
 
         self.http_server = http.server.ThreadingHTTPServer(
-            server_address,
+            (name, port),
             partial(RequestHandler, directory=self.server_directory, callback=callback))
-        self.server_port = self.http_server.server_port
+        self.server_name = name or self.http_server.server_name
+        self.server_port = port or self.http_server.server_port
         self.http_server.socket = ssl.wrap_socket(
             self.http_server.socket,
             server_side=True,
-            certfile=common_dir + '/ssl/fledge-tests.creativecdn.net.crt',
-            keyfile=common_dir + '/ssl/fledge-tests.creativecdn.net.key',
+            certfile=common_dir + '/ssl/localhost.crt',
+            keyfile=common_dir + '/ssl/localhost.key',
             ssl_version=ssl.PROTOCOL_TLS)
+        logger.info(f"server {self.address} initialized")
 
     @property
     def address(self):
-        return f'{self.server_name}:{self.server_port}'
+        return f'https://{self.server_name}:{self.server_port}'
 
     def __enter__(self):
         logger.debug(f"server {self.address} starting")

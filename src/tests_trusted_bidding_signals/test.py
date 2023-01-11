@@ -22,8 +22,8 @@ class TrustedBiddingSignalsTest(BaseTest):
     @measure_time
     @log_exception
     def test__should_pass_trusted_bidding_signals(self):
-        with MockServer(8101, 'resources/buyer') as buyer_server,\
-                MockServer(8102, 'resources/seller') as seller_server:
+        with MockServer(port=8101, directory='resources/buyer') as buyer_server,\
+                MockServer(port=8102, directory='resources/seller') as seller_server:
 
             with MeasureDuration("joinAdInterestGroup"):
                 self.driver.get(buyer_server.address)

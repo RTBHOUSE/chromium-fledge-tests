@@ -1,10 +1,12 @@
 #!/bin/bash
 
-openssl req -config conf.conf -new -key fledge-tests.creativecdn.net.key -out fledge-tests.creativecdn.net.csr
+set -xeu
 
-openssl x509 -req -in fledge-tests.creativecdn.net.csr \
+cd "$(dirname "$0")"
+
+openssl genrsa -traditional -out localhost.key
+
+openssl req -x509 -config conf.conf -new -key localhost.key \
     -CA ca/ca.crt -CAkey ca/ca.key -CAcreateserial \
-    -out fledge-tests.creativecdn.net.crt -days 3650 -sha256 \
-    -extensions v3_req -extfile conf.conf
-
-rm fledge-tests.creativecdn.net.csr
+    -out localhost.crt -days 3650 -sha256 \
+    -extensions v3_req
