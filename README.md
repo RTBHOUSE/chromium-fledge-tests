@@ -275,3 +275,12 @@ INFO:/home/usertd/tests/common/utils/__init__.py:[rtb-chromium-debug] AuctionV8H
 ...
 INFO:/home/usertd/tests/tests_webassembly/test.py:generateBid took: 6.07 ms
 ```
+
+## Running tests without Docker
+
+You can also run tests just like normal Python 3 unittests assuming all [required Python packages](src/requirements.txt) file are installed.
+
+`chrome` binary is searched for in the following places, in order:
+* directory specified in `CHROMIUM_DIR` environment variable, if set
+* `_chromium` subdirectory (recently downloaded by `get_chromium.sh` script)
+* `PATH`
