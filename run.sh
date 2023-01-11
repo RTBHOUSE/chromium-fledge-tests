@@ -182,6 +182,7 @@ docker build --iidfile .iidfile -t chromium-fledge-tests . &> /dev/null
 docker run --rm -i \
   ${termOpt} \
   -v "${CHROMIUM_DIR}:/home/usertd/chromium/" \
+  -e PROFILE_DIR=/home/usertd/profile \
   ${TEST_DIR:+-v "${TEST_DIR}:/home/usertd/tests/`basename "${TEST_DIR}"`"} \
   ${TEST:+-e TEST="$TEST"} \
   --shm-size=1gb \
