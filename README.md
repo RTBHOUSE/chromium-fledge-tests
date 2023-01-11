@@ -60,8 +60,8 @@ In the [tests](https://github.com/RTBHOUSE/chromium-fledge-tests/blob/master/src
 
 ```python
     def test__should_show_ad_our(self):
-        with MockServer(8091, 'resources/buyer') as buyer_server,\
-                MockServer(8092, 'resources/seller') as seller_server:
+        with MockServer(port=8091, directory='resources/buyer') as buyer_server,\
+                MockServer(port=8092, directory='resources/seller') as seller_server:
 
             with MeasureDuration("joinAdInterestGroup"):
                 self.driver.get(buyer_server.address)
@@ -76,16 +76,16 @@ In the [tests](https://github.com/RTBHOUSE/chromium-fledge-tests/blob/master/src
         report_result_signals = seller_server.get_first_request("/reportResult").get_first_json_param('signals')
         logger.info(f"reportResult() signals: {pretty_json(report_result_signals)}")
         assert_that(report_result_signals.get('browserSignals').get('interestGroupOwner'))\
-            .is_equal_to("https://fledge-tests.creativecdn.net:8091")
+            .is_equal_to("https://localhost:8091")
         assert_that(report_result_signals.get('browserSignals').get('renderUrl')) \
-            .is_equal_to("https://fledge-tests.creativecdn.net:8091/ad-1.html")
+            .is_equal_to("https://localhost:8091/ad-1.html")
 
         report_win_signals = buyer_server.get_first_request("/reportWin").get_first_json_param('signals')
         logger.info(f"reportWin() signals: {pretty_json(report_win_signals)}")
         assert_that(report_win_signals.get('browserSignals').get('interestGroupOwner')) \
-            .is_equal_to("https://fledge-tests.creativecdn.net:8091")
+            .is_equal_to("https://localhost:8091")
         assert_that(report_win_signals.get('browserSignals').get('renderUrl')) \
-            .is_equal_to("https://fledge-tests.creativecdn.net:8091/ad-1.html")
+            .is_equal_to("https://localhost:8091/ad-1.html")
 ```
 
 ## Performance benchmarks
@@ -155,8 +155,8 @@ In this scenario we use this testing framework to run [buyer's js script](https:
 
 ```python
     def test__check_nn_with_static_weights_computation_time(self):
-        with MockServer(9011, 'resources/buyer') as buyer_server,\
-                MockServer(9012, 'resources/seller') as seller_server:
+        with MockServer(port=9011, directory='resources/buyer') as buyer_server,\
+                MockServer(port=9012, directory='resources/seller') as seller_server:
 
             with MeasureDuration("joinAdInterestGroup"):
                 self.driver.get(buyer_server.address)
@@ -194,7 +194,7 @@ EDIT: In this benchmark we used Chromium with default flags which add debug asse
 ```bash
 $ bash run.sh --test tests_performance.test --chromium-url https://github.com/RTBHOUSE/chromium/releases/download/98.0.4697.0-rtb-master-without-asserts/chromium-98.0.4697.0-rtb-master-without-asserts.zip
 ...
-INFO:/home/usertd/tests/common/utils/__init__.py:[rtb-chromium-debug] AuctionV8Helper::Compile() https://fledge-tests.creativecdn.net:9011/buyer.js duration: 86.875 ms
+INFO:/home/usertd/tests/common/utils/__init__.py:[rtb-chromium-debug] AuctionV8Helper::Compile() https://localhost:9011/buyer.js duration: 86.875 ms
 INFO:/home/usertd/tests/common/utils/__init__.py:[rtb-chromium-debug] AuctionV8Helper::RunScript() generateBid run() duration: 3.448 ms
 INFO:/home/usertd/tests/common/utils/__init__.py:[rtb-chromium-debug] AuctionV8Helper::RunScript() generateBid get() duration: 0.002 ms
 INFO:/home/usertd/tests/common/utils/__init__.py:[rtb-chromium-debug] AuctionV8Helper::RunScript() generateBid call() duration: 50.11 ms
@@ -268,7 +268,7 @@ In this [scenario](https://github.com/RTBHOUSE/chromium-fledge-tests/blob/master
 $ bash src/tests_webassembly/resources/buyer/compile.sh
 $ bash run.sh --test tests_webassembly.test --chromium-url https://github.com/RTBHOUSE/chromium/releases/download/98.0.4697.0-rtb-wasm-without-asserts/chromium-98.0.4697.0-rtb-wasm-without-asserts.zip
 ...
-INFO:/home/usertd/tests/common/utils/__init__.py:[rtb-chromium-debug] AuctionV8Helper::Compile() https://fledge-tests.creativecdn.net:9021/buyer-chromium.js duration: 253.986 ms
+INFO:/home/usertd/tests/common/utils/__init__.py:[rtb-chromium-debug] AuctionV8Helper::Compile() https://localhost:9021/buyer-chromium.js duration: 253.986 ms
 INFO:/home/usertd/tests/common/utils/__init__.py:[rtb-chromium-debug] AuctionV8Helper::RunScript() generateBid run() duration: 3.811 ms
 INFO:/home/usertd/tests/common/utils/__init__.py:[rtb-chromium-debug] AuctionV8Helper::RunScript() generateBid get() duration: 0.004 ms
 INFO:/home/usertd/tests/common/utils/__init__.py:[rtb-chromium-debug] AuctionV8Helper::RunScript() generateBid call() duration: 2.253 ms

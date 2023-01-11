@@ -36,8 +36,8 @@ class ReportBidTest(BaseTest):
     @measure_time
     @log_exception
     def test__reportbid(self):
-        with MockServer(0, 'resources/buyer') as buyer_server,\
-                MockServer(0, 'resources/seller') as seller_server:
+        with MockServer(directory='resources/buyer') as buyer_server,\
+                MockServer(directory='resources/seller') as seller_server:
 
             bid1 = 17
             self.joinAdInterestGroup(buyer_server, name="test1", bid=bid1)

@@ -7,5 +7,5 @@ function reportResult(auctionConfig, browserSignals) {
     "auctionConfig": auctionConfig,
     "browserSignals": browserSignals
   };
-  sendReportTo("https://fledge-tests.creativecdn.net:8102/reportResult?signals=" + encodeURIComponent(JSON.stringify(signals)));
+  sendReportTo("https://localhost:8102/reportResult?signals=" + encodeURIComponent(JSON.stringify(signals)));
 }

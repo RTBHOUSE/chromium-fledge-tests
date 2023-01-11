@@ -115,7 +115,6 @@ docker run --rm -i \
   ${TEST_DIR:+-v "${TEST_DIR}:/home/usertd/tests/`basename "${TEST_DIR}"`"} \
   ${TEST:+-e TEST="$TEST"} \
   --shm-size=1gb \
-  --add-host fledge-tests.creativecdn.net:127.0.0.1 \
   ${DOCKER_EXTRA_ARGS[@]+"${DOCKER_EXTRA_ARGS[@]}"} \
   "$(cat .iidfile)" \
   "$@"

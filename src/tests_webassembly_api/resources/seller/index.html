@@ -10,12 +10,12 @@ if (!navigator.runAdAuction) {
 <script type=module>
 if (navigator.runAdAuction) {
   const ar = await navigator.runAdAuction({
-    seller: 'https://fledge-tests.creativecdn.net:9032',
-    decisionLogicUrl: 'https://fledge-tests.creativecdn.net:9032/seller.js',
-    interestGroupBuyers: ["https://fledge-tests.creativecdn.net:9031"],
+    seller: 'https://localhost:9032',
+    decisionLogicUrl: 'https://localhost:9032/seller.js',
+    interestGroupBuyers: ["https://localhost:9031"],
     auctionSignals: {key: "auction signals"},
     sellerSignals: {key: "seller signals"},
-    perBuyerSignals: {"https://fledge-tests.creativecdn.net:9031": {key: "tc signals"}},
+    perBuyerSignals: {"https://localhost:9031": {key: "tc signals"}},
   });
 
   console.log("winning url " + ar);

@@ -23,8 +23,8 @@ class PerformanceTest(BaseTest):
     @log_exception
     @average_benchmarks
     def test__check_nn_with_static_weights_computation_time(self):
-        with MockServer(9011, 'resources/buyer') as buyer_server,\
-                MockServer(9012, 'resources/seller') as seller_server:
+        with MockServer(port=9011, directory='resources/buyer') as buyer_server,\
+                MockServer(port=9012, directory='resources/seller') as seller_server:
 
             with MeasureDuration("joinAdInterestGroup"):
                 self.driver.get(buyer_server.address)

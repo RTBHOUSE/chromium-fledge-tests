@@ -21,8 +21,8 @@ class DailyUpdateTest(BaseTest):
     @measure_time
     @log_exception
     def test__should_update(self):
-        with MockServer(8201, 'resources/buyer') as buyer_server,\
-                MockServer(8202, 'resources/seller') as seller_server:
+        with MockServer(port=8201, directory='resources/buyer') as buyer_server,\
+                MockServer(port=8202, directory='resources/seller') as seller_server:
 
             # join interest group
             self.driver.get(buyer_server.address)
@@ -34,7 +34,7 @@ class DailyUpdateTest(BaseTest):
             self.assertDriverContainsText('body', 'TC AD 1')
             report_win_signals = buyer_server.get_last_request("/reportWin").get_first_json_param('signals')
             assert_that(report_win_signals.get('browserSignals').get('renderUrl')) \
-                .is_equal_to("https://fledge-tests.creativecdn.net:8201/ad-1.html")
+                .is_equal_to("https://localhost:8201/ad-1.html")
 
             # update interest group
             self.driver.get(buyer_server.address + "/do_update.html")
@@ -50,4 +50,4 @@ class DailyUpdateTest(BaseTest):
             self.assertDriverContainsText('body', 'TC AD 2')
             report_win_signals = buyer_server.get_last_request("/reportWin").get_first_json_param('signals')
             assert_that(report_win_signals.get('browserSignals').get('renderUrl')) \
-                .is_equal_to("https://fledge-tests.creativecdn.net:8201/ad-2.html")
+                .is_equal_to("https://localhost:8201/ad-2.html")

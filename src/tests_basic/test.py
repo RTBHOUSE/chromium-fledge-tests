@@ -20,9 +20,9 @@ class BasicTest(BaseTest):
     @print_debug
     @log_exception
     def test__should_report_win(self):
-        with MockServer(8081, 'resources/buyer') as buyer_server, \
-                MockServer(8082, 'resources/publisher') as publisher_server, \
-                MockServer(8083, 'resources/seller') as seller_server:
+        with MockServer(port=8081, directory='resources/buyer') as buyer_server, \
+                MockServer(port=8082, directory='resources/publisher') as publisher_server, \
+                MockServer(port=8083, directory='resources/seller') as seller_server:
             self.driver.get(buyer_server.address)
             self.assertDriverContainsText('h1', 'Hello')
             self.driver.get(publisher_server.address)

@@ -23,7 +23,7 @@ class IframeTest(BaseTest):
     @measure_time
     @log_exception
     def test__should_show_ad_jeff_through_iframe(self):
-        with MockServer(8111, 'resources/buyer') as buyer_server:
+        with MockServer(port=8111, directory='resources/buyer') as buyer_server:
 
             with MeasureDuration("joinAdInterestGroup"):
                 self.driver.get(buyer_server.address)
@@ -32,6 +32,6 @@ class IframeTest(BaseTest):
 
             with MeasureDuration("runAdAuction"):
                 self.driver.get('https://www.jefftk.com/test/td/auction.html')
-                self.driver.find_element_by_tag_name('button').click()
+                self.driver.find_element(By.TAG_NAME, 'button').click()
                 self.findFrameAndSwitchToIt()
                 self.assertDriverContainsText('body', 'TC AD 1')

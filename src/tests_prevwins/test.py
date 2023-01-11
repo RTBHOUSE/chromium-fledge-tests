@@ -35,8 +35,8 @@ class PrevWinsTest(BaseTest):
     @measure_time
     @log_exception
     def test__prevwins(self):
-        with MockServer(0, 'resources/buyer') as buyer_server,\
-                MockServer(0, 'resources/seller') as seller_server:
+        with MockServer(directory='resources/buyer') as buyer_server,\
+                MockServer(directory='resources/seller') as seller_server:
 
             bid1 = 100
             self.joinAdInterestGroup(buyer_server, bid=bid1)
