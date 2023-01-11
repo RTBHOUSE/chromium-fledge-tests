@@ -18,6 +18,9 @@ logger = logging.getLogger(__file__)
 
 ROOT_DIR = pathlib.Path(__file__).absolute().parent.parent.parent
 
+CHROMIUM_DIR = os.environ.get('CHROMIUM_DIR') or next((path_dirs_files[0]
+                                                       for path_dirs_files in os.walk(ROOT_DIR / "_chromium")
+                                                       if 'chrome' in path_dirs_files[2]), None)
 PROFILE_DIR = os.environ.get('PROFILE_DIR') or str(ROOT_DIR / "profile")
 CHROMEDRIVER_LOG_PATH = os.environ.get('CHROMEDRIVER_LOG_PATH') or str(ROOT_DIR / "chromedriver.log")
 
@@ -27,7 +30,8 @@ class BaseTest(unittest.TestCase):
     def non_feature_options(self) -> webdriver.ChromeOptions:
         # https://peter.sh/experiments/chromium-command-line-switches
         options = webdriver.ChromeOptions()
-        options.binary_location = '/home/usertd/chromium/chrome'
+        if CHROMIUM_DIR:
+            options.binary_location = CHROMIUM_DIR + '/chrome'
         # FIXME headless chrome does not work with fledge, https://bugs.chromium.org/p/chromium/issues/detail?id=1229652
         # options.headless = True
         options.set_capability('goog:loggingPrefs', dict(browser='ALL', performance='ALL'))
@@ -61,7 +65,8 @@ class BaseTest(unittest.TestCase):
 
         warnings.filterwarnings("ignore")
         logging.basicConfig(stream=sys.stderr, level=logging.INFO)
-        driver = webdriver.Chrome('/home/usertd/chromium/chromedriver', options=self.options(),
+        driver = webdriver.Chrome(CHROMIUM_DIR + '/chromedriver' if CHROMIUM_DIR else 'chromedriver',
+                                  options=self.options(),
                                   service_args=['--enable-chrome-logs'],
                                   service_log_path=CHROMEDRIVER_LOG_PATH)
         self.driver = driver

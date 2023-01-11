@@ -186,6 +186,7 @@ chmod a+w "${HERE}/chromedriver.log"
 docker run --rm -i \
   ${termOpt} \
   -v "${CHROMIUM_DIR}:/home/usertd/chromium/" \
+  -e CHROMIUM_DIR=/home/usertd/chromium \
   -e PROFILE_DIR=/home/usertd/profile \
   -v "${HERE}/chromedriver.log":/home/usertd/chromedriver.log \
   -e CHROMEDRIVER_LOG_PATH=/home/usertd/chromedriver.log \
