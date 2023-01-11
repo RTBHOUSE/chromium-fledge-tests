@@ -14,13 +14,12 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 
-from common.config import config
-
 logger = logging.getLogger(__file__)
 
 ROOT_DIR = pathlib.Path(__file__).absolute().parent.parent.parent
 
 PROFILE_DIR = os.environ.get('PROFILE_DIR') or str(ROOT_DIR / "profile")
+CHROMEDRIVER_LOG_PATH = os.environ.get('CHROMEDRIVER_LOG_PATH') or str(ROOT_DIR / "chromedriver.log")
 
 
 class BaseTest(unittest.TestCase):
@@ -64,7 +63,7 @@ class BaseTest(unittest.TestCase):
         logging.basicConfig(stream=sys.stderr, level=logging.INFO)
         driver = webdriver.Chrome('/home/usertd/chromium/chromedriver', options=self.options(),
                                   service_args=['--enable-chrome-logs'],
-                                  service_log_path=config.get('service_log_path'))
+                                  service_log_path=CHROMEDRIVER_LOG_PATH)
         self.driver = driver
         self.saved_wd = os.getcwd()
         os.chdir(os.path.dirname(sys.modules[self.__module__].__file__))
