@@ -10,6 +10,7 @@ import unittest
 import warnings
 
 from selenium import webdriver
+from selenium.webdriver.chrome import service
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
@@ -22,6 +23,8 @@ CHROMIUM_DIR = os.environ.get('CHROMIUM_DIR') or (str(ROOT_DIR / "_chromium")
                                                   if (ROOT_DIR / "_chromium").exists() else None)
 PROFILE_DIR = os.environ.get('PROFILE_DIR') or str(ROOT_DIR / "profile")
 CHROMEDRIVER_LOG_PATH = os.environ.get('CHROMEDRIVER_LOG_PATH') or str(ROOT_DIR / "chromedriver.log")
+
+NSSDB_DIR = str(pathlib.Path(__file__).absolute().parent / "ssl" / "ca" / "nssdb")
 
 
 class BaseTest(unittest.TestCase):
@@ -62,12 +65,21 @@ class BaseTest(unittest.TestCase):
         if os.path.exists(PROFILE_DIR):
             shutil.rmtree(PROFILE_DIR)
 
+        chrome_home_dir = PROFILE_DIR
+        os.makedirs(chrome_home_dir + "/.pki")
+        os.symlink(NSSDB_DIR, chrome_home_dir + "/.pki/nssdb")
+
         warnings.filterwarnings("ignore")
         logging.basicConfig(stream=sys.stderr, level=logging.INFO)
-        driver = webdriver.Chrome(CHROMIUM_DIR + '/chromedriver' if CHROMIUM_DIR else 'chromedriver',
-                                  options=self.options(),
-                                  service_args=['--enable-chrome-logs'],
-                                  service_log_path=CHROMEDRIVER_LOG_PATH)
+        driver = webdriver.Chrome(
+            service=service.Service(
+                CHROMIUM_DIR + '/chromedriver' if CHROMIUM_DIR else 'chromedriver',
+                service_args=['--enable-chrome-logs'],
+                log_path=CHROMEDRIVER_LOG_PATH,
+                env=dict(os.environ, HOME=chrome_home_dir)
+            ),
+            options=self.options()
+        )
         self.driver = driver
         self.saved_wd = os.getcwd()
         os.chdir(os.path.dirname(sys.modules[self.__module__].__file__))

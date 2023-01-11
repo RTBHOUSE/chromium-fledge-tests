@@ -2,7 +2,7 @@ FROM ubuntu:20.04
 
 RUN apt-get update && \
     DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends -y \
-        curl ca-certificates software-properties-common unzip libnss3-tools \
+        curl ca-certificates software-properties-common unzip \
         xorg \
         `# we use actual x server as chromium headless mode is buggy` \
         tigervnc-common tigervnc-standalone-server \
@@ -16,22 +16,14 @@ RUN apt-get update && \
     mkdir -p /run/systemd && echo 'docker' > /run/systemd/container
 
 USER usertd
-WORKDIR /home/usertd
+WORKDIR /home/usertd/tests
 
 RUN pip3 install --user selenium assertpy
-
-COPY src/common/ssl/ca/ca.crt tests/common/ssl/ca/ca.crt
-
-RUN mkdir -p /home/usertd/.pki/nssdb && \
-    certutil -d /home/usertd/.pki/nssdb -N --empty-password && \
-    certutil -d sql:/home/usertd/.pki/nssdb/ -A -t TC -n "fledge-tests CA" -i /home/usertd/tests/common/ssl/ca/ca.crt
-
-WORKDIR /home/usertd/tests
 
 # This is a hack due to https://bugs.chromium.org/p/chromium/issues/detail?id=1229652
 RUN mkdir -p ~/.vnc && echo turtledove | vncpasswd -f > ~/.vnc/passwd && touch ~/.Xauthority
 
-COPY src/. .
+COPY --chown=usertd:usertd src/. .
 
 ENTRYPOINT [ "/home/usertd/tests/entrypoint.sh" ]
 CMD /home/usertd/tests/run_tests.sh
