@@ -18,9 +18,8 @@ logger = logging.getLogger(__file__)
 
 ROOT_DIR = pathlib.Path(__file__).absolute().parent.parent.parent
 
-CHROMIUM_DIR = os.environ.get('CHROMIUM_DIR') or next((path_dirs_files[0]
-                                                       for path_dirs_files in os.walk(ROOT_DIR / "_chromium")
-                                                       if 'chrome' in path_dirs_files[2]), None)
+CHROMIUM_DIR = os.environ.get('CHROMIUM_DIR') or (str(ROOT_DIR / "_chromium")
+                                                  if (ROOT_DIR / "_chromium").exists() else None)
 PROFILE_DIR = os.environ.get('PROFILE_DIR') or str(ROOT_DIR / "profile")
 CHROMEDRIVER_LOG_PATH = os.environ.get('CHROMEDRIVER_LOG_PATH') or str(ROOT_DIR / "chromedriver.log")
 

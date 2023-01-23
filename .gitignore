@@ -5,6 +5,7 @@
 .vscode
 _chromium
 _chromium_downloads
+_chromium_unpack
 **/__pycache__
 /profile
 /chromedriver.log
