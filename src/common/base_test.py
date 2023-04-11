@@ -15,6 +15,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 
+
 logger = logging.getLogger(__file__)
 
 ROOT_DIR = pathlib.Path(__file__).absolute().parent.parent.parent
@@ -26,6 +27,7 @@ CHROMEDRIVER_LOG_PATH = os.environ.get('CHROMEDRIVER_LOG_PATH') or str(ROOT_DIR 
 
 NSSDB_DIR = str(pathlib.Path(__file__).absolute().parent / "ssl" / "ca" / "nssdb")
 
+CHROME_HEADLESS = os.environ.get('CHROME_HEADLESS', '0').lower() not in ['0', 'false']
 
 class BaseTest(unittest.TestCase):
 
@@ -39,7 +41,8 @@ class BaseTest(unittest.TestCase):
         options.add_argument('--enable-stats-collection-bindings')  # for histograms
         options.add_argument('--no-sandbox')
         options.add_argument('--no-zygote')
-        options.add_argument('--headless=new')
+        if CHROME_HEADLESS:
+            options.add_argument('--headless=new')
         options.add_argument('--disable-gpu')
         options.add_argument(f'--user-data-dir={PROFILE_DIR}')
         options.add_argument('--disable-features=ChromeWhatsNewUI')

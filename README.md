@@ -18,7 +18,6 @@ implementation capabilities in [Chromium](https://chromium-review.googlesource.c
 - `bash run.sh --downloaded` - runs all tests with previously downloaded browser version
 - `bash run.sh --test <module>` - runs all tests from given module (e.g. tests_functional.test)
 - `bash run.sh --test-dir <path-to-python-test>` - runs all tests from given local path
-- `bash run.sh --gui` - runs tests with Chromium connecting to local X server (useful for debugging)
 - `bash run.sh --chromium-revision <chromium-snaphot-revision>` - runs tests with specified chromium revision
 - `bash run.sh --chromium-dir <path-to-chromium-dir>` - runs tests with from given local path containing Chrome/Chromium with proper chromedriver
 - `bash run.sh --chromium-url <url-to-chromium-zip>`  - downloads custom-built chromium with chromedriver from the given location and runs tests with it
@@ -284,3 +283,5 @@ You can also run tests just like normal Python 3 unittests assuming all [require
 * directory specified in `CHROMIUM_DIR` environment variable, if set
 * `_chromium` subdirectory (recently downloaded by `get_chromium.sh` script)
 * `PATH`
+
+If you set CHROME_HEADLESS=1 in environment, Chrome will run in headless mode (like in case of Docker).

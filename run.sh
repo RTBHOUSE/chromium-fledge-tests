@@ -15,7 +15,7 @@ set -euo pipefail
 set -x
 
 OPTIONS=
-LONG_OPTIONS=chromium-dir:,chromium-url:,chromedriver-url:,chromium-revision:,downloaded,test:,test-dir:,gui
+LONG_OPTIONS=chromium-dir:,chromium-url:,chromedriver-url:,chromium-revision:,downloaded,test:,test-dir:
 
 HERE="$(cd "$(dirname "$0")"; pwd)"
 
@@ -58,12 +58,6 @@ while true; do
     TEST_DIR=`cd "$2"; pwd`
     TEST="discover -s $(basename "${TEST_DIR}")"
     shift 2
-    ;;
-  --gui)
-    DOCKER_EXTRA_ARGS=("${DOCKER_EXTRA_ARGS[@]}"
-      -e DISPLAY -v /tmp/.X11-unix/:/tmp/.X11-unix -e "XAUTH=`xauth list $DISPLAY`"
-    )
-    shift
     ;;
   --)
     # Non-option arguments are passed to docker container as a command
