@@ -1,2 +1,2 @@
 assertpy
-selenium
+selenium==4.10
