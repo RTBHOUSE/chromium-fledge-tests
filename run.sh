@@ -3,7 +3,6 @@
 # Usage:
 # ./run.sh
 #   [ --chromium-dir <path-to-chromium-dir> | --chromium-url <url-to-chromium-zip> | --chromium-channel <Stable|Beta|Dev|Canary> ]
-#   [ --platform <linux64|mac-arm64|mac-c64|win64> ]  # optional, default linux64
 #   [ --test <module.Class.test_method> | <module> ]
 #
 # Examples:
@@ -16,7 +15,7 @@ set -euo pipefail
 set -x
 
 OPTIONS=
-LONG_OPTIONS=chromium-dir:,chromium-url:,chromedriver-url:,chromium-revision:,chromium-channel:,platform:,downloaded,test:,test-dir:
+LONG_OPTIONS=chromium-dir:,chromium-url:,chromedriver-url:,chromium-revision:,chromium-channel:,downloaded,test:,test-dir:
 
 HERE="$(cd "$(dirname "$0")"; pwd)"
 
@@ -38,7 +37,7 @@ eval set -- "$PARSED"
 # process options until we see --
 while true; do
   case "$1" in
-  --chromium-url|--chromedriver-url|--chromium-revision|--chromium-channel|--platform)
+  --chromium-url|--chromedriver-url|--chromium-revision|--chromium-channel)
     CHROMIUM_DIR=
     GET_CHROMIUM_PARAMS+=("$1" "$2")
     shift 2
