@@ -2,7 +2,8 @@
 
 # Usage:
 # ./run.sh
-#   [ --chromium-dir <path-to-chromium-dir> | --chromium-url <url-to-chromium-zip> ]
+#   [ --chromium-dir <path-to-chromium-dir> | --chromium-url <url-to-chromium-zip> | --chromium-channel <Stable|Beta|Dev|Canary> ]
+#   [ --platform <linux64|mac-arm64|mac-c64|win64> ]  # optional, default linux64
 #   [ --test <module.Class.test_method> | <module> ]
 #
 # Examples:
@@ -15,7 +16,7 @@ set -euo pipefail
 set -x
 
 OPTIONS=
-LONG_OPTIONS=chromium-dir:,chromium-url:,chromedriver-url:,chromium-revision:,downloaded,test:,test-dir:
+LONG_OPTIONS=chromium-dir:,chromium-url:,chromedriver-url:,chromium-revision:,chromium-channel:,platform:,downloaded,test:,test-dir:
 
 HERE="$(cd "$(dirname "$0")"; pwd)"
 
@@ -37,9 +38,9 @@ eval set -- "$PARSED"
 # process options until we see --
 while true; do
   case "$1" in
-  --chromium-url|--chromedriver-url|--chromium-revision)
+  --chromium-url|--chromedriver-url|--chromium-revision|--chromium-channel|--platform)
     CHROMIUM_DIR=
-    GET_CHROMIUM_PARAMS=("${GET_CHROMIUM_PARAMS[@]}" "$1" "$2")
+    GET_CHROMIUM_PARAMS+=("$1" "$2")
     shift 2
     ;;
   --chromium-dir)
@@ -70,7 +71,7 @@ while true; do
       for ((i=1; i <= $#; i++)); do
         [ "${!i}" == "--" ] && break
       done
-      DOCKER_EXTRA_ARGS=("${DOCKER_EXTRA_ARGS[@]}" "${@:1:i}")
+      DOCKER_EXTRA_ARGS+=("${@:1:i}")
       set -- "${@:i+1}"
     fi
     break
@@ -109,6 +110,6 @@ docker run --rm -i \
   ${TEST_DIR:+-v "${TEST_DIR}:/home/usertd/tests/`basename "${TEST_DIR}"`"} \
   ${TEST:+-e TEST="$TEST"} \
   --shm-size=1gb \
-  ${DOCKER_EXTRA_ARGS[@]+"${DOCKER_EXTRA_ARGS[@]}"} \
+  ${DOCKER_EXTRA_ARGS[@]:+"${DOCKER_EXTRA_ARGS[@]}"} \
   "$(cat .iidfile)" \
   "$@"

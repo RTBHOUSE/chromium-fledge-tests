@@ -2,8 +2,9 @@
 
 # Usage:
 # ./get_chromium.sh
-#   [ --chromium-url <url-to-chromium-zip-or-chrome-deb> | --chromium-revision <revision-number> ]
+#   [ --chromium-url <url-to-chromium-zip-or-chrome-deb> | --chromium-revision <revision-number> | --chromium-channel <Stable|Beta|Dev|Canary> ]
 #   [ --chromedriver-url <url-to-chromedriver-zip> ]  # optional, detected automatically
+#   [ --platform <linux64|mac-arm64|mac-c64|win64> ]  # optional, default linux64
 #
 # Examples:
 # ./get_chromium.sh # downloads latest Chromium snapshot
@@ -13,13 +14,15 @@ set -euo pipefail
 set -x
 
 OPTIONS=
-LONG_OPTIONS=chromium-url:,chromedriver-url:,chromium-revision:
+LONG_OPTIONS=chromium-url:,chromedriver-url:,chromium-revision:,chromium-channel:,platform:
 
 DOWNLOADS_DIR="_chromium_downloads"
 UNPACK_DIR="_chromium_unpack"
 CHROMIUM_DIR="_chromium"
 
 REVISION=latest
+CHROMIUM_CHANNEL=
+PLATFORM="linux64"
 
 PARSED=$(POSIXLY_CORRECT=1 getopt --options=$OPTIONS --longoptions=${LONG_OPTIONS} --name "$0" -- "$@")
 if [[ $? -ne 0 ]]; then
@@ -47,6 +50,14 @@ while true; do
     REVISION="$2"
     shift 2
     ;;
+  --chromium-channel)
+    CHROMIUM_CHANNEL="$2"
+    shift 2
+    ;;
+  --platform)
+    PLATFORM="$2"
+    shift 2
+    ;;
   --)
     shift
     break
@@ -59,6 +70,7 @@ while true; do
 done
 
 cd "${HERE}"
+echo "Channel ${CHROMIUM_CHANNEL}"
 
 function fetchVersion() {
   local url=$1
@@ -129,9 +141,32 @@ function downloadChromiumWithDriver() {
     echo "Downloaded ${CHROMIUM_URL} and extracted to ${PWD}/${CHROMIUM_DIR}" >&2
 }
 
+function downloadChromiumForTestingWithDriver() {
+  CHROMIUM_CHANNEL=$1
+  PLATFORM=${$2:-"linux64"}
+
+  LATEST_CHROMIUM_FOR_TESTING="https://googlechromelabs.github.io/chrome-for-testing/last-known-good-versions-with-downloads.json"
+  CHROMIUM_JSON=$(curl ${LATEST_CHROMIUM_FOR_TESTING})
+  CHROMIUM_URL=$(echo ${CHROMIUM_JSON} | jq -r ".channels.${CHROMIUM_CHANNEL}.downloads.chrome[] | select(.platform == \"${PLATFORM}\") | .url")
+  CHROMEDRIVER_URL=$(echo ${CHROMIUM_JSON} | jq -r ".channels.${CHROMIUM_CHANNEL}.downloads.chromedriver[] | select(.platform == \"${PLATFORM}\") | .url")
+
+  downloadChromiumWithDriver "${CHROMIUM_URL}" "" "${CHROMEDRIVER_URL}" ""
+}
+
 if [[ -n ${CHROMIUM_URL:-} ]]; then
   echo "using chromium build from URL ${CHROMIUM_URL}" >&2
   downloadChromiumWithDriver "${CHROMIUM_URL}" "" "${CHROMEDRIVER_URL:+${CHROMEDRIVER_URL}}" ""
+elif [[ -n ${CHROMIUM_CHANNEL:-} ]]; then
+  if ! [[ "$CHROMIUM_CHANNEL" =~ ^(Stable|Beta|Dev|Alpha)$ ]]; then
+    echo "invalid channel value: ${CHROMIUM_CHANNEL}" >&2
+    exit 1
+  fi
+  if ! [[ "$PLATFORM" =~ ^(linux64|mac-arm64|mac-x64|win64)$ ]]; then
+    echo "invalid platform value: ${CHROMIUM_CHANNEL}" >&2
+    exit 1
+  fi
+  echo "using chrome for testing channel ${CHROMIUM_CHANNEL} for ${PLATFORM}" >&2
+  downloadChromiumForTestingWithDriver "$CHROMIUM_CHANNEL" "$PLATFORM"
 else
   if [[ "${REVISION}" == latest ]]; then
     REVISION=$(fetchVersion 'https://www.googleapis.com/download/storage/v1/b/chromium-browser-snapshots/o/Linux_x64%2FLAST_CHANGE?alt=media')
