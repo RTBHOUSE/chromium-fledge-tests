@@ -145,8 +145,8 @@ function selectUrlsForChannel() {
 
   LATEST_CHROMIUM_FOR_TESTING="https://googlechromelabs.github.io/chrome-for-testing/last-known-good-versions-with-downloads.json"
   CHROMIUM_JSON=$(curl ${LATEST_CHROMIUM_FOR_TESTING})
-  CHROMIUM_URL=$(echo ${CHROMIUM_JSON} | jq -r ".channels.${CHROMIUM_CHANNEL}.downloads.chrome[] | select(.platform == \"${PLATFORM}\") | .url")
-  CHROMEDRIVER_URL=$(echo ${CHROMIUM_JSON} | jq -r ".channels.${CHROMIUM_CHANNEL}.downloads.chromedriver[] | select(.platform == \"${PLATFORM}\") | .url")
+  CHROMIUM_URL=$(echo ${CHROMIUM_JSON} | docker run --rm -i --name chromium-fledge-tests-jq ghcr.io/jqlang/jq:latest -r ".channels.${CHROMIUM_CHANNEL}.downloads.chrome[] | select(.platform == \"${PLATFORM}\") | .url")
+  CHROMEDRIVER_URL=$(echo ${CHROMIUM_JSON} |  docker run --rm -i --name chromium-fledge-tests-jq ghcr.io/jqlang/jq:latest -r ".channels.${CHROMIUM_CHANNEL}.downloads.chromedriver[] | select(.platform == \"${PLATFORM}\") | .url")
 
   downloadChromiumWithDriver "${CHROMIUM_URL}" "" "${CHROMEDRIVER_URL}" ""
 }
