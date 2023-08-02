@@ -8,7 +8,7 @@
 # Examples:
 # ./get_chromium.sh # downloads latest Chromium snapshot
 # ./get_chromium.sh --chromium-url https://github.com/RTBHOUSE/chromium/releases/download/94.0.4588.0-auction-timer/chromium.zip
-# ./get_chromium.sh --chromium_channel Beta --platform mac-arm64 # Download latest Beta for arm macos
+# ./get_chromium.sh --chromium-channel Beta  # Download latest Beta for linux64
 
 
 
@@ -68,7 +68,6 @@ while true; do
 done
 
 cd "${HERE}"
-echo "Channel ${CHROMIUM_CHANNEL}"
 
 function fetchVersion() {
   local url=$1
@@ -139,14 +138,14 @@ function downloadChromiumWithDriver() {
     echo "Downloaded ${CHROMIUM_URL} and extracted to ${PWD}/${CHROMIUM_DIR}" >&2
 }
 
-function selectUrlsForChannel() {
-  CHROMIUM_CHANNEL=$1
+function downloadChromeForTesting() {
   PLATFORM="linux64"
+  JQ=`which jq 2>/dev/null || echo 'docker run --rm -i --name chromium-fledge-tests-jq ghcr.io/jqlang/jq:latest'`
 
   LATEST_CHROMIUM_FOR_TESTING="https://googlechromelabs.github.io/chrome-for-testing/last-known-good-versions-with-downloads.json"
   CHROMIUM_JSON=$(curl ${LATEST_CHROMIUM_FOR_TESTING})
-  CHROMIUM_URL=$(echo ${CHROMIUM_JSON} | docker run --rm -i --name chromium-fledge-tests-jq ghcr.io/jqlang/jq:latest -r ".channels.${CHROMIUM_CHANNEL}.downloads.chrome[] | select(.platform == \"${PLATFORM}\") | .url")
-  CHROMEDRIVER_URL=$(echo ${CHROMIUM_JSON} |  docker run --rm -i --name chromium-fledge-tests-jq ghcr.io/jqlang/jq:latest -r ".channels.${CHROMIUM_CHANNEL}.downloads.chromedriver[] | select(.platform == \"${PLATFORM}\") | .url")
+  CHROMIUM_URL=$(echo ${CHROMIUM_JSON} | $JQ -r ".channels.${CHROMIUM_CHANNEL}.downloads.chrome[] | select(.platform == \"${PLATFORM}\") | .url")
+  CHROMEDRIVER_URL=$(echo ${CHROMIUM_JSON} | $JQ -r ".channels.${CHROMIUM_CHANNEL}.downloads.chromedriver[] | select(.platform == \"${PLATFORM}\") | .url")
 
   downloadChromiumWithDriver "${CHROMIUM_URL}" "" "${CHROMEDRIVER_URL}" ""
 }
@@ -160,7 +159,7 @@ elif [[ -n ${CHROMIUM_CHANNEL:-} ]]; then
     exit 1
   fi
   echo "using chrome for testing channel ${CHROMIUM_CHANNEL}" >&2
-  selectUrlsForChannel "$CHROMIUM_CHANNEL"
+  downloadChromeForTesting
 else
   if [[ "${REVISION}" == latest ]]; then
     REVISION=$(fetchVersion 'https://www.googleapis.com/download/storage/v1/b/chromium-browser-snapshots/o/Linux_x64%2FLAST_CHANGE?alt=media')
