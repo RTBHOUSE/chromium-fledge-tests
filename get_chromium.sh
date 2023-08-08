@@ -139,7 +139,7 @@ function downloadChromiumWithDriver() {
 }
 
 function downloadChromeForTesting() {
-  JQ=`which jq 2>/dev/null || echo 'docker run --rm -i --name chromium-fledge-tests-jq ghcr.io/jqlang/jq:latest'`
+  JQ=$(which jq 2>/dev/null || echo "docker run --rm -i --name chromium-fledge-tests-jq-${RANDOM} ghcr.io/jqlang/jq:latest")
 
   LATEST_CHROMIUM_FOR_TESTING="https://googlechromelabs.github.io/chrome-for-testing/last-known-good-versions-with-downloads.json"
   CHROMIUM_JSON=$(curl ${LATEST_CHROMIUM_FOR_TESTING})
