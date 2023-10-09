@@ -29,6 +29,11 @@ NSSDB_DIR = str(pathlib.Path(__file__).absolute().parent / "ssl" / "ca" / "nssdb
 
 CHROME_HEADLESS = os.environ.get('CHROME_HEADLESS', '0').lower() not in ['0', 'false']
 
+PRIVACY_SANDBOX_ENROLLMENT_OVERRIDES = ['https://localhost']
+
+class ComponentNotFoundException(Exception):
+    pass
+
 class BaseTest(unittest.TestCase):
 
     def non_feature_options(self) -> webdriver.ChromeOptions:
@@ -46,6 +51,7 @@ class BaseTest(unittest.TestCase):
         options.add_argument('--disable-gpu')
         options.add_argument(f'--user-data-dir={PROFILE_DIR}')
         options.add_argument('--disable-features=ChromeWhatsNewUI')
+        options.add_argument(f'--privacy-sandbox-enrollment-overrides={",".join(PRIVACY_SANDBOX_ENROLLMENT_OVERRIDES)}')
         return options
 
     def options(self) -> webdriver.ChromeOptions:
@@ -56,7 +62,8 @@ class BaseTest(unittest.TestCase):
             'FencedFrames:implementation_type/mparch',
             'BiddingAndScoringDebugReportingAPI',
             'PrivacySandboxAdsAPIsOverride',
-            'OverridePrivacySandboxSettingsLocalTesting'
+            'OverridePrivacySandboxSettingsLocalTesting',
+            'PrivacySandboxAttestationsHigherComponentRegistrationPriority',
         ]
         options.add_argument(f"--enable-features={','.join(enabled_features)}")
         return options
@@ -102,6 +109,33 @@ class BaseTest(unittest.TestCase):
             .until(EC.presence_of_element_located((By.XPATH, '//iframe|//fencedframe')), exc_msg)
         logger.info(f"{frame.tag_name}.src: {frame.get_attribute('src')}")
         self.driver.switch_to.frame(frame)
+
+    def updatePrivacySandboxAttestationsComponent(self, **kwargs):
+        """
+        Update a privacy sandbox attestations component. Meant to be used in e2e tests that should use real world
+        settings and using --override-sandbox-enrollment-overrides is not desirable.
+        """
+        self.updateComponent('Privacy Sandbox Attestations', **kwargs)
+
+    def updateComponent(self, component_name, timeout=30):
+        self.driver.get('chrome://components')
+        components_by_name = {
+            component.find_element(By.XPATH, './/span[@class="component-name"]').text: component
+            for component in self.driver.find_elements(By.XPATH, '//div[@class="component"]')
+        }
+
+        component = components_by_name.get(component_name)
+        if component is None:
+            raise ComponentNotFoundException(component_name)
+
+        component = components_by_name[component_name]
+        component.find_element(By.XPATH, './/button').click()
+
+        def component_updated(_):
+            status = component.find_element(By.XPATH, './/span[@jscontent="status"]').text
+            return status in {'Component updated', 'Component already up to date'}
+
+        WebDriverWait(self.driver, timeout).until(component_updated)
 
     def extract_trace_events(self):
         trace_events = []
