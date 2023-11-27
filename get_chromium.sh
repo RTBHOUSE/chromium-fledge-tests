@@ -77,8 +77,14 @@ function fetchVersion() {
 function downloadIfOutdated() {
   URL=$1
   LOCAL_PATH=$2
-  if [ -f "${LOCAL_PATH}" ]; then
-    curl --location --progress-bar --output "${LOCAL_PATH}" "${URL}" --time-cond "${LOCAL_PATH}"
+  if [[ -f "${LOCAL_PATH}" ]]; then
+    [[ "${LOCAL_PATH}" = *.zip ]] && unzip -t ${LOCAL_PATH}
+    IS_OK_ZIP=$?
+    if [[ "${LOCAL_PATH}" = *.deb || ${IS_OK_ZIP} = 0 ]]; then
+      curl --location --progress-bar --output "${LOCAL_PATH}" "${URL}" --time-cond "${LOCAL_PATH}"
+    else 
+      curl --location --progress-bar --output "${LOCAL_PATH}" "${URL}"
+    fi
   else
     curl --location --progress-bar --output "${LOCAL_PATH}" "${URL}"
   fi
