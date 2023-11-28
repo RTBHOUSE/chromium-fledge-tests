@@ -77,10 +77,10 @@ function fetchVersion() {
 function downloadIfOutdated() {
   URL=$1
   LOCAL_PATH=$2
-  if [ -f "${LOCAL_PATH}" ]; then
-    curl --location --progress-bar --output "${LOCAL_PATH}" "${URL}" --time-cond "${LOCAL_PATH}"
+  if [ -f "${LOCAL_PATH}.timestamp" ]; then
+    curl --location --progress-bar --output "${LOCAL_PATH}" "${URL}" --time-cond "${LOCAL_PATH}".timestamp && touch -r "${LOCAL_PATH}" "${LOCAL_PATH}".timestamp
   else
-    curl --location --progress-bar --output "${LOCAL_PATH}" "${URL}"
+    curl --location --progress-bar --output "${LOCAL_PATH}" "${URL}" && touch -r "${LOCAL_PATH}" "${LOCAL_PATH}".timestamp
   fi
 }
 
