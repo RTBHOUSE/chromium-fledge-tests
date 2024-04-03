@@ -21,7 +21,8 @@ if (navigator.runAdAuction) {
       'https://localhost:8081': {
         contextualBidRequestId: 'abc'
       }
-    }
+    },
+    resolveToConfig: true,
   });
   console.log("winning url " + ar);
   const adDiv = document.getElementById('ad');
@@ -30,8 +31,7 @@ if (navigator.runAdAuction) {
     adDiv.appendChild(document.createTextNode("No turtledove winner"));
   } else {
     const fframe = document.createElement('fencedframe');
-    fframe.setAttribute('mode', 'opaque-ads');
-    fframe.setAttribute('src', ar);
+    fframe.config = ar;
     fframe.setAttribute('style', 'width: 100px; height: 100px');
     adDiv.appendChild(fframe);
   }
