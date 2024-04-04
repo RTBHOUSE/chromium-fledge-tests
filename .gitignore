@@ -1,6 +1,7 @@
 .idea
 .iidfile
 .iidfile.node
+*.iml
 .venv
 .vscode
 _chromium
