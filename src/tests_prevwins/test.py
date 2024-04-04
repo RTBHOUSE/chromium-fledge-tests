@@ -58,4 +58,7 @@ class PrevWinsTest(BaseTest):
 
             self.runAdAuction(seller_server, buyer_server)
             report_win_signals = buyer_server.get_last_request("/reportWin").get_first_json_param('signals')
+            # TODO: inconsistent behavior: apparently this assertion always fails, each time in 1 of 2 ways (below):
+            # AssertionError: Expected <302> to be equal to <303>, but was not.
+            # AssertionError: Expected <304> to be equal to <303>, but was not.
             assert_that(report_win_signals.get('browserSignals').get('bid')).is_equal_to(bid2 + 3)
