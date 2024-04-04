@@ -26,14 +26,3 @@ class BasicTest(BaseTest):
             self.driver.get(buyer_server.address)
             self.assertDriverContainsText('h1', 'Hello')
             self.driver.get(publisher_server.address)
-
-    @print_debug
-    @log_exception
-    def test__should_show_ad_jeff(self):
-        self.driver.get('https://www.trycontra.com/test/td/join.html')
-        self.assertDriverContainsText('body', 'joined interest group')
-
-        self.driver.get('https://www.jefftk.com/test/td/auction.html')
-        self.findFrameAndSwitchToIt()
-        logger.info(self.driver.page_source)
-        self.assertDriverContainsText('body', 'TC AD 1')
