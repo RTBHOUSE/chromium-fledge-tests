@@ -1,3 +1,7 @@
+function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
 function generateBid(interestGroup, auctionSignals, perBuyerSignals, trustedBiddingSignals, browserSignals) {
 
   const ad = interestGroup.ads[0];
@@ -15,6 +19,8 @@ function generateBid(interestGroup, auctionSignals, perBuyerSignals, trustedBidd
   forDebuggingOnly.reportAdAuctionWin(
       interestGroup.owner + '/debugReportWin?signals=' + encodeURIComponent(JSON.stringify(signals)));
 
+  // time out the bid
+  await sleep(200);
   return {'ad': 'example', 'bid': ad.metadata.bid, 'render': ad.renderUrl};
 }
 

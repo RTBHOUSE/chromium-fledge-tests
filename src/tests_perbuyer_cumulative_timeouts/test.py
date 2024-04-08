@@ -36,8 +36,8 @@ class DebuggingApiTest(BaseTest):
     @measure_time
     @log_exception
     def test__debugging_api(self):
-        with MockServer(directory='resources/buyer') as buyer_server,\
-                MockServer(directory='resources/seller') as seller_server:
+        with MockServer(port=8081, directory='resources/buyer') as buyer_server,\
+                MockServer(port=8083, directory='resources/seller') as seller_server:
 
             self.joinAdInterestGroup(buyer_server, name='loser', bid=1)
             self.joinAdInterestGroup(buyer_server, name='winner', bid=2)
