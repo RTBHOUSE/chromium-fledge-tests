@@ -21,7 +21,7 @@ logger = logging.getLogger(__file__)
 here = os.path.dirname(__file__)
 
 
-class DebuggingApiTest(BaseTest):
+class PerBuyerCumulativeTimeoutsTest(BaseTest):
 
     def joinAdInterestGroup(self, buyer_server, name, bid):
         with MeasureDuration("joinAdInterestGroup"):
@@ -45,7 +45,7 @@ class DebuggingApiTest(BaseTest):
     @print_debug
     @measure_time
     @log_exception
-    def test__debugging_api(self):
+    def test__perbuyer_cumulative_timeouts(self):
         with MockServer(port=8081, directory='resources/buyer', response_provider=self.serveRequest) as buyer_server,\
                 MockServer(port=8083, directory='resources/seller') as seller_server:
 
