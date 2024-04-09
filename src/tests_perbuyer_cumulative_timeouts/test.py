@@ -56,6 +56,7 @@ class PerBuyerCumulativeTimeoutsTest(BaseTest):
             # self.runAdAuction(seller_server, buyer_server)
             assert_that(self.runAdAuction).raises(TimeoutException).when_called_with(seller_server, buyer_server).starts_with("Message: Failed to find frame in given time 5 seconds.")
 
+            # It looks we are not getting any reports:
             assert_that(buyer_server.get_last_request("/reportWin")).is_none()
             assert_that(buyer_server.get_last_request("/debugReportLoss")).is_none()
             assert_that(buyer_server.get_last_request("/debugReportWin")).is_none()
