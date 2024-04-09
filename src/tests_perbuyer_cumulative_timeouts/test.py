@@ -3,6 +3,7 @@
 
 import logging
 import os
+import time
 import urllib.parse
 
 from assertpy import assert_that
@@ -33,17 +34,25 @@ class DebuggingApiTest(BaseTest):
             self.findFrameAndSwitchToIt()
             self.assertDriverContainsText('body', 'TC AD')
 
+    def serveRequest(self, request):
+        # If trusted_bidding_signals.json is requested, delay it.
+        # This may result in BrokenPipeError: [Errno 32] Broken pipe
+        if "trusted_bidding_signals.json" in request.path:
+            logger.info("sleep 150 ms ...")
+            time.sleep(0.15)
+        return None
+
     @print_debug
     @measure_time
     @log_exception
     def test__debugging_api(self):
-        with MockServer(port=8081, directory='resources/buyer') as buyer_server,\
+        with MockServer(port=8081, directory='resources/buyer', response_provider=self.serveRequest) as buyer_server,\
                 MockServer(port=8083, directory='resources/seller') as seller_server:
 
             self.joinAdInterestGroup(buyer_server, name='loser', bid=1)
             self.joinAdInterestGroup(buyer_server, name='winner', bid=2)
 
-            assert_that(self.runAdAuction).raises(TimeoutException).when_called_with(seller_server, buyer_server).starts_with("Message: Failed to find frame in given time 5 seconds.")
+            self.runAdAuction(seller_server, buyer_server)
 
             assert_that(buyer_server.get_last_request("/reportWin")).is_none()
             assert_that(buyer_server.get_last_request("/debugReportLoss")).is_none()

@@ -7,6 +7,7 @@ if (!navigator.joinAdInterestGroup) {
     owner: buyer_address,
     name: new URLSearchParams(window.location.search).get('name'),
     biddingLogicUrl: buyer_address + "/buyer.js",
+    trustedBiddingSignalsUrl: "https://localhost:8081/trusted_bidding_signals.json",
     ads: [
       {
         renderUrl: buyer_address + "/ad.html",
