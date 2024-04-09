@@ -4,7 +4,6 @@
 import logging
 import os
 import urllib.parse
-import time
 
 from assertpy import assert_that
 
@@ -14,6 +13,8 @@ from common.utils import MeasureDuration
 from common.utils import log_exception
 from common.utils import measure_time
 from common.utils import print_debug
+
+from selenium.common.exceptions import TimeoutException
 
 logger = logging.getLogger(__file__)
 here = os.path.dirname(__file__)
@@ -42,12 +43,8 @@ class DebuggingApiTest(BaseTest):
             self.joinAdInterestGroup(buyer_server, name='loser', bid=1)
             self.joinAdInterestGroup(buyer_server, name='winner', bid=2)
 
-            self.runAdAuction(seller_server, buyer_server)
-            report_win_signals = buyer_server.get_last_request('/reportWin').get_first_json_param('signals')
-            assert_that(report_win_signals.get('browserSignals').get('bid')).is_equal_to(2)
+            assert_that(self.runAdAuction).raises(TimeoutException).when_called_with(seller_server, buyer_server).starts_with("Message: Failed to find frame in given time 5 seconds.")
 
-            debug_loss_signals = buyer_server.get_last_request("/debugReportLoss").get_first_json_param('signals')
-            assert_that(debug_loss_signals.get('interestGroup').get('name')).is_equal_to('loser')
-
-            debug_win_signals = buyer_server.get_last_request("/debugReportWin").get_first_json_param('signals')
-            assert_that(debug_win_signals.get('interestGroup').get('name')).is_equal_to('winner')
+            assert_that(buyer_server.get_last_request("/reportWin")).is_none()
+            assert_that(buyer_server.get_last_request("/debugReportLoss")).is_none()
+            assert_that(buyer_server.get_last_request("/debugReportWin")).is_none()
