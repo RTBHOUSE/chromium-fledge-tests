@@ -49,8 +49,8 @@ class PerBuyerCumulativeTimeoutsTest(BaseTest):
         with MockServer(port=8081, directory='resources/buyer', response_provider=self.serveRequest) as buyer_server,\
                 MockServer(port=8083, directory='resources/seller') as seller_server:
 
-            self.joinAdInterestGroup(buyer_server, name='loser', bid=1)
-            self.joinAdInterestGroup(buyer_server, name='winner', bid=2)
+            self.joinAdInterestGroup(buyer_server, name='ig1', bid=1)
+            self.joinAdInterestGroup(buyer_server, name='ig2', bid=2)
 
             # This would display the error: "Worklet error: https://localhost:8081/buyer.js perBuyerCumulativeTimeout exceeded during bid generation."
             # self.runAdAuction(seller_server, buyer_server)
