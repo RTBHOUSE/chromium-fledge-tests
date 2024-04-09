@@ -1,4 +1,4 @@
-# Copyright 2021 RTBHOUSE. All rights reserved.
+# Copyright 2024 RTBHOUSE. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be found in the LICENSE file.
 
 import logging
@@ -37,8 +37,8 @@ class DebuggingApiTest(BaseTest):
     def serveRequest(self, request):
         # If trusted_bidding_signals.json is requested, delay it.
         # This may result in BrokenPipeError: [Errno 32] Broken pipe
-        if "trusted_bidding_signals.json" in request.path:
-            logger.info("sleep 150 ms ...")
+        if "/trusted_bidding_signals.json" == request.path:
+            logger.info(f"{request} => sleep 150 ms ...")
             time.sleep(0.15)
         return None
 
@@ -52,7 +52,9 @@ class DebuggingApiTest(BaseTest):
             self.joinAdInterestGroup(buyer_server, name='loser', bid=1)
             self.joinAdInterestGroup(buyer_server, name='winner', bid=2)
 
-            self.runAdAuction(seller_server, buyer_server)
+            # This would display the error: "Worklet error: https://localhost:8081/buyer.js perBuyerCumulativeTimeout exceeded during bid generation."
+            # self.runAdAuction(seller_server, buyer_server)
+            assert_that(self.runAdAuction).raises(TimeoutException).when_called_with(seller_server, buyer_server).starts_with("Message: Failed to find frame in given time 5 seconds.")
 
             assert_that(buyer_server.get_last_request("/reportWin")).is_none()
             assert_that(buyer_server.get_last_request("/debugReportLoss")).is_none()
