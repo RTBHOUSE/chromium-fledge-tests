@@ -35,22 +35,23 @@ class PerBuyerCumulativeTimeoutsTest(BaseTest):
             self.assertDriverContainsText('body', 'TC AD')
 
     def serveRequest(self, request):
-        # If trusted_bidding_signals.json is requested, delay it.
+        # If igslow's trusted_bidding_signals.json is requested, delay it.
         # This may result in BrokenPipeError: [Errno 32] Broken pipe
-        if "/trusted_bidding_signals.json" == request.path:
+        if "/igslow/trusted_bidding_signals.json" == request.path:
             logger.info(f"{request} => sleep 150 ms ...")
             time.sleep(0.15)
+        elif "trusted_bidding_signals" in request.path:
+            logger.info(f"{request} => no sleep")
         return None
 
     @print_debug
     @measure_time
     @log_exception
-    def test__perbuyer_cumulative_timeouts(self):
+    def test__perbuyer_cumulative_timeouts_igslow(self):
         with MockServer(port=8081, directory='resources/buyer', response_provider=self.serveRequest) as buyer_server,\
                 MockServer(port=8083, directory='resources/seller') as seller_server:
 
-            self.joinAdInterestGroup(buyer_server, name='ig1', bid=1)
-            self.joinAdInterestGroup(buyer_server, name='ig2', bid=2)
+            self.joinAdInterestGroup(buyer_server, name='igslow', bid=100)
 
             # This would display the error: "Worklet error: https://localhost:8081/buyer.js perBuyerCumulativeTimeout exceeded during bid generation."
             # self.runAdAuction(seller_server, buyer_server)
@@ -58,5 +59,28 @@ class PerBuyerCumulativeTimeoutsTest(BaseTest):
 
             # It looks we are not getting any reports:
             assert_that(buyer_server.get_last_request("/reportWin")).is_none()
-            assert_that(buyer_server.get_last_request("/debugReportLoss")).is_none()
             assert_that(buyer_server.get_last_request("/debugReportWin")).is_none()
+            assert_that(buyer_server.get_last_request("/debugReportLoss")).is_none()
+
+    @print_debug
+    @measure_time
+    @log_exception
+    def test__perbuyer_cumulative_timeouts_twoigs(self):
+        with MockServer(port=8081, directory='resources/buyer', response_provider=self.serveRequest) as buyer_server, \
+                MockServer(port=8083, directory='resources/seller') as seller_server:
+
+            self.joinAdInterestGroup(buyer_server, name='igslow', bid=100)
+            self.joinAdInterestGroup(buyer_server, name='igfast', bid=50)
+
+            self.runAdAuction(seller_server, buyer_server)
+
+            report_win_signals = buyer_server.get_last_request('/reportWin').get_first_json_param('signals')
+            assert_that(report_win_signals.get('browserSignals').get('bid')).is_equal_to(50)
+
+            report_result_signals = seller_server.get_last_request('/reportResult').get_first_json_param('signals')
+            assert_that(report_result_signals.get('browserSignals').get('bid')).is_equal_to(50)
+
+            debug_win_signals = buyer_server.get_last_request("/debugReportWin").get_first_json_param('signals')
+            assert_that(debug_win_signals.get('interestGroup').get('name')).is_equal_to('igfast')
+
+            assert_that(buyer_server.get_last_request("/debugReportLoss")).is_none()
