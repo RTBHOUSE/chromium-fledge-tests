@@ -34,6 +34,9 @@ class PerBuyerCumulativeTimeoutsTest(BaseTest):
             self.findFrameAndSwitchToIt()
             self.assertDriverContainsText('body', 'TC AD')
 
+    def fetch_timeout_logs(self):
+        return filter(lambda entry: entry['source']=='other' and "perBuyerCumulativeTimeout exceeded during bid generation" in entry['message'], self.extract_browser_log())
+
     def serveRequest(self, request):
         # If igslow's trusted_bidding_signals.json is requested, delay it.
         # This may result in BrokenPipeError: [Errno 32] Broken pipe
@@ -53,9 +56,11 @@ class PerBuyerCumulativeTimeoutsTest(BaseTest):
 
             self.joinAdInterestGroup(buyer_server, name='igslow', bid=100)
 
-            # This would display the error: "Worklet error: https://localhost:8081/buyer.js perBuyerCumulativeTimeout exceeded during bid generation."
-            # self.runAdAuction(seller_server, buyer_server)
+            # run the auction
             assert_that(self.runAdAuction).raises(TimeoutException).when_called_with(seller_server, buyer_server).starts_with("Message: Failed to find frame in given time 5 seconds.")
+
+            # check browser logs
+            assert_that(list(self.fetch_timeout_logs())).is_not_empty()
 
             # It looks we are not getting any reports:
             assert_that(buyer_server.get_last_request("/reportWin")).is_none()
@@ -72,8 +77,13 @@ class PerBuyerCumulativeTimeoutsTest(BaseTest):
             self.joinAdInterestGroup(buyer_server, name='igslow', bid=100)
             self.joinAdInterestGroup(buyer_server, name='igfast', bid=50)
 
+            # run the auction
             self.runAdAuction(seller_server, buyer_server)
 
+            # check browser logs
+            assert_that(list(self.fetch_timeout_logs())).is_not_empty()
+
+            # analyze reports
             report_win_signals = buyer_server.get_last_request('/reportWin').get_first_json_param('signals')
             assert_that(report_win_signals.get('browserSignals').get('bid')).is_equal_to(50)
 
@@ -83,4 +93,5 @@ class PerBuyerCumulativeTimeoutsTest(BaseTest):
             debug_win_signals = buyer_server.get_last_request("/debugReportWin").get_first_json_param('signals')
             assert_that(debug_win_signals.get('interestGroup').get('name')).is_equal_to('igfast')
 
+            # it looks we're not getting this one
             assert_that(buyer_server.get_last_request("/debugReportLoss")).is_none()

@@ -137,6 +137,9 @@ class BaseTest(unittest.TestCase):
 
         WebDriverWait(self.driver, timeout).until(component_updated)
 
+    def extract_browser_log(self):
+        return self.driver.get_log('browser')
+
     def extract_trace_events(self):
         trace_events = []
         for entry in self.driver.get_log('performance'):
