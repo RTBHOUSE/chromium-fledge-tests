@@ -38,8 +38,8 @@ class PerBuyerCumulativeTimeoutsTest(BaseTest):
         # If igslow's trusted_bidding_signals.json is requested, delay it.
         # This may result in BrokenPipeError: [Errno 32] Broken pipe
         if "/igslow/trusted_bidding_signals.json" == request.path:
-            logger.info(f"{request} => sleep 150 ms ...")
-            time.sleep(0.15)
+            logger.info(f"{request} => sleep 750 ms ...")
+            time.sleep(0.75)
         elif "trusted_bidding_signals" in request.path:
             logger.info(f"{request} => no sleep")
         return None
