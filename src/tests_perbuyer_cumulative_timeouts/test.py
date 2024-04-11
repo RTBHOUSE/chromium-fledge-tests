@@ -62,6 +62,10 @@ class PerBuyerCumulativeTimeoutsTest(BaseTest):
             # check browser logs
             assert_that(list(self.fetch_timeout_logs())).is_not_empty()
 
+            # wait for the (missing) reports
+            logger.info("sleep 1 sec ...")
+            time.sleep(1)
+
             # It looks we are not getting any reports:
             assert_that(buyer_server.get_last_request("/reportWin")).is_none()
             assert_that(buyer_server.get_last_request("/debugReportWin")).is_none()
@@ -92,6 +96,10 @@ class PerBuyerCumulativeTimeoutsTest(BaseTest):
 
             debug_win_signals = buyer_server.get_last_request("/debugReportWin").get_first_json_param('signals')
             assert_that(debug_win_signals.get('interestGroup').get('name')).is_equal_to('igfast')
+
+            # wait for the final (missing) report
+            logger.info("sleep 1 sec ...")
+            time.sleep(1)
 
             # it looks we're not getting this one
             assert_that(buyer_server.get_last_request("/debugReportLoss")).is_none()
