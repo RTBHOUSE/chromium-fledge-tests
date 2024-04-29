@@ -1,0 +1,38 @@
+<h1>run ad auction</h1>
+<div id="ad" style="width: 1500px; height: 1000px;"> Ad should be placed here</div>
+
+<script>
+if (!navigator.runAdAuction) {
+  document.write("your browser doesn't have runAdAuction -- do you need to set some flags?");
+}
+</script>
+
+<script type=module>
+if (navigator.runAdAuction) {
+  const seller_address = window.location.origin;
+  const buyer_address = new URLSearchParams(window.location.search).get('buyer');
+  const ar = await navigator.runAdAuction({
+    seller: seller_address,
+    decisionLogicUrl: seller_address + '/seller.js',
+    interestGroupBuyers: [buyer_address],
+    // per buyer cumulative timeout: 100 ms
+    // https://wicg.github.io/turtledove/#auction-config-per-buyer-cumulative-timeouts
+    perBuyerCumulativeTimeouts: {
+      'https://localhost:8081': 500
+    },
+    resolveToConfig: true,
+  });
+
+  console.log("winning url " + ar);
+  const adDiv = document.getElementById('ad');
+  adDiv.innerHTML = "";
+  if (ar === null) {
+    adDiv.appendChild(document.createTextNode("No turtledove winner"));
+  } else {
+    const fframe = document.createElement('fencedframe');
+    fframe.config = ar;
+    fframe.setAttribute('style', 'width: 100px; height: 100px');
+    adDiv.appendChild(fframe);
+  }
+}
+</script>
