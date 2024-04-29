@@ -14,8 +14,6 @@ from common.utils import log_exception
 from common.utils import measure_time
 from common.utils import print_debug
 
-from selenium.common.exceptions import TimeoutException
-
 logger = logging.getLogger(__file__)
 here = os.path.dirname(__file__)
 
