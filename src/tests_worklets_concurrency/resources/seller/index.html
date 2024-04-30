@@ -8,13 +8,21 @@ if (!navigator.runAdAuction) {
 </script>
 
 <script type=module>
+function arrayToList(arr) {
+    let list = [];
+    for (let i = 0; i < arr.length; i++) {
+        list.push(arr[i]);
+    }
+    return list;
+}
+
 if (navigator.runAdAuction) {
   const seller_address = window.location.origin;
-  const buyer_address = new URLSearchParams(window.location.search).get('buyer');
+  const buyer_addresses = new URLSearchParams(window.location.search).getAll('buyer');
   const ar = await navigator.runAdAuction({
     seller: seller_address,
     decisionLogicUrl: seller_address + '/seller.js',
-    interestGroupBuyers: [buyer_address],
+    interestGroupBuyers: arrayToList(buyer_addresses),
     resolveToConfig: true,
   });
 

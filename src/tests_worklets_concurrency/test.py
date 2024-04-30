@@ -26,9 +26,10 @@ class WorkletsConcurrencyTest(BaseTest):
             self.driver.get(buyer_server.address + "?name=" + name + "&bid=" + str(bid))
             self.assertDriverContainsText('body', 'joined interest group')
 
-    def runAdAuction(self, seller_server, buyer_server):
+    def runAdAuction(self, seller_server, *buyer_servers):
         with MeasureDuration("runAdAuction"):
-            self.driver.get(seller_server.address + "?buyer=" + urllib.parse.quote_plus(buyer_server.address))
+            seller_url_params = "?buyer=" + "&buyer=".join([urllib.parse.quote_plus(bs.address) for bs in buyer_servers])
+            self.driver.get(seller_server.address + seller_url_params)
             self.findFrameAndSwitchToIt()
             self.assertDriverContainsText('body', 'TC AD')
 
@@ -39,11 +40,15 @@ class WorkletsConcurrencyTest(BaseTest):
     @measure_time
     @log_exception
     def test__worklets_simple(self):
-        with MockServer(port=8081, directory='resources/buyer') as buyer_server,\
-                MockServer(port=8083, directory='resources/seller') as seller_server:
+        with MockServer(port=8083, directory='resources/seller') as seller_server,  \
+            MockServer(port=8101, directory='resources/buyer')  as buyer_server_1,  \
+            MockServer(port=8102, directory='resources/buyer')  as buyer_server_2,  \
+            MockServer(port=8103, directory='resources/buyer')  as buyer_server_3:
 
-            self.joinAdInterestGroup(buyer_server, name='igslow', bid=100)
-            self.runAdAuction(seller_server, buyer_server)
+            self.joinAdInterestGroup(buyer_server_1, name='ig', bid=101)
+            self.joinAdInterestGroup(buyer_server_2, name='ig', bid=102)
+            self.joinAdInterestGroup(buyer_server_3, name='ig', bid=103)
+            self.runAdAuction(seller_server, buyer_server_1, buyer_server_2)
 
             # check browser logs
             # assert_that(list(self.fetch_timeout_logs())).is_not_empty()
@@ -53,5 +58,5 @@ class WorkletsConcurrencyTest(BaseTest):
             time.sleep(1)
 
             # analyze reports
-            report_win_signals = buyer_server.get_last_request('/reportWin').get_first_json_param('signals')
-            assert_that(report_win_signals.get('browserSignals').get('bid')).is_equal_to(100)
+            report_win_signals = buyer_server_2.get_last_request('/reportWin').get_first_json_param('signals')
+            assert_that(report_win_signals.get('browserSignals').get('bid')).is_equal_to(102)
