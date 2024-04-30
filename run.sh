@@ -12,10 +12,9 @@
 # ./run.sh --chromium-url https://github.com/RTBHOUSE/chromium/releases/download/94.0.4588.0-auction-timer/chromium.zip
 
 set -euo pipefail
-set -x
 
 OPTIONS=
-LONG_OPTIONS=chromium-dir:,chromium-url:,chromedriver-url:,chromium-revision:,chromium-channel:,downloaded,test:,test-dir:
+LONG_OPTIONS=chromium-dir:,chromium-url:,chromedriver-url:,chromium-revision:,chromium-channel:,downloaded,test:,test-dir:,verbose
 
 HERE="$(cd "$(dirname "$0")"; pwd)"
 
@@ -24,6 +23,7 @@ DOWNLOADED_CHROMIUM_DIR="${HERE}/_chromium"
 DOCKER_EXTRA_ARGS=()
 GET_CHROMIUM_PARAMS=()
 CHROMIUM_DIR=
+DOCKER_BUILD_EXTRA_ARGS='--quiet'
 
 PARSED=$(POSIXLY_CORRECT=1 getopt --options=$OPTIONS --longoptions=${LONG_OPTIONS} --name "$0" -- "$@")
 if [[ $? -ne 0 ]]; then
@@ -59,6 +59,11 @@ while true; do
     TEST="discover -s $(basename "${TEST_DIR}")"
     shift 2
     ;;
+  --verbose)
+    set -x
+    DOCKER_BUILD_EXTRA_ARGS=
+    shift
+    ;;
   --)
     # Non-option arguments are passed to docker container as a command
     # You can also pass extra docker-run parameters after --:
@@ -91,7 +96,7 @@ fi
 
 [ -f "${CHROMIUM_DIR}/chromedriver" ] || { echo "chromium dir [${CHROMIUM_DIR}] does not contain chromedriver" >&2; exit 1; }
 
-docker build --iidfile .iidfile -t chromium-fledge-tests "${HERE}" >&2
+docker build $DOCKER_BUILD_EXTRA_ARGS --iidfile .iidfile -t chromium-fledge-tests "${HERE}" >&2
 
 [ -t 0 ] && [ -t 1 ] && termOpt='-t' || termOpt=''
 
