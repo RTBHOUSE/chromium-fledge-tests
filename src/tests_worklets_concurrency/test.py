@@ -39,16 +39,58 @@ class WorkletsConcurrencyTest(BaseTest):
     @print_debug
     @measure_time
     @log_exception
-    def test__worklets_simple(self):
+    def test__worklets_16_buyers(self):
         with MockServer(port=8083, directory='resources/seller') as seller_server,  \
             MockServer(port=8101, directory='resources/buyer')  as buyer_server_1,  \
             MockServer(port=8102, directory='resources/buyer')  as buyer_server_2,  \
-            MockServer(port=8103, directory='resources/buyer')  as buyer_server_3:
+            MockServer(port=8103, directory='resources/buyer')  as buyer_server_3,  \
+            MockServer(port=8104, directory='resources/buyer')  as buyer_server_4,  \
+            MockServer(port=8105, directory='resources/buyer')  as buyer_server_5,  \
+            MockServer(port=8106, directory='resources/buyer')  as buyer_server_6,  \
+            MockServer(port=8107, directory='resources/buyer')  as buyer_server_7,  \
+            MockServer(port=8108, directory='resources/buyer')  as buyer_server_8,  \
+            MockServer(port=8109, directory='resources/buyer')  as buyer_server_9,  \
+            MockServer(port=8110, directory='resources/buyer')  as buyer_server_10, \
+            MockServer(port=8111, directory='resources/buyer')  as buyer_server_11, \
+            MockServer(port=8112, directory='resources/buyer')  as buyer_server_12, \
+            MockServer(port=8113, directory='resources/buyer')  as buyer_server_13, \
+            MockServer(port=8114, directory='resources/buyer')  as buyer_server_14, \
+            MockServer(port=8115, directory='resources/buyer')  as buyer_server_15, \
+            MockServer(port=8116, directory='resources/buyer')  as buyer_server_16:
 
-            self.joinAdInterestGroup(buyer_server_1, name='ig', bid=101)
-            self.joinAdInterestGroup(buyer_server_2, name='ig', bid=102)
-            self.joinAdInterestGroup(buyer_server_3, name='ig', bid=103)
-            self.runAdAuction(seller_server, buyer_server_1, buyer_server_2)
+            self.joinAdInterestGroup(buyer_server_1,  name='ig', bid=101)
+            self.joinAdInterestGroup(buyer_server_2,  name='ig', bid=102)
+            self.joinAdInterestGroup(buyer_server_3,  name='ig', bid=103)
+            self.joinAdInterestGroup(buyer_server_4,  name='ig', bid=104)
+            self.joinAdInterestGroup(buyer_server_5,  name='ig', bid=105)
+            self.joinAdInterestGroup(buyer_server_6,  name='ig', bid=106)
+            self.joinAdInterestGroup(buyer_server_7,  name='ig', bid=107)
+            self.joinAdInterestGroup(buyer_server_8,  name='ig', bid=108)
+            self.joinAdInterestGroup(buyer_server_9,  name='ig', bid=109)
+            self.joinAdInterestGroup(buyer_server_10, name='ig', bid=110)
+            self.joinAdInterestGroup(buyer_server_11, name='ig', bid=111)
+            self.joinAdInterestGroup(buyer_server_12, name='ig', bid=112)
+            self.joinAdInterestGroup(buyer_server_13, name='ig', bid=113)
+            self.joinAdInterestGroup(buyer_server_14, name='ig', bid=114)
+            self.joinAdInterestGroup(buyer_server_15, name='ig', bid=115)
+            self.joinAdInterestGroup(buyer_server_16, name='ig', bid=116)
+            self.runAdAuction(seller_server,
+                              buyer_server_1,
+                              buyer_server_2,
+                              buyer_server_3,
+                              buyer_server_4,
+                              buyer_server_5,
+                              buyer_server_6,
+                              buyer_server_7,
+                              buyer_server_8,
+                              buyer_server_9,
+                              buyer_server_10,
+                              buyer_server_11,
+                              buyer_server_12,
+                              buyer_server_13,
+                              buyer_server_14,
+                              buyer_server_15,
+                              buyer_server_16)
 
             # check browser logs
             # assert_that(list(self.fetch_timeout_logs())).is_not_empty()
@@ -58,5 +100,5 @@ class WorkletsConcurrencyTest(BaseTest):
             time.sleep(1)
 
             # analyze reports
-            report_win_signals = buyer_server_2.get_last_request('/reportWin').get_first_json_param('signals')
-            assert_that(report_win_signals.get('browserSignals').get('bid')).is_equal_to(102)
+            report_win_signals = buyer_server_16.get_last_request('/reportWin').get_first_json_param('signals')
+            assert_that(report_win_signals.get('browserSignals').get('bid')).is_equal_to(116)
