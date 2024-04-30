@@ -38,7 +38,7 @@ class WorkletsConcurrencyTest(BaseTest):
     @print_debug
     @measure_time
     @log_exception
-    def test__perbuyer_cumulative_timeouts_igslow(self):
+    def test__worklets_simple(self):
         with MockServer(port=8081, directory='resources/buyer') as buyer_server,\
                 MockServer(port=8083, directory='resources/seller') as seller_server:
 

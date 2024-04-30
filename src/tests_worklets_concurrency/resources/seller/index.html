@@ -15,11 +15,6 @@ if (navigator.runAdAuction) {
     seller: seller_address,
     decisionLogicUrl: seller_address + '/seller.js',
     interestGroupBuyers: [buyer_address],
-    // per buyer cumulative timeout: 100 ms
-    // https://wicg.github.io/turtledove/#auction-config-per-buyer-cumulative-timeouts
-    perBuyerCumulativeTimeouts: {
-      'https://localhost:8081': 500
-    },
     resolveToConfig: true,
   });
 
