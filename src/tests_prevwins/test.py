@@ -6,13 +6,9 @@ import os
 import urllib.parse
 
 from assertpy import assert_that
-
 from common.base_test import BaseTest
 from common.mockserver import MockServer
-from common.utils import MeasureDuration
-from common.utils import log_exception
-from common.utils import measure_time
-from common.utils import print_debug
+from common.utils import MeasureDuration, log_exception, measure_time, print_debug
 
 logger = logging.getLogger(__file__)
 here = os.path.dirname(__file__)
@@ -53,12 +49,12 @@ class PrevWinsTest(BaseTest):
             report_win_signals = buyer_server.get_last_request("/reportWin").get_first_json_param('signals')
             assert_that(report_win_signals.get('browserSignals').get('bid')).is_equal_to(bid1 + 2)
 
-            bid2 = 300
+            # Note: using integer bid value > 256 will result in stochastic rounding to
+            # an 8-bit mantissa/8-bit exponent float number on recent Chrome versions
+            # (such behavior is compliant with fledge spec).
+            bid2 = 200
             self.joinAdInterestGroup(buyer_server, bid=bid2)
 
             self.runAdAuction(seller_server, buyer_server)
             report_win_signals = buyer_server.get_last_request("/reportWin").get_first_json_param('signals')
-            # TODO: inconsistent behavior: apparently this assertion always fails, each time in 1 of 2 ways (below):
-            # AssertionError: Expected <302> to be equal to <303>, but was not.
-            # AssertionError: Expected <304> to be equal to <303>, but was not.
             assert_that(report_win_signals.get('browserSignals').get('bid')).is_equal_to(bid2 + 3)
