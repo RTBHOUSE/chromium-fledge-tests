@@ -10,7 +10,7 @@ import time
 from dataclasses import dataclass
 from functools import partial
 from http import HTTPStatus
-from typing import Dict, List, Optional, Union, Iterable, Tuple, Callable
+from typing import Callable, Dict, Iterable, List, Optional, Tuple, Union
 from urllib.parse import parse_qs, urlsplit
 
 logger = logging.getLogger(__file__)
@@ -121,7 +121,7 @@ class MockServer:
             certfile=common_dir + '/ssl/localhost.crt',
             keyfile=common_dir + '/ssl/localhost.key',
             ssl_version=ssl.PROTOCOL_TLS)
-        logger.info(f"server {self.address} initialized")
+        logger.info(f"server {self.address} for {self.server_directory} initialized")
 
     @property
     def address(self):
