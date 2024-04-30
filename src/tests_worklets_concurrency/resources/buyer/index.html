@@ -1,0 +1,22 @@
+<script>
+if (!navigator.joinAdInterestGroup) {
+  document.write("your browser doesn't have joinAdInterestGroup -- do you need to set some flags?");
+} else {
+  const buyer_address = window.location.origin;
+  navigator.joinAdInterestGroup({
+    owner: buyer_address,
+    name: new URLSearchParams(window.location.search).get('name'),
+    biddingLogicUrl: buyer_address + "/buyer.js",
+    trustedBiddingSignalsUrl: "https://localhost:8081/" + (new URLSearchParams(window.location.search).get('name')) + "/trusted_bidding_signals.json",
+    ads: [
+      {
+        renderUrl: buyer_address + "/ad.html",
+        metadata: {
+          bid: parseInt(new URLSearchParams(window.location.search).get('bid'))
+        },
+      },
+    ],
+  }, 10000);
+  document.write("joined interest group");
+}
+</script>
