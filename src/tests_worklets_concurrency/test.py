@@ -33,9 +33,6 @@ class WorkletsConcurrencyTest(BaseTest):
             self.findFrameAndSwitchToIt()
             self.assertDriverContainsText('body', 'TC AD')
 
-    # def fetch_timeout_logs(self):
-    #     return filter(lambda entry: entry['source']=='other' and "perBuyerCumulativeTimeout exceeded during bid generation" in entry['message'], self.extract_browser_log())
-
     @print_debug
     @measure_time
     @log_exception
@@ -74,6 +71,7 @@ class WorkletsConcurrencyTest(BaseTest):
             self.joinAdInterestGroup(buyer_server_14, name='ig', bid=114)
             self.joinAdInterestGroup(buyer_server_15, name='ig', bid=115)
             self.joinAdInterestGroup(buyer_server_16, name='ig', bid=116)
+
             self.runAdAuction(seller_server,
                               buyer_server_1,
                               buyer_server_2,
@@ -91,9 +89,6 @@ class WorkletsConcurrencyTest(BaseTest):
                               buyer_server_14,
                               buyer_server_15,
                               buyer_server_16)
-
-            # check browser logs
-            # assert_that(list(self.fetch_timeout_logs())).is_not_empty()
 
             for entry in self.extract_browser_log():
                 logger.info(f"browser log: {entry}")
