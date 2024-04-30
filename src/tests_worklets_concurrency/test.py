@@ -95,6 +95,9 @@ class WorkletsConcurrencyTest(BaseTest):
             # check browser logs
             # assert_that(list(self.fetch_timeout_logs())).is_not_empty()
 
+            for entry in self.extract_browser_log():
+                logger.info(f"browser log: {entry}")
+
             # wait for the (missing) reports
             logger.info("sleep 1 sec ...")
             time.sleep(1)
