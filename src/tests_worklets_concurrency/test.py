@@ -33,27 +33,54 @@ class WorkletsConcurrencyTest(BaseTest):
             self.findFrameAndSwitchToIt()
             self.assertDriverContainsText('body', 'TC AD')
 
+
+    @print_debug
+    @measure_time
+    @log_exception
+    def test__worklets_basic(self):
+        with MockServer(port=8083, directory='resources/seller') as seller_server,  \
+                MockServer(port=8101, directory='resources/buyer')  as buyer_server:
+
+            self.joinAdInterestGroup(buyer_server,  name='ig', bid=101)
+
+            self.runAdAuction(seller_server, buyer_server)
+
+            for entry in self.extract_browser_log():
+                logger.info(f"browser: {entry}")
+
+            for entry in self.extract_fledge_trace_events():
+                logger.info(f"trace: {entry}")
+
+            # wait for the (missing) reports
+            logger.info("sleep 1 sec ...")
+            time.sleep(1)
+
+            # analyze reports
+            report_win_signals = buyer_server.get_last_request('/reportWin').get_first_json_param('signals')
+            assert_that(report_win_signals.get('browserSignals').get('bid')).is_equal_to(101)
+
+
     @print_debug
     @measure_time
     @log_exception
     def test__worklets_16_buyers(self):
-        with MockServer(port=8083, directory='resources/seller') as seller_server,  \
-            MockServer(port=8101, directory='resources/buyer')  as buyer_server_1,  \
-            MockServer(port=8102, directory='resources/buyer')  as buyer_server_2,  \
-            MockServer(port=8103, directory='resources/buyer')  as buyer_server_3,  \
-            MockServer(port=8104, directory='resources/buyer')  as buyer_server_4,  \
-            MockServer(port=8105, directory='resources/buyer')  as buyer_server_5,  \
-            MockServer(port=8106, directory='resources/buyer')  as buyer_server_6,  \
-            MockServer(port=8107, directory='resources/buyer')  as buyer_server_7,  \
-            MockServer(port=8108, directory='resources/buyer')  as buyer_server_8,  \
-            MockServer(port=8109, directory='resources/buyer')  as buyer_server_9,  \
-            MockServer(port=8110, directory='resources/buyer')  as buyer_server_10, \
-            MockServer(port=8111, directory='resources/buyer')  as buyer_server_11, \
-            MockServer(port=8112, directory='resources/buyer')  as buyer_server_12, \
-            MockServer(port=8113, directory='resources/buyer')  as buyer_server_13, \
-            MockServer(port=8114, directory='resources/buyer')  as buyer_server_14, \
-            MockServer(port=8115, directory='resources/buyer')  as buyer_server_15, \
-            MockServer(port=8116, directory='resources/buyer')  as buyer_server_16:
+        with MockServer(port=8083, directory='resources/seller') as seller_server, \
+                MockServer(port=8101, directory='resources/buyer')  as buyer_server_1, \
+                MockServer(port=8102, directory='resources/buyer')  as buyer_server_2, \
+                MockServer(port=8103, directory='resources/buyer')  as buyer_server_3, \
+                MockServer(port=8104, directory='resources/buyer')  as buyer_server_4, \
+                MockServer(port=8105, directory='resources/buyer')  as buyer_server_5, \
+                MockServer(port=8106, directory='resources/buyer')  as buyer_server_6, \
+                MockServer(port=8107, directory='resources/buyer')  as buyer_server_7, \
+                MockServer(port=8108, directory='resources/buyer')  as buyer_server_8, \
+                MockServer(port=8109, directory='resources/buyer')  as buyer_server_9, \
+                MockServer(port=8110, directory='resources/buyer')  as buyer_server_10, \
+                MockServer(port=8111, directory='resources/buyer')  as buyer_server_11, \
+                MockServer(port=8112, directory='resources/buyer')  as buyer_server_12, \
+                MockServer(port=8113, directory='resources/buyer')  as buyer_server_13, \
+                MockServer(port=8114, directory='resources/buyer')  as buyer_server_14, \
+                MockServer(port=8115, directory='resources/buyer')  as buyer_server_15, \
+                MockServer(port=8116, directory='resources/buyer')  as buyer_server_16:
 
             self.joinAdInterestGroup(buyer_server_1,  name='ig', bid=101)
             self.joinAdInterestGroup(buyer_server_2,  name='ig', bid=102)
@@ -89,9 +116,6 @@ class WorkletsConcurrencyTest(BaseTest):
                               buyer_server_14,
                               buyer_server_15,
                               buyer_server_16)
-
-            for entry in self.extract_browser_log():
-                logger.info(f"browser log: {entry}")
 
             # wait for the (missing) reports
             logger.info("sleep 1 sec ...")
