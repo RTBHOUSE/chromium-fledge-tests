@@ -155,4 +155,6 @@ class BaseTest(unittest.TestCase):
             .until(lambda driver: json.loads(driver.execute_script(js)))
 
     def extract_fledge_trace_events(self):
-        return filter(lambda x: 'fledge' == x.get('cat',None), self.extract_trace_events())
+        fledge_events = [x for x in self.extract_trace_events() if 'fledge' == x.get('cat',None)]
+        fledge_events.sort(key=lambda x: x['ts'])
+        return fledge_events
