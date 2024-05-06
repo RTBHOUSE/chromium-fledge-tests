@@ -72,7 +72,6 @@ class WorkletsConcurrencyTest(BaseTest):
                 MockServer(port=8101, directory='resources/buyer')  as buyer_server:
 
             self.joinAdInterestGroup(buyer_server,  name='ig', bid=101)
-
             self.runAdAuction(seller_server, buyer_server)
 
             for entry in self.extract_browser_log():
