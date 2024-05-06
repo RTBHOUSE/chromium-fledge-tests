@@ -182,3 +182,78 @@ class WorkletsConcurrencyTest(BaseTest):
             # analyze reports
             report_win_signals = buyer_server_16.get_last_request('/reportWin').get_first_json_param('signals')
             assert_that(report_win_signals.get('browserSignals').get('bid')).is_equal_to(116)
+
+
+    @print_debug
+    @measure_time
+    @log_exception
+    def test__worklets_16_buyers_multiple(self):
+        with MockServer(port=8283, directory='resources/seller') as seller_server, \
+                MockServer(port=8301, directory='resources/buyer')  as buyer_server_1, \
+                MockServer(port=8302, directory='resources/buyer')  as buyer_server_2, \
+                MockServer(port=8303, directory='resources/buyer')  as buyer_server_3, \
+                MockServer(port=8304, directory='resources/buyer')  as buyer_server_4, \
+                MockServer(port=8305, directory='resources/buyer')  as buyer_server_5, \
+                MockServer(port=8306, directory='resources/buyer')  as buyer_server_6, \
+                MockServer(port=8307, directory='resources/buyer')  as buyer_server_7, \
+                MockServer(port=8308, directory='resources/buyer')  as buyer_server_8, \
+                MockServer(port=8309, directory='resources/buyer')  as buyer_server_9, \
+                MockServer(port=8310, directory='resources/buyer')  as buyer_server_10, \
+                MockServer(port=8311, directory='resources/buyer')  as buyer_server_11, \
+                MockServer(port=8312, directory='resources/buyer')  as buyer_server_12, \
+                MockServer(port=8313, directory='resources/buyer')  as buyer_server_13, \
+                MockServer(port=8314, directory='resources/buyer')  as buyer_server_14, \
+                MockServer(port=8315, directory='resources/buyer')  as buyer_server_15, \
+                MockServer(port=8316, directory='resources/buyer')  as buyer_server_16:
+
+            self.joinAdInterestGroup(buyer_server_1,  name='ig', bid=101)
+            self.joinAdInterestGroup(buyer_server_2,  name='ig', bid=102)
+            self.joinAdInterestGroup(buyer_server_3,  name='ig', bid=103)
+            self.joinAdInterestGroup(buyer_server_4,  name='ig', bid=104)
+            self.joinAdInterestGroup(buyer_server_5,  name='ig', bid=105)
+            self.joinAdInterestGroup(buyer_server_6,  name='ig', bid=106)
+            self.joinAdInterestGroup(buyer_server_7,  name='ig', bid=107)
+            self.joinAdInterestGroup(buyer_server_8,  name='ig', bid=108)
+            self.joinAdInterestGroup(buyer_server_9,  name='ig', bid=109)
+            self.joinAdInterestGroup(buyer_server_10, name='ig', bid=110)
+            self.joinAdInterestGroup(buyer_server_11, name='ig', bid=111)
+            self.joinAdInterestGroup(buyer_server_12, name='ig', bid=112)
+            self.joinAdInterestGroup(buyer_server_13, name='ig', bid=113)
+            self.joinAdInterestGroup(buyer_server_14, name='ig', bid=114)
+            self.joinAdInterestGroup(buyer_server_15, name='ig', bid=115)
+            self.joinAdInterestGroup(buyer_server_16, name='ig', bid=116)
+
+            # Run a number of auctions ...
+            testcase_count = 12
+            for testcase in range(0, testcase_count):
+                self.runAdAuction(seller_server,
+                                  buyer_server_1,
+                                  buyer_server_2,
+                                  buyer_server_3,
+                                  buyer_server_4,
+                                  buyer_server_5,
+                                  buyer_server_6,
+                                  buyer_server_7,
+                                  buyer_server_8,
+                                  buyer_server_9,
+                                  buyer_server_10,
+                                  buyer_server_11,
+                                  buyer_server_12,
+                                  buyer_server_13,
+                                  buyer_server_14,
+                                  buyer_server_15,
+                                  buyer_server_16)
+
+            # Inspect fledge trace events
+            fledge_trace = self.extract_fledge_trace_events()
+            logger.info(f"fledge_trace: {len(fledge_trace)} events")
+
+            # check concurrency level of generate_bid
+            (count_events,count_par) = concurrency_level_with_filter(fledge_trace, 'generate_bid')
+            assert_that(count_events).is_equal_to(testcase_count * 16)
+            assert_that(count_par).is_greater_than_or_equal_to(4)
+
+            # check concurrency level of generate_bid worklet
+            (count_events,count_par) = concurrency_level_with_filter(fledge_trace, 'bidder_worklet_generate_bid')
+            assert_that(count_events).is_equal_to(testcase_count * 16)
+            assert_that(count_par).is_equal_to(10)   # note: it's equal to 10!
