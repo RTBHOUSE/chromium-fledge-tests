@@ -3,6 +3,7 @@
 
 import logging
 import os
+import re
 import time
 import urllib.parse
 
@@ -19,6 +20,36 @@ logger = logging.getLogger(__file__)
 here = os.path.dirname(__file__)
 
 
+def concurrency_level(fledge_trace_sorted):
+    count_max = 0
+    count_par = 0
+    count_b = 0
+    count_e = 0
+    count_all = 0
+
+    for x in fledge_trace_sorted:
+        if 'b' == x['ph']:
+            count_par += 1
+            count_b += 1
+        if 'e' == x['ph']:
+            count_par -= 1
+            count_e += 1
+
+        count_max = max(count_max, count_par)
+        count_all += 1
+
+    assert_that(count_all).is_equal_to(count_b+count_e)
+    assert_that(count_b).is_equal_to(count_e)
+    return (count_b,count_max)
+
+
+def concurrency_level_with_filter(fledge_trace_sorted, name_pattern):
+    patt_comp = re.compile(name_pattern, re.ASCII | re.IGNORECASE)
+    (count_events,count_par) = concurrency_level(filter(lambda x: patt_comp.match(x['name']), fledge_trace_sorted))
+    logger.info(f"concurrency level ({name_pattern}): {count_par} (total: {count_events})")
+    return (count_events,count_par)
+
+
 class WorkletsConcurrencyTest(BaseTest):
 
     def joinAdInterestGroup(self, buyer_server, name, bid):
@@ -32,7 +63,6 @@ class WorkletsConcurrencyTest(BaseTest):
             self.driver.get(seller_server.address + seller_url_params)
             self.findFrameAndSwitchToIt()
             self.assertDriverContainsText('body', 'TC AD')
-
 
     @print_debug
     @measure_time
@@ -48,8 +78,23 @@ class WorkletsConcurrencyTest(BaseTest):
             for entry in self.extract_browser_log():
                 logger.info(f"browser: {entry}")
 
-            for entry in self.extract_fledge_trace_events():
+            # inspect fledge trace events
+            fledge_trace = self.extract_fledge_trace_events()
+
+            for entry in fledge_trace:
                 logger.info(f"trace: {entry}")
+
+            (count_events,count_par) = concurrency_level_with_filter(fledge_trace, 'generate_bid')
+            assert_that(count_events).is_equal_to(1)
+            assert_that(count_par).is_equal_to(1)
+
+            (count_events,count_par) = concurrency_level_with_filter(fledge_trace, 'bidder_worklet_generate_bid')
+            assert_that(count_events).is_equal_to(1)
+            assert_that(count_par).is_equal_to(1)
+
+            (count_events,count_par) = concurrency_level_with_filter(fledge_trace, '.*worklet.*')
+            assert_that(count_events).is_equal_to(5)
+            assert_that(count_par).is_equal_to(1)
 
             # wait for the (missing) reports
             logger.info("sleep 1 sec ...")
@@ -116,6 +161,20 @@ class WorkletsConcurrencyTest(BaseTest):
                               buyer_server_14,
                               buyer_server_15,
                               buyer_server_16)
+
+            # inspect fledge trace events
+            fledge_trace = self.extract_fledge_trace_events()
+
+            (count_events,count_par) = concurrency_level_with_filter(fledge_trace, 'generate_bid')
+            assert_that(count_events).is_equal_to(16)
+            assert_that(count_par).is_greater_than_or_equal_to(3)
+
+            (count_events,count_par) = concurrency_level_with_filter(fledge_trace, 'bidder_worklet_generate_bid')
+            assert_that(count_events).is_equal_to(16)
+            assert_that(count_par).is_greater_than_or_equal_to(8)
+
+            (count_events,count_par) = concurrency_level_with_filter(fledge_trace, '.*worklet.*')
+            assert_that(count_events).is_equal_to(35)
 
             # wait for the (missing) reports
             logger.info("sleep 1 sec ...")
