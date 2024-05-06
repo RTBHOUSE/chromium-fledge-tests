@@ -20,6 +20,20 @@ logger = logging.getLogger(__file__)
 here = os.path.dirname(__file__)
 
 
+def generate_buyers(count, start_port=8500):
+    servers = []
+    for i in range(0,count):
+        ms = MockServer(port=start_port+i+1, directory='resources/buyer')
+        ms.__enter__()
+        servers.append(ms)
+    return servers
+
+
+def shutdown_servers(servers):
+    for s in servers:
+        s.__exit__(None,None,None)
+
+
 def concurrency_level(fledge_trace_sorted):
     count_max = 0
     count_par = 0
@@ -256,4 +270,38 @@ class WorkletsConcurrencyTest(BaseTest):
             # check concurrency level of generate_bid worklet
             (count_events,count_par) = concurrency_level_with_filter(fledge_trace, 'bidder_worklet_generate_bid')
             assert_that(count_events).is_equal_to(testcase_count * 16)
+            assert_that(count_par).is_equal_to(10)   # note: it's equal to 10!
+
+
+    @print_debug
+    @measure_time
+    @log_exception
+    def test__worklets_32_buyers_multiple(self):
+        with MockServer(port=8483, directory='resources/seller') as seller_server:
+            buyer_servers = generate_buyers(32,8500)
+
+            # join interest groups
+            for i in range(0,32):
+                self.joinAdInterestGroup(buyer_servers[i],  name='ig', bid=100+i)
+
+            # Run a number of auctions ...
+            testcase_count = 12
+            for testcase in range(0, testcase_count):
+                self.runAdAuction(seller_server, *buyer_servers)
+
+            # shutdown servers
+            shutdown_servers(buyer_servers)
+
+            # Inspect fledge trace events
+            fledge_trace = self.extract_fledge_trace_events()
+            logger.info(f"fledge_trace: {len(fledge_trace)} events")
+
+            # check concurrency level of generate_bid
+            (count_events,count_par) = concurrency_level_with_filter(fledge_trace, 'generate_bid')
+            assert_that(count_events).is_equal_to(testcase_count * 32)
+            assert_that(count_par).is_greater_than_or_equal_to(4)
+
+            # check concurrency level of generate_bid worklet
+            (count_events,count_par) = concurrency_level_with_filter(fledge_trace, 'bidder_worklet_generate_bid')
+            assert_that(count_events).is_equal_to(testcase_count * 32)
             assert_that(count_par).is_equal_to(10)   # note: it's equal to 10!
