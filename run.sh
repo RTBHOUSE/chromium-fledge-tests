@@ -22,7 +22,7 @@ DOWNLOADED_CHROMIUM_DIR="${HERE}/_chromium"
 
 DOCKER_EXTRA_ARGS=()
 GET_CHROMIUM_PARAMS=()
-CHROMIUM_DIR=
+CHROMIUM_DIR="{HERE}/_chromium"
 DOCKER_BUILD_EXTRA_ARGS='--quiet'
 
 PARSED=$(POSIXLY_CORRECT=1 getopt --options=$OPTIONS --longoptions=${LONG_OPTIONS} --name "$0" -- "$@")
@@ -87,7 +87,7 @@ while true; do
   esac
 done
 
-if [[ -n ${CHROMIUM_DIR:-} ]]; then
+if [[ -d ${CHROMIUM_DIR:-} ]]; then
   echo "using chromium build from local directory ${CHROMIUM_DIR}" >&2
 else
   "${HERE}/get_chromium.sh" "${GET_CHROMIUM_PARAMS[@]}"
@@ -97,6 +97,8 @@ fi
 [ -f "${CHROMIUM_DIR}/chromedriver" ] || { echo "chromium dir [${CHROMIUM_DIR}] does not contain chromedriver" >&2; exit 1; }
 
 docker build $DOCKER_BUILD_EXTRA_ARGS --iidfile .iidfile -t chromium-fledge-tests "${HERE}" >&2
+
+trap 'rm .iidfile' EXIT
 
 [ -t 0 ] && [ -t 1 ] && termOpt='-t' || termOpt=''
 
