@@ -14,7 +14,7 @@
 set -euo pipefail
 
 OPTIONS=
-LONG_OPTIONS=chromium-dir:,chromium-url:,chromedriver-url:,chromium-revision:,chromium-channel:,downloaded,test:,test-dir:,verbose
+LONG_OPTIONS=chromium-dir:,chromium-url:,chromedriver-url:,chromium-revision:,chromium-channel:,downloaded,test:,test-dir:,verbose,keep-image
 
 HERE="$(cd "$(dirname "$0")"; pwd)"
 
@@ -24,6 +24,7 @@ DOCKER_EXTRA_ARGS=()
 GET_CHROMIUM_PARAMS=()
 CHROMIUM_DIR="{HERE}/_chromium"
 DOCKER_BUILD_EXTRA_ARGS='--quiet'
+KEEP_IMAGE=0  # Docker image will be deleted by default to save disk space
 
 PARSED=$(POSIXLY_CORRECT=1 getopt --options=$OPTIONS --longoptions=${LONG_OPTIONS} --name "$0" -- "$@")
 if [[ $? -ne 0 ]]; then
@@ -64,6 +65,10 @@ while true; do
     DOCKER_BUILD_EXTRA_ARGS=
     shift
     ;;
+  --keep-image)
+    KEEP_IMAGE=1
+    shift
+    ;;
   --)
     # Non-option arguments are passed to docker container as a command
     # You can also pass extra docker-run parameters after --:
@@ -98,7 +103,14 @@ fi
 
 docker build $DOCKER_BUILD_EXTRA_ARGS --iidfile .iidfile -t chromium-fledge-tests "${HERE}" >&2
 
-trap 'rm .iidfile' EXIT
+cleanup() {
+    if [ "$KEEP_IMAGE" -eq 0 ]; then
+        docker rmi -f "$(cat .iidfile)"
+    fi
+    rm -f .iidfile
+}
+
+trap cleanup EXIT
 
 [ -t 0 ] && [ -t 1 ] && termOpt='-t' || termOpt=''
 
