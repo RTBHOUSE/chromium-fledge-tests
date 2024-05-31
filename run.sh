@@ -11,7 +11,8 @@
 # ./run.sh --test tests_functional.test
 # ./run.sh --chromium-url https://github.com/RTBHOUSE/chromium/releases/download/94.0.4588.0-auction-timer/chromium.zip
 
-set -euo pipefail
+set -euvo pipefail
+echo "hello from chromium-fledge-tests/run.sh"
 
 OPTIONS=
 LONG_OPTIONS=chromium-dir:,chromium-url:,chromedriver-url:,chromium-revision:,chromium-channel:,downloaded,test:,test-dir:,verbose,keep-image
