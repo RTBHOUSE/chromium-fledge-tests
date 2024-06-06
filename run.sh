@@ -120,6 +120,13 @@ trap cleanup EXIT
 touch "${HERE}/chromedriver.log"
 chmod a+w "${HERE}/chromedriver.log"
 
+# container uses a different user: make TEST_DIR readable
+find ${TEST_DIR} -type d -print0 | xargs -0 chmod o+r+x,g+r+x
+find ${TEST_DIR} -type f -print0 | xargs -0 chmod o+r,g+r
+
+echo "hello from chromium-fledge-tests/run.sh (3)"
+ls -laR ${TEST_DIR}
+
 docker run --rm -i \
   ${termOpt} \
   -v "${CHROMIUM_DIR}:/home/usertd/chromium/" \
@@ -134,4 +141,4 @@ docker run --rm -i \
   "$(cat .iidfile)" \
   "$@"
 
-echo "hello from chromium-fledge-tests/run.sh (3)"
+echo "hello from chromium-fledge-tests/run.sh (4)"
