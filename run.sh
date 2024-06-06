@@ -12,7 +12,7 @@
 # ./run.sh --chromium-url https://github.com/RTBHOUSE/chromium/releases/download/94.0.4588.0-auction-timer/chromium.zip
 
 set -euvo pipefail
-echo "hello from chromium-fledge-tests/run.sh"
+echo "hello from chromium-fledge-tests/run.sh (1)"
 
 OPTIONS=
 LONG_OPTIONS=chromium-dir:,chromium-url:,chromedriver-url:,chromium-revision:,chromium-channel:,downloaded,test:,test-dir:,verbose,keep-image
@@ -103,6 +103,7 @@ fi
 [ -f "${CHROMIUM_DIR}/chromedriver" ] || { echo "chromium dir [${CHROMIUM_DIR}] does not contain chromedriver" >&2; exit 1; }
 
 docker build $DOCKER_BUILD_EXTRA_ARGS --iidfile .iidfile -t chromium-fledge-tests "${HERE}" >&2
+echo "hello from chromium-fledge-tests/run.sh (2)"
 
 cleanup() {
     if [ "$KEEP_IMAGE" -eq 0 ]; then
@@ -132,3 +133,5 @@ docker run --rm -i \
   ${DOCKER_EXTRA_ARGS[@]:+"${DOCKER_EXTRA_ARGS[@]}"} \
   "$(cat .iidfile)" \
   "$@"
+
+echo "hello from chromium-fledge-tests/run.sh (3)"
