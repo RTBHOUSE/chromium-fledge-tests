@@ -122,7 +122,7 @@ class WorkletsConcurrencyTest(BaseTest):
     @measure_time
     @log_exception
     def test__worklets_16_buyers(self):
-        """1 seller, 16 buyers, 1 IG, 1 auction."""
+        """1 seller, 16 buyers, 1 interest group, 1 auction."""
         with MockServer(port=8083, directory='resources/seller') as seller_server, \
                 MockServer(port=8101, directory='resources/buyer')  as buyer_server_1, \
                 MockServer(port=8102, directory='resources/buyer')  as buyer_server_2, \
@@ -204,7 +204,7 @@ class WorkletsConcurrencyTest(BaseTest):
     @measure_time
     @log_exception
     def test__worklets_16_buyers_12_auctions(self):
-        """1 seller, 16 buyers, 1 IG, 12 auctions."""
+        """1 seller, 16 buyers, 1 interest group, 12 auctions."""
         with MockServer(port=8283, directory='resources/seller') as seller_server, \
                 MockServer(port=8301, directory='resources/buyer')  as buyer_server_1, \
                 MockServer(port=8302, directory='resources/buyer')  as buyer_server_2, \
@@ -283,7 +283,7 @@ class WorkletsConcurrencyTest(BaseTest):
     @measure_time
     @log_exception
     def test__worklets_32_buyers_12_auctions(self):
-        """1 seller, 32 buyers, 1 IG, 12 auctions."""
+        """1 seller, 32 buyers, 1 interest group, 12 auctions."""
         with MockServer(port=8483, directory='resources/seller') as seller_server:
             buyer_servers = generate_buyers(32,8500)
 
