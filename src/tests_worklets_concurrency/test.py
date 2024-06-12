@@ -314,3 +314,40 @@ class WorkletsConcurrencyTest(BaseTest):
 
             # Exactly 10 worklets running at the same time!
             assert_that(count_par).is_equal_to(10)
+
+
+    @print_debug
+    @measure_time
+    @log_exception
+    def test__worklets_32_buyers_32_igroups_12_auctions(self):
+        """1 seller, 32 buyers, 32 interest groups, 12 auctions."""
+        with MockServer(port=8483, directory='resources/seller') as seller_server:
+            buyer_servers = generate_buyers(32,8500)
+
+            # Join interest groups
+            for i in range(0,32):
+                self.joinAdInterestGroup(buyer_servers[i],  name='ig_' + str(i), bid=100+i)
+
+            # Run a number of auctions ...
+            testcase_count = 12
+            for testcase in range(0, testcase_count):
+                self.runAdAuction(seller_server, *buyer_servers)
+
+            # shutdown servers
+            shutdown_servers(buyer_servers)
+
+            # Inspect fledge trace events
+            fledge_trace = self.extract_fledge_trace_events()
+            logger.info(f"fledge_trace: {len(fledge_trace)} events")
+
+            # Check concurrency level of generate_bid
+            (count_events,count_par) = concurrency_level_with_filter(fledge_trace, 'generate_bid')
+            assert_that(count_events).is_equal_to(testcase_count * 32)
+            assert_that(count_par).is_greater_than_or_equal_to(4)  # at least 4 generate_bid calls at the same time
+
+            # Check concurrency level of generate_bid worklet
+            (count_events,count_par) = concurrency_level_with_filter(fledge_trace, 'bidder_worklet_generate_bid')
+            assert_that(count_events).is_equal_to(testcase_count * 32)
+
+            # Exactly 10 worklets running at the same time!
+            assert_that(count_par).is_equal_to(10)
