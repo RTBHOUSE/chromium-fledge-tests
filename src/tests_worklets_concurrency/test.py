@@ -52,8 +52,10 @@ def concurrency_level(fledge_trace_sorted):
         count_max = max(count_max, count_par)
         count_all += 1
 
+    assert_that(count_par).is_equal_to(0)
     assert_that(count_all).is_equal_to(count_b+count_e)
     assert_that(count_b).is_equal_to(count_e)
+    assert_that(count_max).is_less_than_or_equal_to(count_b)
     return (count_b,count_max)
 
 
