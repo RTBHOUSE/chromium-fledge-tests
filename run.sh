@@ -95,6 +95,7 @@ done
 
 if [[ -d ${CHROMIUM_DIR:-} ]]; then
   echo "using chromium build from local directory ${CHROMIUM_DIR}" >&2
+  ls -laR "${CHROMIUM_DIR}"
 else
   "${HERE}/get_chromium.sh" "${GET_CHROMIUM_PARAMS[@]}"
   CHROMIUM_DIR=${DOWNLOADED_CHROMIUM_DIR}
@@ -102,8 +103,9 @@ fi
 
 [ -f "${CHROMIUM_DIR}/chromedriver" ] || { echo "chromium dir [${CHROMIUM_DIR}] does not contain chromedriver" >&2; exit 1; }
 
-docker build $DOCKER_BUILD_EXTRA_ARGS --iidfile .iidfile -t chromium-fledge-tests "${HERE}" >&2
 echo "hello from chromium-fledge-tests/run.sh (2)"
+docker build $DOCKER_BUILD_EXTRA_ARGS --iidfile .iidfile -t chromium-fledge-tests "${HERE}" >&2
+echo "hello from chromium-fledge-tests/run.sh (3)"
 
 cleanup() {
     if [ "$KEEP_IMAGE" -eq 0 ]; then
@@ -124,7 +126,7 @@ chmod a+w "${HERE}/chromedriver.log"
 find ${TEST_DIR} -type d -print0 | xargs -0 chmod o+r+x,g+r+x
 find ${TEST_DIR} -type f -print0 | xargs -0 chmod o+r,g+r
 
-echo "hello from chromium-fledge-tests/run.sh (3)"
+echo "hello from chromium-fledge-tests/run.sh (4)"
 ls -laR ${TEST_DIR}
 
 docker run --rm -i \
@@ -141,4 +143,4 @@ docker run --rm -i \
   "$(cat .iidfile)" \
   "$@"
 
-echo "hello from chromium-fledge-tests/run.sh (4)"
+echo "hello from chromium-fledge-tests/run.sh (5)"
