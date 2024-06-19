@@ -15,7 +15,7 @@ set -euvo pipefail
 echo "hello from chromium-fledge-tests/run.sh (1)"
 
 OPTIONS=
-LONG_OPTIONS=chromium-dir:,chromium-url:,chromedriver-url:,chromium-revision:,chromium-channel:,downloaded,test:,test-dir:,verbose,keep-image
+LONG_OPTIONS=chromium-dir:,chromium-url:,chromedriver-url:,chromium-revision:,chromium-channel:,downloaded,test:,test-dir:,test-lib-dir:,verbose,keep-image
 
 HERE="$(cd "$(dirname "$0")"; pwd)"
 
