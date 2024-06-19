@@ -95,10 +95,10 @@ done
 
 if [[ -d ${CHROMIUM_DIR:-} ]]; then
   echo "using chromium build from local directory ${CHROMIUM_DIR}" >&2
-  ls -laR "${CHROMIUM_DIR}"
-  cat ${CHROMIUM_DIR}/chrome-wrapper
-  ${CHROMIUM_DIR}/chrome-wrapper --help
-  ${CHROMIUM_DIR}/chrome-wrapper --version
+  # ls -laR "${CHROMIUM_DIR}"
+  # cat ${CHROMIUM_DIR}/chrome-wrapper
+  # ${CHROMIUM_DIR}/chrome-wrapper --help
+  # ${CHROMIUM_DIR}/chrome-wrapper --version
 else
   "${HERE}/get_chromium.sh" "${GET_CHROMIUM_PARAMS[@]}"
   CHROMIUM_DIR=${DOWNLOADED_CHROMIUM_DIR}
