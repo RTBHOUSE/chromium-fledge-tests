@@ -61,6 +61,10 @@ while true; do
     TEST="discover -s $(basename "${TEST_DIR}")"
     shift 2
     ;;
+  --test-lib-dir)
+    TEST_LIB_DIR=`cd "$2"; pwd`
+    shift 2
+    ;;
   --verbose)
     set -x
     DOCKER_BUILD_EXTRA_ARGS=
@@ -125,6 +129,10 @@ trap cleanup EXIT
 touch "${HERE}/chromedriver.log"
 chmod a+w "${HERE}/chromedriver.log"
 
+# container uses a different user: make TEST_LIB_DIR readable
+find ${TEST_LIB_DIR} -type d -print0 | xargs -0 chmod o+r+x,g+r+x
+find ${TEST_LIB_DIR} -type f -print0 | xargs -0 chmod o+r,g+r
+
 # container uses a different user: make TEST_DIR readable
 find ${TEST_DIR} -type d -print0 | xargs -0 chmod o+r+x,g+r+x
 find ${TEST_DIR} -type f -print0 | xargs -0 chmod o+r,g+r
@@ -139,6 +147,7 @@ docker run --rm -i \
   -e PROFILE_DIR=/home/usertd/profile \
   -v "${HERE}/chromedriver.log":/home/usertd/chromedriver.log \
   -e CHROMEDRIVER_LOG_PATH=/home/usertd/chromedriver.log \
+  ${TEST_LIB_DIR:+-v "${TEST_LIB_DIR}:/home/usertd/tests/`basename "${TEST_LIB_DIR}"`"} \
   ${TEST_DIR:+-v "${TEST_DIR}:/home/usertd/tests/`basename "${TEST_DIR}"`"} \
   ${TEST:+-e TEST="$TEST"} \
   --shm-size=1gb \
