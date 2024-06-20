@@ -130,15 +130,18 @@ touch "${HERE}/chromedriver.log"
 chmod a+w "${HERE}/chromedriver.log"
 
 # container uses a different user: make TEST_LIB_DIR readable
-find ${TEST_LIB_DIR} -type d -print0 | xargs -0 chmod o+r+x,g+r+x
-find ${TEST_LIB_DIR} -type f -print0 | xargs -0 chmod o+r,g+r
+if [[ -z TEST_LIB_DIR ]] && [[ -n "${TEST_LIB_DIR}" ]]; then
+  find ${TEST_LIB_DIR} -type d -print0 | xargs -0 chmod o+r+x,g+r+x
+  find ${TEST_LIB_DIR} -type f -print0 | xargs -0 chmod o+r,g+r
+fi
 
 # container uses a different user: make TEST_DIR readable
-find ${TEST_DIR} -type d -print0 | xargs -0 chmod o+r+x,g+r+x
-find ${TEST_DIR} -type f -print0 | xargs -0 chmod o+r,g+r
-
-echo "hello from chromium-fledge-tests/run.sh (4)"
-ls -laR ${TEST_DIR}
+if [[ -z TEST_DIR ]] && [[ -n "${TEST_DIR}" ]]; then
+  find ${TEST_DIR} -type d -print0 | xargs -0 chmod o+r+x,g+r+x
+  find ${TEST_DIR} -type f -print0 | xargs -0 chmod o+r,g+r
+  echo "hello from chromium-fledge-tests/run.sh (4)"
+  ls -laR ${TEST_DIR}
+fi
 
 docker run --rm -i \
   ${termOpt} \

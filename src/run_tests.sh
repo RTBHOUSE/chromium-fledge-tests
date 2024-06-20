@@ -5,7 +5,7 @@ echo "(1) hello from chromium-fledge-tests/src/run_tests.sh; PYTHONPATH=$PYTHONP
 pwd
 ls -la
 
-if [ -n "${TEST_LIB_DIR}" ]; then
+if [[ -z TEST_LIB_DIR ]] && [[ -n "${TEST_LIB_DIR}" ]]; then
   export PYTHONPATH="${TEST_LIB_DIR}:${PYTHONPATH}"
 fi
 
