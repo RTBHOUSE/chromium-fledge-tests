@@ -14,7 +14,7 @@
 set -euo pipefail
 
 OPTIONS=
-LONG_OPTIONS=chromium-dir:,chromium-url:,chromedriver-url:,chromium-revision:,chromium-channel:,downloaded,test:,test-dir:,verbose,keep-image
+LONG_OPTIONS=chromium-dir:,chromium-url:,chromedriver-url:,chromium-revision:,chromium-channel:,downloaded,test:,test-dir:,test-lib-dir:,verbose,keep-image
 
 HERE="$(cd "$(dirname "$0")"; pwd)"
 
@@ -58,6 +58,10 @@ while true; do
   --test-dir)
     TEST_DIR=`cd "$2"; pwd`
     TEST="discover -s $(basename "${TEST_DIR}")"
+    shift 2
+    ;;
+  --test-lib-dir)
+    TEST_LIB_DIR=`cd "$2"; pwd`
     shift 2
     ;;
   --verbose)
@@ -118,6 +122,18 @@ trap cleanup EXIT
 touch "${HERE}/chromedriver.log"
 chmod a+w "${HERE}/chromedriver.log"
 
+# container uses a different user: make TEST_LIB_DIR readable
+if [[ -v TEST_LIB_DIR ]] && [[ -n "${TEST_LIB_DIR}" ]]; then
+  find ${TEST_LIB_DIR} -type d -print0 | xargs -0 chmod o+r+x,g+r+x
+  find ${TEST_LIB_DIR} -type f -print0 | xargs -0 chmod o+r,g+r
+fi
+
+# container uses a different user: make TEST_DIR readable
+if [[ -v TEST_DIR ]] && [[ -n "${TEST_DIR}" ]]; then
+  find ${TEST_DIR} -type d -print0 | xargs -0 chmod o+r+x,g+r+x
+  find ${TEST_DIR} -type f -print0 | xargs -0 chmod o+r,g+r
+fi
+
 docker run --rm -i \
   ${termOpt} \
   -v "${CHROMIUM_DIR}:/home/usertd/chromium/" \
@@ -125,6 +141,7 @@ docker run --rm -i \
   -e PROFILE_DIR=/home/usertd/profile \
   -v "${HERE}/chromedriver.log":/home/usertd/chromedriver.log \
   -e CHROMEDRIVER_LOG_PATH=/home/usertd/chromedriver.log \
+  ${TEST_LIB_DIR:+-v "${TEST_LIB_DIR}:/home/usertd/tests/`basename "${TEST_LIB_DIR}"`"} \
   ${TEST_DIR:+-v "${TEST_DIR}:/home/usertd/tests/`basename "${TEST_DIR}"`"} \
   ${TEST:+-e TEST="$TEST"} \
   --shm-size=1gb \
