@@ -14,7 +14,7 @@
 set -euo pipefail
 
 OPTIONS=
-LONG_OPTIONS=chromium-dir:,chromium-url:,chromedriver-url:,chromium-revision:,chromium-channel:,downloaded,test:,test-dir:,verbose,keep-image
+LONG_OPTIONS=chromium-dir:,chromium-url:,chromedriver-url:,chromium-revision:,chromium-channel:,downloaded,test:,test-dir:,test-lib-dir:,verbose,keep-image
 
 HERE="$(cd "$(dirname "$0")"; pwd)"
 
@@ -58,6 +58,10 @@ while true; do
   --test-dir)
     TEST_DIR=`cd "$2"; pwd`
     TEST="discover -s $(basename "${TEST_DIR}")"
+    shift 2
+    ;;
+  --test-lib-dir)
+    TEST_LIB_DIR=`cd "$2"; pwd`
     shift 2
     ;;
   --verbose)
@@ -118,14 +122,19 @@ trap cleanup EXIT
 touch "${HERE}/chromedriver.log"
 chmod a+w "${HERE}/chromedriver.log"
 
+# Note: container's WORKDIR is /home/usertd/tests , which is where TEST_DIR and TEST_LIB_DIR are mounted.
+#       This way we can skip PYTHONPATH setting.
+# Note: TEST_DIR and TEST_LIB_DIR volumes are mounted read-only.
 docker run --rm -i \
+  --workdir /home/usertd/tests/ \
   ${termOpt} \
   -v "${CHROMIUM_DIR}:/home/usertd/chromium/" \
   -e CHROMIUM_DIR=/home/usertd/chromium \
   -e PROFILE_DIR=/home/usertd/profile \
   -v "${HERE}/chromedriver.log":/home/usertd/chromedriver.log \
   -e CHROMEDRIVER_LOG_PATH=/home/usertd/chromedriver.log \
-  ${TEST_DIR:+-v "${TEST_DIR}:/home/usertd/tests/`basename "${TEST_DIR}"`"} \
+  ${TEST_LIB_DIR:+-v "${TEST_LIB_DIR}:/home/usertd/tests/`basename "${TEST_LIB_DIR}"`:ro"} \
+  ${TEST_DIR:+-v "${TEST_DIR}:/home/usertd/tests/`basename "${TEST_DIR}"`:ro"} \
   ${TEST:+-e TEST="$TEST"} \
   --shm-size=1gb \
   ${DOCKER_EXTRA_ARGS[@]:+"${DOCKER_EXTRA_ARGS[@]}"} \
