@@ -137,6 +137,7 @@ fi
 # Note: container's WORKDIR is /home/usertd/tests , which is where TEST_DIR and TEST_LIB_DIR are mounted.
 #       This way we can skip PYTHONPATH setting.
 docker run --rm -i \
+  --workdir /home/usertd/tests/ \
   ${termOpt} \
   -v "${CHROMIUM_DIR}:/home/usertd/chromium/" \
   -e CHROMIUM_DIR=/home/usertd/chromium \
