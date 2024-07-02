@@ -134,6 +134,8 @@ if [[ -v TEST_DIR ]] && [[ -n "${TEST_DIR}" ]]; then
   find ${TEST_DIR} -type f -print0 | xargs -0 chmod o+r,g+r
 fi
 
+# Note: container's WORKDIR is /home/usertd/tests , which is where TEST_DIR and TEST_LIB_DIR are mounted.
+#       This way we can skip PYTHONPATH setting.
 docker run --rm -i \
   ${termOpt} \
   -v "${CHROMIUM_DIR}:/home/usertd/chromium/" \
