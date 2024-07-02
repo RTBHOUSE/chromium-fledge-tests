@@ -1,6 +1,6 @@
 #!/bin/bash
 
-if [[ -z TEST_LIB_DIR ]] && [[ -n "${TEST_LIB_DIR}" ]]; then
+if [[ -v TEST_LIB_DIR ]] && [[ -n "${TEST_LIB_DIR}" ]]; then
   export PYTHONPATH="${TEST_LIB_DIR}:${PYTHONPATH}"
 fi
 
