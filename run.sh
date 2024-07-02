@@ -122,21 +122,12 @@ trap cleanup EXIT
 touch "${HERE}/chromedriver.log"
 chmod a+w "${HERE}/chromedriver.log"
 
-# container uses a different user: make TEST_LIB_DIR readable
-if [[ -v TEST_LIB_DIR ]] && [[ -n "${TEST_LIB_DIR}" ]]; then
-  find ${TEST_LIB_DIR} -type d -print0 | xargs -0 chmod o+r+x,g+r+x
-  find ${TEST_LIB_DIR} -type f -print0 | xargs -0 chmod o+r,g+r
-fi
-
-# container uses a different user: make TEST_DIR readable
-if [[ -v TEST_DIR ]] && [[ -n "${TEST_DIR}" ]]; then
-  find ${TEST_DIR} -type d -print0 | xargs -0 chmod o+r+x,g+r+x
-  find ${TEST_DIR} -type f -print0 | xargs -0 chmod o+r,g+r
-fi
-
+# Note: we set UID and GID to those of the current user, to avoid permission denied errors when reading files.
 # Note: container's WORKDIR is /home/usertd/tests , which is where TEST_DIR and TEST_LIB_DIR are mounted.
 #       This way we can skip PYTHONPATH setting.
+# Note: TEST_DIR and TEST_LIB_DIR volumes are mounted read-only.
 docker run --rm -i \
+  --user $(id -u):$(id -g) \
   --workdir /home/usertd/tests/ \
   ${termOpt} \
   -v "${CHROMIUM_DIR}:/home/usertd/chromium/" \
@@ -144,8 +135,8 @@ docker run --rm -i \
   -e PROFILE_DIR=/home/usertd/profile \
   -v "${HERE}/chromedriver.log":/home/usertd/chromedriver.log \
   -e CHROMEDRIVER_LOG_PATH=/home/usertd/chromedriver.log \
-  ${TEST_LIB_DIR:+-v "${TEST_LIB_DIR}:/home/usertd/tests/`basename "${TEST_LIB_DIR}"`"} \
-  ${TEST_DIR:+-v "${TEST_DIR}:/home/usertd/tests/`basename "${TEST_DIR}"`"} \
+  ${TEST_LIB_DIR:+-v "${TEST_LIB_DIR}:/home/usertd/tests/`basename "${TEST_LIB_DIR}"`:ro"} \
+  ${TEST_DIR:+-v "${TEST_DIR}:/home/usertd/tests/`basename "${TEST_DIR}"`:ro"} \
   ${TEST:+-e TEST="$TEST"} \
   --shm-size=1gb \
   ${DOCKER_EXTRA_ARGS[@]:+"${DOCKER_EXTRA_ARGS[@]}"} \
