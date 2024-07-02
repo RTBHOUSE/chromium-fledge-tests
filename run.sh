@@ -122,12 +122,10 @@ trap cleanup EXIT
 touch "${HERE}/chromedriver.log"
 chmod a+w "${HERE}/chromedriver.log"
 
-# Note: we set UID and GID to those of the current user, to avoid permission denied errors when reading files.
 # Note: container's WORKDIR is /home/usertd/tests , which is where TEST_DIR and TEST_LIB_DIR are mounted.
 #       This way we can skip PYTHONPATH setting.
 # Note: TEST_DIR and TEST_LIB_DIR volumes are mounted read-only.
 docker run --rm -i \
-  --user $(id -u):$(id -g) \
   --workdir /home/usertd/tests/ \
   ${termOpt} \
   -v "${CHROMIUM_DIR}:/home/usertd/chromium/" \
