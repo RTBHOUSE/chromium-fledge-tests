@@ -16,6 +16,9 @@ ENV CHROME_HEADLESS=1
 
 USER usertd
 
+# Note: run.sh depends on this WORKDIR path
+WORKDIR /home/usertd/tests
+
 COPY src/requirements.txt .
 RUN pip3 install --user -r requirements.txt
 
