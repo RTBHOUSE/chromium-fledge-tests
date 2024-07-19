@@ -4,6 +4,7 @@ import json
 import logging
 import os
 import pathlib
+import random
 import shutil
 import sys
 import unittest
@@ -69,6 +70,9 @@ class BaseTest(unittest.TestCase):
         return options
 
     def setUp(self) -> None:
+        # initialize the random number generator with the current system time
+        random.seed()
+
         if os.path.exists(PROFILE_DIR):
             shutil.rmtree(PROFILE_DIR)
 
@@ -153,3 +157,8 @@ class BaseTest(unittest.TestCase):
 
         return WebDriverWait(self.driver, timeout) \
             .until(lambda driver: json.loads(driver.execute_script(js)))
+
+    def extract_fledge_trace_events(self):
+        fledge_events = [x for x in self.extract_trace_events() if 'fledge' == x.get('cat', None)]
+        fledge_events.sort(key=lambda x: x['ts'])
+        return fledge_events
