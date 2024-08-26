@@ -10,11 +10,6 @@ function generateBid(interestGroup, auctionSignals, perBuyerSignals, trustedBidd
     "browserSignals": browserSignals
   };
 
-  forDebuggingOnly.reportAdAuctionLoss(
-      interestGroup.owner + '/debugReportLoss?signals=' + encodeURIComponent(JSON.stringify(signals)));
-  forDebuggingOnly.reportAdAuctionWin(
-      interestGroup.owner + '/debugReportWin?signals=' + encodeURIComponent(JSON.stringify(signals)));
-
   return {'ad': 'example', 'bid': ad.metadata.bid, 'render': ad.renderUrl};
 }
 

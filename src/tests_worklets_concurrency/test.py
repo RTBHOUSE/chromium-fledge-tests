@@ -66,13 +66,25 @@ def concurrency_level_with_filter(fledge_trace_sorted, name_pattern):
     return (count_events, count_par)
 
 
+def precomputeBid(buyer, ig):
+    """
+    Given the buyer index (0+) and interest group index (0+) precomputes the bid value
+    to be used in the testcase.
+
+    Note: using integer bid value > 256 will result in stochastic rounding to
+    an 8-bit mantissa/8-bit exponent float number on recent Chrome versions
+    (such behavior is compliant with the Fledge specs).
+    """
+    bid = 5 * buyer + ig
+    assert 0 <= bid
+    assert bid < 256
+    return bid
+
+
 class WorkletsConcurrencyTest(BaseTest):
     """
     This test suite aims to assess bidding worklets concurrency level. It demonstrates an upper limit
-    of 10 bidding worklets running in parallel, irrespective of the number of buyers, interest groups
-    or auctions.
-
-    The result seems to be independent of Interest Group's execution mode.
+    of 10 bidding worklets, times the number of IGs per buyer, running in parallel.
     """
 
     def joinAdInterestGroup(self, buyer_server, name, execution_mode, bid):
@@ -88,51 +100,65 @@ class WorkletsConcurrencyTest(BaseTest):
             self.findFrameAndSwitchToIt()
             self.assertDriverContainsText('body', 'TC AD')
 
-    def genericTest(self, buyers, auctions, execution_mode):
+    def genericTest(self, buyers, buyer_igs, auctions, execution_mode):
+        assert 1 <= buyers
+        assert 1 <= buyer_igs
+        assert 1 <= auctions
         assert execution_mode in ['compatibility', 'frozen-context', 'group-by-origin']
 
         with MockServer(port=8483, directory='resources/seller') as seller_server:
-            # Create buyer servers
-            buyer_servers = generate_buyers(buyers, 8500)
+            shutdown_ok = False
 
-            # Join interest groups, one per buyer server
-            for i in range(0, buyers):
-                self.joinAdInterestGroup(buyer_servers[i], name='ig_'+str(i), execution_mode=execution_mode, bid=100+i)
+            try:
+                # Create buyer servers
+                buyer_servers = generate_buyers(buyers, 8500)
 
-            # Run a number of auctions ...
-            for testcase in range(0, auctions):
-                self.runAdAuction(seller_server, *buyer_servers)
+                # Join ad interest groups
+                for i in range(0, buyers):
+                    for j in range(0, buyer_igs):
+                        self.joinAdInterestGroup(
+                            buyer_servers[i],
+                            name='ig_'+str(i)+'_'+str(j),
+                            execution_mode=execution_mode,
+                            bid=precomputeBid(i, j))
 
-            # shutdown servers
-            shutdown_servers(buyer_servers)
+                # Run a number of auctions ...
+                for testcase in range(0, auctions):
+                    self.runAdAuction(seller_server, *buyer_servers)
 
-            # Inspect fledge trace events
-            fledge_trace = self.extract_fledge_trace_events()
-            logger.info(f"fledge_trace: {len(fledge_trace)} events")
+                # shutdown servers
+                shutdown_servers(buyer_servers)
+                shutdown_ok = True
 
-            # inspect bidder worklet events
-            (count_events, count_par) = concurrency_level_with_filter(fledge_trace, 'bidder_worklet_generate_bid')
-            assert_that(count_events).is_equal_to(auctions * buyers)
+                # Inspect fledge trace events
+                fledge_trace = self.extract_fledge_trace_events()
+                logger.info(f"fledge_trace: {len(fledge_trace)} events")
 
-            ################################################################
-            # Exactly 10 bidding worklets running in parallel!
-            # (or less if not enough buyers)
-            # This is the key result of this test suite.
-            ################################################################
-            expected_par = min(10, buyers)
-            assert_that(count_par, description=f"Exactly {expected_par} bidding worklets running in parallel").is_equal_to(expected_par)
+                # inspect bidder worklet events
+                (count_events, count_par) = concurrency_level_with_filter(fledge_trace, 'bidder_worklet_generate_bid')
+                assert_that(count_events).is_equal_to(auctions * buyers * buyer_igs)
 
-            # inspect generate_bid events
-            (count_events, count_par) = concurrency_level_with_filter(fledge_trace, 'generate_bid')
-            assert_that(count_events).is_equal_to(auctions * buyers)
+                ################################################################
+                # Exactly 10 bidding worklets (or less, if not enough buyers),
+                # times the number of IGs per buyer, running in parallel!
+                ################################################################
+                expected_par = min(10, buyers) * buyer_igs
+                assert_that(count_par, description=f"Exactly {expected_par} bidding worklets running in parallel").is_equal_to(expected_par)
 
-            # wait for the (missing) reports
-            logger.info("sleep 1 sec ...")
-            time.sleep(1)
+                # inspect generate_bid events
+                (count_events, count_par) = concurrency_level_with_filter(fledge_trace, 'generate_bid')
+                assert_that(count_events).is_equal_to(auctions * buyers * buyer_igs)
 
-            # analyze the reports
-            report_win_signals = buyer_servers[-1].get_last_request('/reportWin').get_first_json_param('signals')
-            assert_that(report_win_signals.get('browserSignals').get('bid')).is_equal_to(100+buyers-1)
+                # wait for the (missing) reports
+                logger.info("sleep 1 sec ...")
+                time.sleep(1)
+
+                # analyze the reports
+                report_win_signals = buyer_servers[-1].get_last_request('/reportWin').get_first_json_param('signals')
+                assert_that(report_win_signals.get('browserSignals').get('bid')).is_equal_to(precomputeBid(buyers-1, buyer_igs-1))
+            finally:
+                if not shutdown_ok:
+                    shutdown_servers(buyer_servers)
 
 
     @print_debug
@@ -179,61 +205,124 @@ class WorkletsConcurrencyTest(BaseTest):
     @print_debug
     @measure_time
     @log_exception
-    def test__worklets_5_buyers_3_auctions_compatibility(self):
-        self.genericTest(5, 3, 'compatibility')
+    def test__worklets_5_buyers_1_ig_3_auctions_compatibility(self):
+        self.genericTest(5, 1, 3, 'compatibility')
 
 
     @print_debug
     @measure_time
     @log_exception
-    def test__worklets_5_buyers_3_auctions_frozencontext(self):
-        self.genericTest(5, 3, 'frozen-context')
+    def test__worklets_5_buyers_1_ig_3_auctions_frozencontext(self):
+        self.genericTest(5, 1, 3, 'frozen-context')
 
 
     @print_debug
     @measure_time
     @log_exception
-    def test__worklets_5_buyers_3_auctions_groupbyorigin(self):
-        self.genericTest(5, 3, 'group-by-origin')
+    def test__worklets_5_buyers_1_ig_3_auctions_groupbyorigin(self):
+        self.genericTest(5, 1, 3, 'group-by-origin')
 
 
     @print_debug
     @measure_time
     @log_exception
-    def test__worklets_16_buyers_3_auctions_compatibility(self):
-        self.genericTest(16, 3, 'compatibility')
+    def test__worklets_5_buyers_6_ig_3_auctions_compatibility(self):
+        self.genericTest(5, 6, 3, 'compatibility')
 
 
     @print_debug
     @measure_time
     @log_exception
-    def test__worklets_16_buyers_3_auctions_frozencontext(self):
-        self.genericTest(16, 3, 'frozen-context')
+    def test__worklets_5_buyers_6_ig_3_auctions_frozencontext(self):
+        self.genericTest(5, 6, 3, 'frozen-context')
 
 
     @print_debug
     @measure_time
     @log_exception
-    def test__worklets_16_buyers_3_auctions_groupbyorigin(self):
-        self.genericTest(16, 3, 'group-by-origin')
+    def test__worklets_5_buyers_6_ig_3_auctions_groupbyorigin(self):
+        self.genericTest(5, 6, 3, 'group-by-origin')
 
 
     @print_debug
     @measure_time
     @log_exception
-    def test__worklets_32_buyers_2_auctions_compatibility(self):
-        self.genericTest(32, 2, 'compatibility')
+    def test__worklets_16_buyers_1_ig_3_auctions_compatibility(self):
+        self.genericTest(16, 1, 3, 'compatibility')
 
 
     @print_debug
     @measure_time
     @log_exception
-    def test__worklets_32_buyers_2_auctions_frozencontext(self):
-        self.genericTest(32, 2, 'frozen-context')
+    def test__worklets_16_buyers_1_ig_3_auctions_frozencontext(self):
+        self.genericTest(16, 1, 3, 'frozen-context')
 
 
     @print_debug
     @measure_time
     @log_exception
-    def test__worklets_32_buyers_2_auctions_groupbyorigin(self):
-        self.genericTest(32, 2, 'group-by-origin')
+    def test__worklets_16_buyers_1_ig_3_auctions_groupbyorigin(self):
+        self.genericTest(16, 1, 3, 'group-by-origin')
+
+
+    @print_debug
+    @measure_time
+    @log_exception
+    def test__worklets_16_buyers_7_ig_3_auctions_compatibility(self):
+        self.genericTest(16, 7, 3, 'compatibility')
+
+
+    @print_debug
+    @measure_time
+    @log_exception
+    def test__worklets_16_buyers_7_ig_3_auctions_frozencontext(self):
+        self.genericTest(16, 7, 3, 'frozen-context')
+
+
+    @print_debug
+    @measure_time
+    @log_exception
+    def test__worklets_16_buyers_7_ig_3_auctions_groupbyorigin(self):
+        self.genericTest(16, 7, 3, 'group-by-origin')
+
+
+    @print_debug
+    @measure_time
+    @log_exception
+    def test__worklets_32_buyers_1_ig_2_auctions_compatibility(self):
+        self.genericTest(32, 1, 2, 'compatibility')
+
+
+    @print_debug
+    @measure_time
+    @log_exception
+    def test__worklets_32_buyers_1_ig_2_auctions_frozencontext(self):
+        self.genericTest(32, 1, 2, 'frozen-context')
+
+
+    @print_debug
+    @measure_time
+    @log_exception
+    def test__worklets_32_buyers_1_ig_2_auctions_groupbyorigin(self):
+        self.genericTest(32, 1, 2, 'group-by-origin')
+
+
+    @print_debug
+    @measure_time
+    @log_exception
+    def test__worklets_32_buyers_17_ig_2_auctions_compatibility(self):
+        self.genericTest(32, 17, 2, 'compatibility')
+
+
+    @print_debug
+    @measure_time
+    @log_exception
+    def test__worklets_32_buyers_17_ig_2_auctions_frozencontext(self):
+        self.genericTest(32, 17, 2, 'frozen-context')
+
+
+    @print_debug
+    @measure_time
+    @log_exception
+    def test__worklets_32_buyers_17_ig_2_auctions_groupbyorigin(self):
+        self.genericTest(32, 17, 2, 'group-by-origin')
