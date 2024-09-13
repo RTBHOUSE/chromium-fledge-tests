@@ -126,6 +126,7 @@ chmod a+w "${HERE}/chromedriver.log"
 #       This way we can skip PYTHONPATH setting.
 # Note: TEST_DIR and TEST_LIB_DIR volumes are mounted read-only.
 docker run --rm -i \
+  --init \
   --workdir /home/usertd/tests/ \
   ${termOpt} \
   -v "${CHROMIUM_DIR}:/home/usertd/chromium/" \
