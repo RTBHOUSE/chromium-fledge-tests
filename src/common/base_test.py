@@ -132,10 +132,8 @@ class BaseTest(unittest.TestCase):
         component.find_element(By.XPATH, './/button').click()
 
         def component_updated(_):
-            status = component.find_element(By.XPATH, './/span[@jscontent="status"]').text
-            return status in {'Up-to-date',
-                              'Component updated', 'Component already up to date' # legacy, up to Chrome 130
-                              }
+            status = component.find_element(By.CSS_SELECTOR, 'span[id^="status-"]').text
+            return status == 'Up-to-date'
 
         WebDriverWait(self.driver, timeout).until(component_updated)
 
